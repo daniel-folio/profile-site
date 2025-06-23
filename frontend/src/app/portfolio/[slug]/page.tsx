@@ -23,26 +23,32 @@ interface ProjectAttributes {
   liveUrl?: string;
 }
 
+// Strapi API의 단일 항목 응답 형태
+interface StrapiApiSingleResponse<T> {
+  data: { id: number; attributes: T } | null;
+}
+
+// Strapi API의 여러 항목(컬렉션) 응답 형태
+interface StrapiApiCollectionResponse<T> {
+  data: { id: number; attributes: T }[];
+}
+
 // --- 페이지 컴포넌트 ---
 
-// ⭐️ 최종 해결책: TypeScript에게 이 부분의 타입 검사를 일시적으로 무시하도록 지시합니다.
-// 이는 빌드 시스템의 깊은 타입 추론 문제를 우회하기 위한 강력한 방법입니다.
-// @ts-expect-error Server Component의 타입 에러를 우회합니다.
+// ⭐️ 최종 해결책: Next.js의 내부 타입과 충돌하지 않도록,
+//    Props를 함수의 인자에 직접, 그리고 명확하게 정의합니다.
+//    별도의 타입 별칭(type alias)을 사용하지 않는 것이 핵심입니다.
 export default async function ProjectPage({ params }: { params: { slug: string } }) {
   
   const slug = params.slug;
 
-  // 'as any'를 사용하여 API 응답의 타입을 일시적으로 비활성화하고,
-  // 우리가 직접 데이터의 유효성을 검사하여 안전성을 확보합니다.
-  const response = await getProjectBySlug(slug) as any;
+  const response = await getProjectBySlug(slug) as StrapiApiSingleResponse<ProjectAttributes>;
 
-  // API 응답 데이터의 구조를 직접 확인하여 안전하게 접근합니다.
-  const project = response?.data?.[0]?.attributes;
-
-  // 데이터가 없으면 404 페이지를 보여줍니다.
-  if (!project) {
+  if (!response?.data?.attributes) {
     notFound();
   }
+
+  const project = response.data.attributes;
 
   const {
     title,
@@ -62,7 +68,7 @@ export default async function ProjectPage({ params }: { params: { slug: string }
 
   if (images && images.data) {
     mainImage = images.data[0]?.attributes ?? null;
-    otherImages = images.data.slice(1).map((img: any) => img.attributes);
+    otherImages = images.data.slice(1).map(img => img.attributes);
   }
 
   return (
@@ -84,7 +90,7 @@ export default async function ProjectPage({ params }: { params: { slug: string }
               <div className="mt-16">
                 <h3 className="text-2xl font-bold mb-6">스크린샷</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {otherImages.map((image: StrapiMedia) => (
+                  {otherImages.map((image) => (
                     <div key={image.url} className="relative aspect-video overflow-hidden rounded-lg">
                       <Image
                         src={getImageUrl(image.url)}
@@ -161,13 +167,17 @@ export default async function ProjectPage({ params }: { params: { slug: string }
 
 // 빌드 시점에 정적 페이지를 미리 생성하기 위한 함수입니다.
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
-  const allProjects = await getAllProjectSlugs() as any;
+  const allProjects = await getAllProjectSlugs() as StrapiApiCollectionResponse<{ slug: string }>;
   
-  const slugs = allProjects?.data?.map((item: any) => item.attributes.slug) || [];
+  if (!allProjects?.data || !Array.isArray(allProjects.data)) {
+    return [];
+  }
+
+  const slugs = allProjects.data
+    .map((item: { id: number, attributes: { slug: string } }) => item.attributes.slug)
+    .filter((slug): slug is string => typeof slug === 'string');
   
-  return slugs
-    .filter((slug: any): slug is string => typeof slug === 'string')
-    .map((slug: string) => ({
-      slug: slug,
-    }));
+  return slugs.map((slug) => ({
+    slug: slug,
+  }));
 }
