@@ -14,7 +14,7 @@ if (strapiUrl.endsWith('/api')) {
 }
 const STRAPI_URL = strapiUrl;
 
-// ⭐️ 해결책 1: Vercel에 등록한 API 토큰을 가져옵니다.
+// Vercel에 등록한 API 토큰을 가져옵니다.
 const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN;
 
 /**
@@ -36,7 +36,6 @@ export function getStrapiMedia(url: string | null | undefined): string | null {
  */
 async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> {
   
-  // ⭐️ 해결책 2: 모든 요청에 인증 헤더를 기본으로 포함시킵니다.
   const defaultOptions: RequestInit = {
     cache: 'no-store',
     headers: {
@@ -65,7 +64,7 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
 }
 
 
-// --- API 함수들 (이제 모두 인증된 상태로 요청됩니다) ---
+// --- API 함수들 ---
 
 export async function getProfile(): Promise<ProfileResponse> {
   return fetchAPI<ProfileResponse>('/profile?populate=*');
@@ -81,11 +80,22 @@ export async function getProjects(featured?: boolean): Promise<ProjectsResponse>
 }
 
 export async function getProjectBySlug(slug: string): Promise<ProjectsResponse> {
-  const path = `/projects?filters[slug][$eq]=${slug}&populate=*`;
+  const path = `/projects?filters[slug][$eq]a=${slug}&populate=*`;
   return fetchAPI<ProjectsResponse>(path);
 }
 
-export async function getAllProjectSlugs(): Promise<{ data: { attributes: { slug: string } }[] }> {
+// ⭐️ 최종 해결책: API 응답을 받은 후, 데이터를 직접 검사하고 정제하여 안전한 형태로 반환합니다.
+export async function getAllProjectSlugs(): Promise<{ slug: string }[]> {
   const path = `/projects?fields=slug`;
-  return fetchAPI<{ data: { attributes: { slug: string } }[] }>(path);
+  const response = await fetchAPI<{ data: { attributes: { slug: string } }[] }>(path);
+
+  // 데이터가 유효하지 않으면 빈 배열을 반환하여 빌드 에러를 방지합니다.
+  if (!response || !Array.isArray(response.data)) {
+    return [];
+  }
+
+  // 데이터 배열을 순회하며, 유효한 slug 값만 추출합니다.
+  return response.data
+    .filter(item => item && item.attributes && typeof item.attributes.slug === 'string')
+    .map(item => ({ slug: item.attributes.slug }));
 }
