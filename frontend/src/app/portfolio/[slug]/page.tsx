@@ -7,9 +7,8 @@ import { InfoItem, InfoSection } from '@/components/ui/InfoItem';
 import { Skill } from '@/types/skill';
 import { StrapiMedia } from '@/types/media';
 
-// --- 타입 정의 수정 ---
+// --- 타입 정의 ---
 
-// 단일 프로젝트 데이터의 형태
 interface ProjectType {
   title: string;
   fullDescription: string;
@@ -23,7 +22,6 @@ interface ProjectType {
   liveUrl?: string;
 }
 
-// Strapi API의 '단일' 항목 응답 형태
 interface StrapiApiSingleResponse<T> {
   data: {
     id: number;
@@ -31,7 +29,6 @@ interface StrapiApiSingleResponse<T> {
   } | null;
 }
 
-// Strapi API의 '여러' 항목(컬렉션) 응답 형태
 interface StrapiApiCollectionResponse<T> {
   data: {
     id: number;
@@ -39,28 +36,23 @@ interface StrapiApiCollectionResponse<T> {
   }[];
 }
 
-// ⭐️ 해결책: 페이지가 받을 수 있는 모든 Props 타입을 정의합니다.
 type PageProps = {
   params: { slug: string };
   searchParams?: { [key: string]: string | string[] | undefined };
 };
 
-
 // --- 페이지 컴포넌트 ---
 
-export default async function ProjectPage({ params }: PageProps) {
-  
+export default async function ProjectPage(props: Awaited<PageProps>) {
+  const { params } = props;
   const slug = params.slug;
 
-  // '단일' 항목 응답 타입으로 API를 호출합니다.
   const projectApiResponse: StrapiApiSingleResponse<ProjectType> = await getProjectBySlug(slug);
 
-  // 데이터가 없는 경우 404 페이지를 보여줍니다.
   if (!projectApiResponse?.data?.attributes) {
     notFound();
   }
 
-  // 이제 project는 'attributes' 객체 그 자체입니다.
   const project = projectApiResponse.data.attributes;
 
   const {
@@ -117,7 +109,7 @@ export default async function ProjectPage({ params }: PageProps) {
               </div>
             )}
           </main>
-          
+
           {/* ----- 오른쪽 사이드바 정보 ----- */}
           <aside className="lg:sticky lg:top-24 h-fit">
             <div className="space-y-8">
@@ -178,13 +170,13 @@ export default async function ProjectPage({ params }: PageProps) {
   );
 }
 
-// 빌드 시점에 정적 페이지를 미리 생성하기 위한 함수입니다.
+// --- 정적 경로 생성을 위한 함수 ---
+
 export async function generateStaticParams() {
-  // '여러' 항목 응답 타입으로 API를 호출합니다.
   const allProjects: StrapiApiCollectionResponse<{ slug: string }> = await getAllProjectSlugs();
-  
+
   const slugs = allProjects?.data?.map((item) => item.attributes.slug) || [];
-  
+
   return slugs.map((slug: string) => ({
     slug: slug,
   }));
