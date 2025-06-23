@@ -36,18 +36,17 @@ interface StrapiApiCollectionResponse<T> {
   }[];
 }
 
-type PageProps = {
+// --- ✅ 오류 없는 페이지 컴포넌트 정의 ---
+
+export default async function ProjectPage({
+  params,
+}: {
   params: { slug: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
-};
-
-// --- 페이지 컴포넌트 ---
-
-export default async function ProjectPage(props: Awaited<PageProps>) {
-  const { params } = props;
+}) {
   const slug = params.slug;
 
-  const projectApiResponse: StrapiApiSingleResponse<ProjectType> = await getProjectBySlug(slug);
+  const projectApiResponse: StrapiApiSingleResponse<ProjectType> =
+    await getProjectBySlug(slug);
 
   if (!projectApiResponse?.data?.attributes) {
     notFound();
@@ -73,7 +72,7 @@ export default async function ProjectPage(props: Awaited<PageProps>) {
 
   if (images && images.data) {
     mainImage = images.data[0]?.attributes ?? null;
-    otherImages = images.data.slice(1).map(img => img.attributes);
+    otherImages = images.data.slice(1).map((img) => img.attributes);
   }
 
   return (
@@ -85,7 +84,11 @@ export default async function ProjectPage(props: Awaited<PageProps>) {
             <div className="relative aspect-video mb-8 overflow-hidden rounded-lg">
               <Image
                 src={mainImage ? getImageUrl(mainImage.url) : '/placeholder.svg'}
-                alt={mainImage ? mainImage.alternativeText || title : `${title} placeholder image`}
+                alt={
+                  mainImage
+                    ? mainImage.alternativeText || title
+                    : `${title} placeholder image`
+                }
                 fill
                 className="object-cover"
                 priority
@@ -96,7 +99,10 @@ export default async function ProjectPage(props: Awaited<PageProps>) {
                 <h3 className="text-2xl font-bold mb-6">스크린샷</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {otherImages.map((image) => (
-                    <div key={image.url} className="relative aspect-video overflow-hidden rounded-lg">
+                    <div
+                      key={image.url}
+                      className="relative aspect-video overflow-hidden rounded-lg"
+                    >
                       <Image
                         src={getImageUrl(image.url)}
                         alt={image.alternativeText || `${title} 스크린샷`}
@@ -114,7 +120,9 @@ export default async function ProjectPage(props: Awaited<PageProps>) {
           <aside className="lg:sticky lg:top-24 h-fit">
             <div className="space-y-8">
               <div>
-                <h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">{title}</h1>
+                <h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+                  {title}
+                </h1>
                 <div
                   className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300"
                   dangerouslySetInnerHTML={{ __html: fullDescription || '' }}
@@ -124,7 +132,10 @@ export default async function ProjectPage(props: Awaited<PageProps>) {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <InfoItem label="프로젝트 형태" value={projectType} />
                 <InfoItem label="상태" value={projectStatus} />
-                <InfoItem label="기간" value={formatDateRange(startDate, endDate)} />
+                <InfoItem
+                  label="기간"
+                  value={formatDateRange(startDate, endDate)}
+                />
               </div>
 
               {technologies?.data && technologies.data.length > 0 && (
@@ -147,14 +158,22 @@ export default async function ProjectPage(props: Awaited<PageProps>) {
                   <div className="flex flex-wrap gap-4">
                     {githubUrl && (
                       <Button asChild>
-                        <a href={githubUrl} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           GitHub 저장소
                         </a>
                       </Button>
                     )}
                     {liveUrl && (
                       <Button asChild variant="secondary">
-                        <a href={liveUrl} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           라이브 데모
                         </a>
                       </Button>
@@ -173,11 +192,12 @@ export default async function ProjectPage(props: Awaited<PageProps>) {
 // --- 정적 경로 생성을 위한 함수 ---
 
 export async function generateStaticParams() {
-  const allProjects: StrapiApiCollectionResponse<{ slug: string }> = await getAllProjectSlugs();
+  const allProjects: StrapiApiCollectionResponse<{ slug: string }> =
+    await getAllProjectSlugs();
 
   const slugs = allProjects?.data?.map((item) => item.attributes.slug) || [];
 
   return slugs.map((slug: string) => ({
-    slug: slug,
+    slug,
   }));
 }
