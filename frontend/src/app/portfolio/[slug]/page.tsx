@@ -24,17 +24,20 @@ interface ProjectAttributes {
   liveUrl?: string;
 }
 
-// Strapi API의 일반적인 응답 형태 (단일/컬렉션 모두 포함)
-interface StrapiApiResponse<T> {
-  data: 
-    | { id: number; attributes: T } // 단일 항목 응답
-    | { id: number; attributes: T }[] // 여러 항목 응답
-    | null;
+// Strapi API의 단일 항목 응답 형태
+interface StrapiApiSingleResponse<T> {
+  data: { id: number; attributes: T } | null;
 }
 
-// 페이지가 받는 Props의 정확한 타입
+// Strapi API의 여러 항목(컬렉션) 응답 형태
+interface StrapiApiCollectionResponse<T> {
+  data: { id: number; attributes: T }[];
+}
+
+// 페이지가 받는 Props의 정확한 타입 (Next.js 규칙 준수)
 type PageProps = {
   params: { slug: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
 };
 
 // --- 페이지 컴포넌트 ---
@@ -43,15 +46,12 @@ export default async function ProjectPage({ params }: PageProps) {
   
   const slug = params.slug;
 
-  // getProjectBySlug가 반환하는 타입을 정확히 명시합니다.
-  const response = await getProjectBySlug(slug) as StrapiApiResponse<ProjectAttributes>;
+  const response = await getProjectBySlug(slug) as StrapiApiSingleResponse<ProjectAttributes>;
 
-  // 데이터가 없거나, 데이터 구조가 예상과 다를 경우 404 페이지를 보여줍니다.
-  if (!response?.data || Array.isArray(response.data)) {
+  if (!response?.data?.attributes) {
     notFound();
   }
 
-  // 이제 project는 'attributes' 객체 그 자체입니다.
   const project = response.data.attributes;
 
   const {
@@ -129,7 +129,7 @@ export default async function ProjectPage({ params }: PageProps) {
               {technologies?.data && technologies.data.length > 0 && (
                 <InfoSection title="사용 기술">
                   <div className="flex flex-wrap gap-2">
-                    {technologies.data.map((tech) => (
+                    {technologies.data.map((tech: { id: number; attributes: Skill }) => (
                       <span
                         key={tech.id}
                         className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm rounded-full"
@@ -171,13 +171,13 @@ export default async function ProjectPage({ params }: PageProps) {
 
 // 빌드 시점에 정적 페이지를 미리 생성하기 위한 함수입니다.
 export async function generateStaticParams() {
-  const allProjects = await getAllProjectSlugs() as StrapiApiResponse<{ slug: string }>;
+  const allProjects = await getAllProjectSlugs() as StrapiApiCollectionResponse<{ slug: string }>;
   
   if (!allProjects?.data || !Array.isArray(allProjects.data)) {
     return [];
   }
 
-  const slugs = allProjects.data.map((item) => item.attributes.slug);
+  const slugs = allProjects.data.map((item: { id: number, attributes: { slug: string } }) => item.attributes.slug);
   
   return slugs.map((slug: string) => ({
     slug: slug,
