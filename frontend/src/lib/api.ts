@@ -41,6 +41,9 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
     const response = await fetch(requestUrl, defaultOptions);
 
     if (!response.ok) {
+      // 에러가 발생하면 응답 내용을 함께 로깅하여 디버깅을 돕습니다.
+      const errorBody = await response.text();
+      console.error('API Error Response:', errorBody);
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
     
@@ -78,8 +81,9 @@ export async function getProjectBySlug(slug: string): Promise<ProjectsResponse> 
 }
 
 export async function getAllProjectSlugs(): Promise<{ data: { attributes: { slug: string } }[] }> {
-  // ⭐️ 해결책: 쿼리 파라미터 양식을 `fields[0]=slug`에서 `fields=slug`로 변경합니다.
-  // 이것이 더 간단하고 표준적인 방식입니다.
-  const path = `/projects?fields=slug`;
+  // ⭐️ 최종 해결책: 특정 필드만 요청하는 대신, 전체 프로젝트 목록을 요청합니다.
+  // 이는 쿼리 파라미터 문법으로 인한 400 Bad Request 에러를 우회하는 가장 확실한 방법입니다.
+  // populate를 제외하여 요청을 가볍게 유지합니다.
+  const path = `/projects`;
   return fetchAPI<{ data: { attributes: { slug: string } }[] }>(path);
 }
