@@ -7,8 +7,7 @@ import { InfoItem, InfoSection } from '@/components/ui/InfoItem';
 import { Skill } from '@/types/skill';
 import { StrapiMedia } from '@/types/media';
 
-// --- 타입 정의 ---
-
+// 단일 프로젝트 데이터의 형태
 interface ProjectType {
   title: string;
   fullDescription: string;
@@ -22,6 +21,7 @@ interface ProjectType {
   liveUrl?: string;
 }
 
+// Strapi API의 '단일' 항목 응답 형태
 interface StrapiApiSingleResponse<T> {
   data: {
     id: number;
@@ -29,6 +29,7 @@ interface StrapiApiSingleResponse<T> {
   } | null;
 }
 
+// Strapi API의 '여러' 항목(컬렉션) 응답 형태
 interface StrapiApiCollectionResponse<T> {
   data: {
     id: number;
@@ -36,17 +37,11 @@ interface StrapiApiCollectionResponse<T> {
   }[];
 }
 
-// --- ✅ 오류 없는 페이지 컴포넌트 정의 ---
+// --- 페이지 컴포넌트 ---
+export default async function ProjectPage(props: any) {
+  const slug = props.params.slug;
 
-export default async function ProjectPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const slug = params.slug;
-
-  const projectApiResponse: StrapiApiSingleResponse<ProjectType> =
-    await getProjectBySlug(slug);
+  const projectApiResponse: StrapiApiSingleResponse<ProjectType> = await getProjectBySlug(slug);
 
   if (!projectApiResponse?.data?.attributes) {
     notFound();
@@ -79,16 +74,12 @@ export default async function ProjectPage({
     <div className="bg-white dark:bg-gray-900">
       <div className="container mx-auto px-4 py-16">
         <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
-          {/* ----- 왼쪽 메인 콘텐츠 ----- */}
+          {/* 왼쪽 메인 콘텐츠 */}
           <main className="lg:col-span-2">
             <div className="relative aspect-video mb-8 overflow-hidden rounded-lg">
               <Image
                 src={mainImage ? getImageUrl(mainImage.url) : '/placeholder.svg'}
-                alt={
-                  mainImage
-                    ? mainImage.alternativeText || title
-                    : `${title} placeholder image`
-                }
+                alt={mainImage ? mainImage.alternativeText || title : `${title} placeholder image`}
                 fill
                 className="object-cover"
                 priority
@@ -99,10 +90,7 @@ export default async function ProjectPage({
                 <h3 className="text-2xl font-bold mb-6">스크린샷</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {otherImages.map((image) => (
-                    <div
-                      key={image.url}
-                      className="relative aspect-video overflow-hidden rounded-lg"
-                    >
+                    <div key={image.url} className="relative aspect-video overflow-hidden rounded-lg">
                       <Image
                         src={getImageUrl(image.url)}
                         alt={image.alternativeText || `${title} 스크린샷`}
@@ -116,13 +104,11 @@ export default async function ProjectPage({
             )}
           </main>
 
-          {/* ----- 오른쪽 사이드바 정보 ----- */}
+          {/* 오른쪽 사이드바 정보 */}
           <aside className="lg:sticky lg:top-24 h-fit">
             <div className="space-y-8">
               <div>
-                <h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">
-                  {title}
-                </h1>
+                <h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">{title}</h1>
                 <div
                   className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300"
                   dangerouslySetInnerHTML={{ __html: fullDescription || '' }}
@@ -132,10 +118,7 @@ export default async function ProjectPage({
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <InfoItem label="프로젝트 형태" value={projectType} />
                 <InfoItem label="상태" value={projectStatus} />
-                <InfoItem
-                  label="기간"
-                  value={formatDateRange(startDate, endDate)}
-                />
+                <InfoItem label="기간" value={formatDateRange(startDate, endDate)} />
               </div>
 
               {technologies?.data && technologies.data.length > 0 && (
@@ -158,22 +141,14 @@ export default async function ProjectPage({
                   <div className="flex flex-wrap gap-4">
                     {githubUrl && (
                       <Button asChild>
-                        <a
-                          href={githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
+                        <a href={githubUrl} target="_blank" rel="noopener noreferrer">
                           GitHub 저장소
                         </a>
                       </Button>
                     )}
                     {liveUrl && (
                       <Button asChild variant="secondary">
-                        <a
-                          href={liveUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
+                        <a href={liveUrl} target="_blank" rel="noopener noreferrer">
                           라이브 데모
                         </a>
                       </Button>
@@ -189,15 +164,9 @@ export default async function ProjectPage({
   );
 }
 
-// --- 정적 경로 생성을 위한 함수 ---
-
 export async function generateStaticParams() {
-  const allProjects: StrapiApiCollectionResponse<{ slug: string }> =
-    await getAllProjectSlugs();
-
+  const allProjects: StrapiApiCollectionResponse<{ slug: string }> = await getAllProjectSlugs();
   const slugs = allProjects?.data?.map((item) => item.attributes.slug) || [];
 
-  return slugs.map((slug: string) => ({
-    slug,
-  }));
+  return slugs.map((slug: string) => ({ slug }));
 }
