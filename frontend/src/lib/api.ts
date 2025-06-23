@@ -24,7 +24,7 @@ export function getStrapiMedia(url: string | null | undefined): string | null {
 
 
 /**
- * API 호출을 위한 중앙 집중식 셔 함수
+ * API 호출을 위한 중앙 집중식 헬퍼 함수
  * @param path - /api/ 이후의 경로 (예: /projects)
  * @param options - fetch 함수에 전달할 옵션
  * @returns - API로부터 받은 JSON 데이터
@@ -73,14 +73,13 @@ export async function getProjects(featured?: boolean): Promise<ProjectsResponse>
 }
 
 export async function getProjectBySlug(slug: string): Promise<ProjectsResponse> {
-  // 2. 단일 프로젝트를 가져오는 API 호출도 필터링을 사용하므로,
-  // 여러 프로젝트를 가져오는 ProjectsResponse 타입을 사용하는 것이 맞습니다.
   const path = `/projects?filters[slug][$eq]=${slug}&populate=*`;
   return fetchAPI<ProjectsResponse>(path);
 }
 
 export async function getAllProjectSlugs(): Promise<{ data: { attributes: { slug: string } }[] }> {
-  // 3. Strapi의 실제 응답 구조에 맞게 타입을 수정합니다.
-  const path = `/projects?fields[0]=slug`;
+  // ⭐️ 해결책: 쿼리 파라미터 양식을 `fields[0]=slug`에서 `fields=slug`로 변경합니다.
+  // 이것이 더 간단하고 표준적인 방식입니다.
+  const path = `/projects?fields=slug`;
   return fetchAPI<{ data: { attributes: { slug: string } }[] }>(path);
 }
