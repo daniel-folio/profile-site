@@ -7,7 +7,7 @@ import { InfoItem, InfoSection } from '@/components/ui/InfoItem';
 import { Skill } from '@/types/skill';
 import { StrapiMedia } from '@/types/media';
 
-// --- 최종 타입 정의: API 응답 구조를 정확히 반영합니다 ---
+// --- 타입 정의: API 응답과 페이지 Props의 구조를 명확하게 정의합니다 ---
 
 // 프로젝트 데이터의 상세 속성 타입
 interface ProjectAttributes {
@@ -170,16 +170,19 @@ export default async function ProjectPage({ params }: PageProps) {
 }
 
 // 빌드 시점에 정적 페이지를 미리 생성하기 위한 함수입니다.
-export async function generateStaticParams() {
+// ⭐️ 해결책: 함수의 반환 타입을 명시적으로 지정하여 타입 추론의 모호함을 없앱니다.
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
   const allProjects = await getAllProjectSlugs() as StrapiApiCollectionResponse<{ slug: string }>;
   
   if (!allProjects?.data || !Array.isArray(allProjects.data)) {
     return [];
   }
 
-  const slugs = allProjects.data.map((item: { id: number, attributes: { slug: string } }) => item.attributes.slug);
+  const slugs = allProjects.data
+    .map((item: { id: number, attributes: { slug: string } }) => item.attributes.slug)
+    .filter((slug): slug is string => typeof slug === 'string'); // slug가 문자열인지 한 번 더 확인
   
-  return slugs.map((slug: string) => ({
+  return slugs.map((slug) => ({
     slug: slug,
   }));
 }
