@@ -7,11 +7,13 @@ import { InfoItem, InfoSection } from '@/components/ui/InfoItem';
 import { Skill } from '@/types/skill';
 import { StrapiMedia } from '@/types/media';
 
-// API 응답 타입 (Strapi 기준)
-type Project = {
-  id: number;
+// --- 최종 타입 정의: API 응답 구조를 정확히 반영합니다 ---
+
+// 프로젝트 데이터의 상세 속성 타입
+interface ProjectAttributes {
   title: string;
-  fullDescription?: string;
+  slug: string;
+  fullDescription: string;
   images: { data: { id: number; attributes: StrapiMedia }[] | null };
   technologies: { data: { id: number; attributes: Skill }[] | null };
   projectType: string;
@@ -20,21 +22,37 @@ type Project = {
   endDate: string;
   githubUrl?: string;
   liveUrl?: string;
+}
+
+// Strapi API의 일반적인 응답 형태 (단일/컬렉션 모두 포함)
+interface StrapiApiResponse<T> {
+  data: 
+    | { id: number; attributes: T } // 단일 항목 응답
+    | { id: number; attributes: T }[] // 여러 항목 응답
+    | null;
+}
+
+// 페이지가 받는 Props의 정확한 타입
+type PageProps = {
+  params: { slug: string };
 };
 
-type ProjectResponse = {
-  data: Project | null;
-};
+// --- 페이지 컴포넌트 ---
 
-export default async function ProjectPage(props: any) {
-  const slug = props.params.slug;
+export default async function ProjectPage({ params }: PageProps) {
+  
+  const slug = params.slug;
 
-  const response: ProjectResponse = await getProjectBySlug(slug);
-  if (!response || !response.data) {
+  // getProjectBySlug가 반환하는 타입을 정확히 명시합니다.
+  const response = await getProjectBySlug(slug) as StrapiApiResponse<ProjectAttributes>;
+
+  // 데이터가 없거나, 데이터 구조가 예상과 다를 경우 404 페이지를 보여줍니다.
+  if (!response?.data || Array.isArray(response.data)) {
     notFound();
   }
 
-  const project = response.data;
+  // 이제 project는 'attributes' 객체 그 자체입니다.
+  const project = response.data.attributes;
 
   const {
     title,
@@ -54,13 +72,14 @@ export default async function ProjectPage(props: any) {
 
   if (images && images.data) {
     mainImage = images.data[0]?.attributes ?? null;
-    otherImages = images.data.slice(1).map((img) => img.attributes);
+    otherImages = images.data.slice(1).map(img => img.attributes);
   }
 
   return (
     <div className="bg-white dark:bg-gray-900">
       <div className="container mx-auto px-4 py-16">
         <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
+          {/* ----- 왼쪽 메인 콘텐츠 ----- */}
           <main className="lg:col-span-2">
             <div className="relative aspect-video mb-8 overflow-hidden rounded-lg">
               <Image
@@ -71,7 +90,6 @@ export default async function ProjectPage(props: any) {
                 priority
               />
             </div>
-
             {otherImages.length > 0 && (
               <div className="mt-16">
                 <h3 className="text-2xl font-bold mb-6">스크린샷</h3>
@@ -90,7 +108,8 @@ export default async function ProjectPage(props: any) {
               </div>
             )}
           </main>
-
+          
+          {/* ----- 오른쪽 사이드바 정보 ----- */}
           <aside className="lg:sticky lg:top-24 h-fit">
             <div className="space-y-8">
               <div>
@@ -150,9 +169,17 @@ export default async function ProjectPage(props: any) {
   );
 }
 
+// 빌드 시점에 정적 페이지를 미리 생성하기 위한 함수입니다.
 export async function generateStaticParams() {
-  const allProjects = await getAllProjectSlugs();
-  const slugs = allProjects?.data?.map((item) => item.attributes.slug) || [];
+  const allProjects = await getAllProjectSlugs() as StrapiApiResponse<{ slug: string }>;
+  
+  if (!allProjects?.data || !Array.isArray(allProjects.data)) {
+    return [];
+  }
 
-  return slugs.map((slug: string) => ({ slug }));
+  const slugs = allProjects.data.map((item) => item.attributes.slug);
+  
+  return slugs.map((slug: string) => ({
+    slug: slug,
+  }));
 }
