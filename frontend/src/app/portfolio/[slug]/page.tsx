@@ -11,7 +11,7 @@ import { StrapiMedia } from '@/types/media';
 type Project = {
   id: number;
   title: string;
-  fullDescription: string;
+  fullDescription?: string;
   images: { data: { id: number; attributes: StrapiMedia }[] | null };
   technologies: { data: { id: number; attributes: Skill }[] | null };
   projectType: string;
