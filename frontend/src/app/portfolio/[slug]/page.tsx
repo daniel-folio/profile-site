@@ -7,8 +7,9 @@ import { InfoItem, InfoSection } from '@/components/ui/InfoItem';
 import { Skill } from '@/types/skill';
 import { StrapiMedia } from '@/types/media';
 
-// 단일 프로젝트 데이터의 형태
-interface ProjectType {
+// API 응답 타입 (Strapi 기준)
+type Project = {
+  id: number;
   title: string;
   fullDescription: string;
   images: { data: { id: number; attributes: StrapiMedia }[] | null };
@@ -19,35 +20,21 @@ interface ProjectType {
   endDate: string;
   githubUrl?: string;
   liveUrl?: string;
-}
+};
 
-// Strapi API의 '단일' 항목 응답 형태
-interface StrapiApiSingleResponse<T> {
-  data: {
-    id: number;
-    attributes: T;
-  } | null;
-}
+type ProjectResponse = {
+  data: Project | null;
+};
 
-// Strapi API의 '여러' 항목(컬렉션) 응답 형태
-interface StrapiApiCollectionResponse<T> {
-  data: {
-    id: number;
-    attributes: T;
-  }[];
-}
-
-// --- 페이지 컴포넌트 ---
 export default async function ProjectPage(props: any) {
   const slug = props.params.slug;
 
-  const projectApiResponse: StrapiApiSingleResponse<ProjectType> = await getProjectBySlug(slug);
-
-  if (!projectApiResponse?.data?.attributes) {
+  const response: ProjectResponse = await getProjectBySlug(slug);
+  if (!response || !response.data) {
     notFound();
   }
 
-  const project = projectApiResponse.data.attributes;
+  const project = response.data;
 
   const {
     title,
@@ -74,7 +61,6 @@ export default async function ProjectPage(props: any) {
     <div className="bg-white dark:bg-gray-900">
       <div className="container mx-auto px-4 py-16">
         <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
-          {/* 왼쪽 메인 콘텐츠 */}
           <main className="lg:col-span-2">
             <div className="relative aspect-video mb-8 overflow-hidden rounded-lg">
               <Image
@@ -85,6 +71,7 @@ export default async function ProjectPage(props: any) {
                 priority
               />
             </div>
+
             {otherImages.length > 0 && (
               <div className="mt-16">
                 <h3 className="text-2xl font-bold mb-6">스크린샷</h3>
@@ -104,7 +91,6 @@ export default async function ProjectPage(props: any) {
             )}
           </main>
 
-          {/* 오른쪽 사이드바 정보 */}
           <aside className="lg:sticky lg:top-24 h-fit">
             <div className="space-y-8">
               <div>
@@ -165,7 +151,7 @@ export default async function ProjectPage(props: any) {
 }
 
 export async function generateStaticParams() {
-  const allProjects: StrapiApiCollectionResponse<{ slug: string }> = await getAllProjectSlugs();
+  const allProjects = await getAllProjectSlugs();
   const slugs = allProjects?.data?.map((item) => item.attributes.slug) || [];
 
   return slugs.map((slug: string) => ({ slug }));
