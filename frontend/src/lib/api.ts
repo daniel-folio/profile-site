@@ -2,8 +2,19 @@ import { ProfileResponse } from '@/types/profile';
 import { SkillsResponse } from '@/types/skill';
 import { ProjectsResponse, ProjectResponse, Project } from '@/types/project';
 
-// 1. 환경 변수 이름을 Vercel에 설정한 것과 정확히 일치시킵니다.
-const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://127.0.0.1:1337';
+// 1. Vercel에 설정된 환경 변수 값을 가져옵니다.
+let strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://127.0.0.1:1337';
+
+// 2. ⭐️ 최종 해결책: 사용자가 실수로 URL 끝에 '/'나 '/api'를 붙이는 경우를 대비해,
+//    코드가 알아서 불필요한 부분을 제거하도록 보강합니다.
+if (strapiUrl.endsWith('/')) {
+  strapiUrl = strapiUrl.slice(0, -1);
+}
+if (strapiUrl.endsWith('/api')) {
+  strapiUrl = strapiUrl.slice(0, -4);
+}
+const STRAPI_URL = strapiUrl;
+
 
 /**
  * Strapi 미디어 파일의 전체 URL을 반환하는 함수
@@ -14,11 +25,9 @@ export function getStrapiMedia(url: string | null | undefined): string | null {
   if (!url) {
     return null;
   }
-  // 이미 전체 URL인 경우 그대로 반환
   if (url.startsWith('http')) {
     return url;
   }
-  // 상대 경로인 경우 기본 URL을 앞에 붙여서 반환
   return `${STRAPI_URL}${url}`;
 }
 
@@ -30,7 +39,6 @@ export function getStrapiMedia(url: string | null | undefined): string | null {
  * @returns - API로부터 받은 JSON 데이터
  */
 async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> {
-  // 기본 옵션에 no-store 캐시 전략을 포함하여 항상 최신 데이터를 가져오도록 합니다.
   const defaultOptions: RequestInit = {
     cache: 'no-store',
     ...options,
@@ -41,7 +49,6 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
     const response = await fetch(requestUrl, defaultOptions);
 
     if (!response.ok) {
-      // 에러가 발생하면 응답 내용을 함께 로깅하여 디버깅을 돕습니다.
       const errorBody = await response.text();
       console.error('API Error Response:', errorBody);
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
@@ -51,7 +58,6 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
     return data;
   } catch (error) {
     console.error("Error fetching API:", error);
-    // 에러를 다시 던져서 호출한 쪽에서 처리할 수 있도록 합니다.
     throw new Error(`Error fetching API: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
@@ -59,17 +65,14 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
 
 // --- API 함수들 ---
 
-// Profile API
 export async function getProfile(): Promise<ProfileResponse> {
   return fetchAPI<ProfileResponse>('/profile?populate=*');
 }
 
-// Skills API
 export async function getSkills(): Promise<SkillsResponse> {
   return fetchAPI<SkillsResponse>('/skills?populate=*&sort=order:asc');
 }
 
-// Projects API
 export async function getProjects(featured?: boolean): Promise<ProjectsResponse> {
   const filters = featured ? '&filters[featured][$eq]=true' : '';
   return fetchAPI<ProjectsResponse>(`/projects?populate=*&sort=order:asc${filters}`);
@@ -81,9 +84,6 @@ export async function getProjectBySlug(slug: string): Promise<ProjectsResponse> 
 }
 
 export async function getAllProjectSlugs(): Promise<{ data: { attributes: { slug: string } }[] }> {
-  // ⭐️ 최종 해결책: 특정 필드만 요청하는 대신, 전체 프로젝트 목록을 요청합니다.
-  // 이는 쿼리 파라미터 문법으로 인한 400 Bad Request 에러를 우회하는 가장 확실한 방법입니다.
-  // populate를 제외하여 요청을 가볍게 유지합니다.
   const path = `/projects`;
   return fetchAPI<{ data: { attributes: { slug: string } }[] }>(path);
 }
