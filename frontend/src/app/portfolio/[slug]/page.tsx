@@ -39,13 +39,17 @@ interface StrapiApiCollectionResponse<T> {
   }[];
 }
 
+// ⭐️ 해결책: 페이지가 받을 수 있는 모든 Props 타입을 정의합니다.
+type PageProps = {
+  params: { slug: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
+};
+
+
 // --- 페이지 컴포넌트 ---
 
-// ⭐️ 해결책: props를 함수 시그니처에서 바로 분해하지 않고, 함수 본문 안에서 처리합니다.
-export default async function ProjectPage(props: { params: { slug: string } }) {
+export default async function ProjectPage({ params }: PageProps) {
   
-  // props에서 params와 slug를 안전하게 추출합니다.
-  const { params } = props;
   const slug = params.slug;
 
   // '단일' 항목 응답 타입으로 API를 호출합니다.
