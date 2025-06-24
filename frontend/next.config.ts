@@ -1,14 +1,25 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
     remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '1337',
+        pathname: '/uploads/**',
+      },
+      // ⭐️ 추가 해결책: 'localhost'도 동일하게 등록해줍니다.
       {
         protocol: 'http',
         hostname: 'localhost',
         port: '1337',
         pathname: '/uploads/**',
       },
+      // (선택 사항) 나중에 Cloudinary를 사용하게 되면 아래와 같이 추가할 수 있습니다.
+      // {
+      //   protocol: 'https',
+      //   hostname: 'res.cloudinary.com',
+      // },
     ],
   },
   // 아래 eslint 설정을 추가해주세요.

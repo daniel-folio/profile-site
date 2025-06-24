@@ -20,8 +20,6 @@ const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN;
 
 /**
  * Strapi 미디어 파일의 전체 URL을 반환하는 함수
- * @param url - Strapi에서 받은 미디어의 URL
- * @returns 전체 이미지 URL 또는 null
  */
 export function getStrapiMedia(url: string | null | undefined): string | null {
   if (!url) {
@@ -36,9 +34,6 @@ export function getStrapiMedia(url: string | null | undefined): string | null {
 
 /**
  * API 호출을 위한 중앙 집중식 헬퍼 함수
- * @param path - /api/ 이후의 경로 (예: /projects)
- * @param options - fetch 함수에 전달할 옵션
- * @returns - API로부터 받은 JSON 데이터
  */
 async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> {
   
@@ -74,7 +69,8 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
 // --- API 함수들 ---
 
 export async function getProfile(): Promise<ProfileResponse> {
-  return fetchAPI<ProfileResponse>('/profile?populate=deep');
+  // ⭐️ 해결책: 'populate=deep' 대신 가장 안정적인 'populate=*'를 사용합니다.
+  return fetchAPI<ProfileResponse>('/profile?populate=*');
 }
 
 export async function getSkills(): Promise<SkillsResponse> {
@@ -83,13 +79,13 @@ export async function getSkills(): Promise<SkillsResponse> {
 
 export async function getProjects(featured?: boolean): Promise<ProjectsResponse> {
   const filters = featured ? '&filters[featured][$eq]=true' : '';
-  // 'populate'를 'deep'으로 설정하여 모든 관계형 데이터를 한 번에 가져옵니다.
-  return fetchAPI<ProjectsResponse>(`/projects?populate=deep&sort=order:asc${filters}`);
+  // ⭐️ 해결책: 'populate=deep' 대신 가장 안정적인 'populate=*'를 사용합니다.
+  return fetchAPI<ProjectsResponse>(`/projects?populate=*&sort=order:asc${filters}`);
 }
 
 export async function getProjectBySlug(slug: string): Promise<ProjectsResponse> {
-  // 오타 수정: [$eq]a= -> [$eq]=
-  const path = `/projects?filters[slug][$eq]=${slug}&populate=deep`;
+  // ⭐️ 해결책: 'populate=deep' 대신 가장 안정적인 'populate=*'를 사용합니다.
+  const path = `/projects?filters[slug][$eq]=${slug}&populate=*`;
   return fetchAPI<ProjectsResponse>(path);
 }
 
