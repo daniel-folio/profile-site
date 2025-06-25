@@ -21,11 +21,7 @@ interface ProjectAttributes {
   endDate: string;
   githubUrl?: string;
   liveUrl?: string;
-}
-
-// Strapi API의 단일 항목 응답 형태
-interface StrapiApiSingleResponse<T> {
-  data: { id: number; attributes: T } | null;
+  thumbnailImage?: StrapiMedia | null;
 }
 
 // Strapi API의 여러 항목(컬렉션) 응답 형태
@@ -33,42 +29,53 @@ interface StrapiApiCollectionResponse<T> {
   data: { id: number; attributes: T }[];
 }
 
+// 페이지가 받는 Props의 정확한 타입
+type PageProps = {
+  params: { slug: string };
+};
+
 // --- 페이지 컴포넌트 ---
 
-// ⭐️ 최종 해결책: 끈질긴 빌드 에러를 우회하기 위해 @ts-expect-error를 사용합니다.
-// 이는 Vercel 빌드 환경에서 발생하는 복잡한 타입 추론 충돌을 해결하기 위한 방법입니다.
-// @ts-expect-error Server Component의 Props 타입 에러를 무시하도록 지시합니다.
-export default async function ProjectPage({ params }: { params: { slug: string } }) {
-  
+export default async function ProjectPage(props: any) {
+  const params = await props.params;
   const slug = params.slug;
+  console.log('상세페이지 slug:', slug);
 
-  const response = await getProjectBySlug(slug) as StrapiApiSingleResponse<ProjectAttributes>;
+  const response = await getProjectBySlug(slug);
+  console.log('상세페이지 response:', JSON.stringify(response, null, 2));
 
-  if (!response?.data?.attributes) {
+  // 유연하게 flat/attributes 구조 모두 지원
+  const projectData = response?.data?.[0];
+  const project = (projectData as any)?.attributes || projectData;
+
+  if (!project) {
+    console.log('404로 빠지는 원인:', projectData);
     notFound();
   }
 
-  const project = response.data.attributes;
-
   const {
-    title,
-    fullDescription,
-    images,
-    technologies,
-    projectType,
-    projectStatus,
-    startDate,
-    endDate,
-    githubUrl,
-    liveUrl,
+    title = '',
+    fullDescription = '',
+    images = { data: [] },
+    technologies = { data: [] },
+    projectType = '',
+    projectStatus = '',
+    startDate = '',
+    endDate = '',
+    githubUrl = '',
+    liveUrl = '',
+    thumbnailImage = null,
   } = project;
 
-  let mainImage: StrapiMedia | null = null;
-  let otherImages: StrapiMedia[] = [];
-
-  if (images && images.data) {
+  // 이미지 추출 로직 유연하게
+  let mainImage: any = null;
+  let otherImages: any[] = [];
+  if (Array.isArray(images) && images.length > 0) {
+    mainImage = images[0];
+    otherImages = images.slice(1);
+  } else if (images && images.data && images.data.length > 0) {
     mainImage = images.data[0]?.attributes ?? null;
-    otherImages = images.data.slice(1).map(img => img.attributes);
+    otherImages = images.data.slice(1).map((img: any) => img.attributes);
   }
 
   return (
@@ -141,18 +148,24 @@ export default async function ProjectPage({ params }: { params: { slug: string }
                 <InfoSection title="관련 링크">
                   <div className="flex flex-wrap gap-4">
                     {githubUrl && (
-                      <Button asChild>
-                        <a href={githubUrl} target="_blank" rel="noopener noreferrer">
-                          GitHub 저장소
-                        </a>
-                      </Button>
+                      <a
+                        href={githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block px-4 py-2 rounded bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-white font-semibold shadow hover:opacity-90 transition"
+                      >
+                        GitHub 저장소
+                      </a>
                     )}
                     {liveUrl && (
-                      <Button asChild variant="secondary">
-                        <a href={liveUrl} target="_blank" rel="noopener noreferrer">
-                          라이브 데모
-                        </a>
-                      </Button>
+                      <a
+                        href={liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-semibold shadow hover:opacity-90 transition"
+                      >
+                        라이브 데모
+                      </a>
                     )}
                   </div>
                 </InfoSection>
@@ -166,18 +179,14 @@ export default async function ProjectPage({ params }: { params: { slug: string }
 }
 
 // 빌드 시점에 정적 페이지를 미리 생성하기 위한 함수입니다.
-export async function generateStaticParams(): Promise<{ slug: string }[]> {
-  const allProjects = await getAllProjectSlugs() as StrapiApiCollectionResponse<{ slug: string }>;
-  
+export async function generateStaticParams() {
+  const allProjects = await getAllProjectSlugs();
   if (!allProjects?.data || !Array.isArray(allProjects.data)) {
     return [];
   }
-
+  // flat 구조와 attributes 구조 모두 지원
   const slugs = allProjects.data
-    .map((item: { id: number, attributes: { slug: string } }) => item.attributes.slug)
-    .filter((slug): slug is string => typeof slug === 'string');
-  
-  return slugs.map((slug) => ({
-    slug: slug,
-  }));
+    .map((item: any) => item?.attributes?.slug || item?.slug)
+    .filter((slug: any) => typeof slug === 'string' && !!slug);
+  return slugs.map((slug: string) => ({ slug }));
 }

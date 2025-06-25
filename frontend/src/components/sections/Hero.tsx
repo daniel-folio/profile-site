@@ -39,34 +39,53 @@ export function Hero({ profile }: HeroProps) {
   const resumeUrl = resumeFile?.url ? getStrapiMedia(resumeFile.url) : null;
 
   return (
-    <motion.section 
-      id="hero" 
-      className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center min-h-[calc(100vh-10rem)]"
+    <motion.section
+      id="hero"
+      className="
+        flex flex-col md:flex-row-reverse items-start justify-center
+        min-h-[calc(100vh-10rem)] px-4
+        gap-y-8
+        md:gap-x-8
+        lg:gap-x-24
+        xl:gap-x-[190px]
+        py-12 md:py-24
+      "
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="flex justify-center md:justify-end md:order-last">
-        <motion.div 
-          className="relative w-64 h-80 md:w-80 md:h-96 lg:w-96 lg:h-[30rem]"
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ duration: 0.8, type: 'spring', stiffness: 100 }}
-        >
-          {profileImageUrl && (
-            <Image
-              src={profileImageUrl}
-              alt={profileImage?.alternativeText || 'Profile image'}
-              fill
-              sizes="(max-width: 768px) 16rem, (max-width: 1024px) 20rem, 24rem"
-              className="rounded-full object-cover shadow-2xl"
-              priority
-            />
-          )}
-        </motion.div>
+      {/* 프로필 이미지 */}
+      <div className="mt-0 md:mt-0 flex-shrink-0 flex justify-center md:justify-end w-full md:w-auto">
+        <div className="relative w-40 h-52 md:w-52 md:h-64 lg:w-64 lg:h-[20rem] flex items-center justify-center">
+          {/* Gradient Border */}
+          <div className="absolute inset-0 rounded-[40%] p-1 bg-gradient-to-br from-primary-gradient-start via-white/30 to-primary-gradient-end blur-sm z-0" />
+          {/* 완전 불투명 흰색 + subtle pastel gradient */}
+          <div className="relative w-full h-full rounded-[40%] bg-white overflow-hidden z-10 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-[40%] bg-gradient-to-br from-white via-pink-100 to-blue-100 opacity-80" />
+            {profileImageUrl ? (
+              <Image
+                src={profileImageUrl}
+                alt={profileImage?.alternativeText || 'Profile image'}
+                fill
+                sizes="(max-width: 768px) 10rem, (max-width: 1024px) 13rem, 16rem"
+                className="rounded-[40%] object-cover relative z-10"
+                priority
+              />
+            ) : (
+              <Image
+                src="/placeholder.svg"
+                alt="Profile placeholder"
+                fill
+                sizes="(max-width: 768px) 10rem, (max-width: 1024px) 13rem, 16rem"
+                className="rounded-[40%] object-cover relative z-10"
+                priority
+              />
+            )}
+          </div>
+        </div>
       </div>
-
-      <div className="text-center md:text-left md:order-first px-4">
+      {/* 텍스트 영역 */}
+      <div className="text-center md:text-left w-full md:w-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
