@@ -38,7 +38,10 @@ export function getStrapiMedia(url: string | null | undefined): string | null {
 async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> {
   
   const defaultOptions: RequestInit = {
-    cache: 'no-store',
+    // ⭐️ 해결책: cache: 'no-store' 옵션을 제거하고,
+    //    Next.js의 기본 캐싱 동작(정적 생성)을 따르도록 합니다.
+    //    revalidate 옵션을 통해 주기적으로 데이터를 업데이트할 수 있습니다.
+    next: { revalidate: 60 }, // 60초마다 데이터를 새로 가져오도록 설정
     headers: {
       'Content-Type': 'application/json',
       // API 토큰이 있을 경우에만 인증 헤더를 추가합니다.
@@ -69,7 +72,6 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
 // --- API 함수들 ---
 
 export async function getProfile(): Promise<ProfileResponse> {
-  // ⭐️ 해결책: 'populate=deep' 대신 가장 안정적인 'populate=*'를 사용합니다.
   return fetchAPI<ProfileResponse>('/profile?populate=*');
 }
 
@@ -79,12 +81,10 @@ export async function getSkills(): Promise<SkillsResponse> {
 
 export async function getProjects(featured?: boolean): Promise<ProjectsResponse> {
   const filters = featured ? '&filters[featured][$eq]=true' : '';
-  // ⭐️ 해결책: 'populate=deep' 대신 가장 안정적인 'populate=*'를 사용합니다.
   return fetchAPI<ProjectsResponse>(`/projects?populate=*&sort=order:asc${filters}`);
 }
 
 export async function getProjectBySlug(slug: string): Promise<ProjectsResponse> {
-  // ⭐️ 해결책: 'populate=deep' 대신 가장 안정적인 'populate=*'를 사용합니다.
   const path = `/projects?filters[slug][$eq]=${slug}&populate=*`;
   return fetchAPI<ProjectsResponse>(path);
 }
