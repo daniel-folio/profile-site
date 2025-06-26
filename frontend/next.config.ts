@@ -15,6 +15,10 @@ const nextConfig = {
         port: '1337',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
       // (선택 사항) 나중에 Cloudinary를 사용하게 되면 아래와 같이 추가할 수 있습니다.
       // {
       //   protocol: 'https',
