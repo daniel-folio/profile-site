@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={GeistSans.className}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="light"
         >
           <ThreeShapesBackground />
           <div className="relative z-10 flex flex-col min-h-screen">
