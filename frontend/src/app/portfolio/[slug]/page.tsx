@@ -118,8 +118,8 @@ export default async function ProjectPage(props: any) {
               <div>
                 <h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">{title}</h1>
                 <div
-                  className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300"
-                  dangerouslySetInnerHTML={{ __html: fullDescription || '' }}
+                  className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 whitespace-pre-line"
+                  dangerouslySetInnerHTML={{ __html: (fullDescription || '').replace(/\n/g, '<br />') }}
                 />
               </div>
 
