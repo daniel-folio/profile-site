@@ -15,7 +15,7 @@ export default async function Home() {
   return (
     <div className="container mx-auto px-4">
       <div className="space-y-24 md:space-y-32">
-        <section id="hero" className="py-16 md:py-24">
+        <section id="hero" className="py-24 md:py-32">
           <Hero profile={profile.data} />
         </section>
         <section id="skills" className="py-16 md:py-24 bg-transparent">
