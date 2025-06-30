@@ -41,9 +41,11 @@ export default ({ strapi }) => ({
     if (!file || !file.stream) {
       throw new Error('No file stream provided for upload.');
     }
+    const fileName = file.name ? file.name.split('.')[0] : Date.now().toString();
+    const publicId = `${folder}/${fileName}`;
     return new Promise((resolve, reject) => {
       const stream = cloudinary.v2.uploader.upload_stream(
-        { folder },
+        { public_id: publicId, resource_type: 'auto' },
         (error, result) => {
           if (error) return reject(error);
           resolve({
