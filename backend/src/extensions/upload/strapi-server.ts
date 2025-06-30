@@ -12,6 +12,12 @@ export default (plugin) => {
   console.log('[Upload] CLOUDINARY_FOLDER:', folder);
   console.log('[Upload] envPrefix:', envPrefix);
 
+  // upload 컨트롤러가 존재하는지 확인
+  if (!plugin.controllers || !plugin.controllers.upload || typeof plugin.controllers.upload.upload !== 'function') {
+    console.error('[Upload] plugin.controllers.upload.upload is undefined!');
+    return plugin;
+  }
+
   const originalUpload = plugin.controllers.upload.upload;
 
   plugin.controllers.upload.upload = async (ctx) => {
