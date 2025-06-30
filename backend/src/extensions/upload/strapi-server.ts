@@ -7,19 +7,24 @@ export default (plugin) => {
   } else if (folder.includes('prod')) {
     envPrefix = 'prod_';
   } else {
-    envPrefix = 'else_'; // 기본값
+    envPrefix = 'else_';
   }
+  console.log('[Upload] CLOUDINARY_FOLDER:', folder);
+  console.log('[Upload] envPrefix:', envPrefix);
 
   const originalUpload = plugin.controllers.upload.upload;
 
   plugin.controllers.upload.upload = async (ctx) => {
     const files: any = ctx.request.files;
+    console.log('[Upload] files:', files);
 
     if (files) {
       Object.values(files).forEach((file: any) => {
-        if (!file.name.startsWith(envPrefix)) {
+        console.log('[Upload] before:', file.name);
+        if (envPrefix && !file.name.startsWith(envPrefix)) {
           file.name = `${envPrefix}${file.name}`;
         }
+        console.log('[Upload] after:', file.name);
       });
     }
 
