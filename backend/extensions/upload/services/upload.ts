@@ -39,15 +39,22 @@ export default ({ strapi }) => ({
   async uploadStream(file) {
     const folder = process.env.CLOUDINARY_FOLDER || 'default_folder';
     if (!file || !file.stream) {
+      console.error('[Cloudinary] No file stream provided for upload.');
       throw new Error('No file stream provided for upload.');
     }
-    const fileName = file.name ? file.name.split('.')[0] : Date.now().toString();
+    const fileName = file.name || Date.now().toString();
     const publicId = `${folder}/${fileName}`;
+    console.log('[Cloudinary] Uploading to folder:', folder);
+    console.log('[Cloudinary] public_id:', publicId);
     return new Promise((resolve, reject) => {
       const stream = cloudinary.v2.uploader.upload_stream(
         { public_id: publicId, resource_type: 'auto' },
         (error, result) => {
-          if (error) return reject(error);
+          if (error) {
+            console.error('[Cloudinary] Upload error:', error);
+            return reject(error);
+          }
+          console.log('[Cloudinary] Upload result:', result);
           resolve({
             url: result.secure_url,
             provider_metadata: {
@@ -58,13 +65,16 @@ export default ({ strapi }) => ({
         }
       );
       file.stream.pipe(stream);
+      console.log('[Cloudinary] File stream piped to upload_stream.');
     });
   },
 
   async delete(file) {
     if (!file || !file.provider_metadata || !file.provider_metadata.public_id) {
+      console.error('[Cloudinary] No public_id provided for deletion.');
       throw new Error('No public_id provided for deletion.');
     }
+    console.log('[Cloudinary] Deleting public_id:', file.provider_metadata.public_id);
     return cloudinary.v2.uploader.destroy(file.provider_metadata.public_id);
   },
 }); 
