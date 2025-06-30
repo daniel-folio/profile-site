@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { motion } from 'framer-motion';
 
 interface ProjectsProps {
-  projects: Project[];
+  projects: Project[] | null;
   featured?: boolean;
 }
 

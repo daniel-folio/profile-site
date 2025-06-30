@@ -16,13 +16,13 @@ export default async function Home() {
     <div className="container mx-auto px-4">
       <div className="space-y-24 md:space-y-32">
         <section id="hero" className="py-24 md:py-32">
-          <Hero profile={profile.data} />
+          <Hero profile={profile ? profile.data : null} />
         </section>
         <section id="skills" className="py-16 md:py-24 bg-transparent">
-          <Skills skills={skills.data} />
+          <Skills skills={skills ? skills.data : null} />
         </section>
         <section id="projects" className="py-16 md:py-24 bg-transparent">
-          <Projects projects={projects.data} />
+          <Projects projects={projects ? projects.data : null} />
         </section>
       </div>
     </div>
