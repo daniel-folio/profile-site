@@ -71,8 +71,13 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
 
 // --- API 함수들 ---
 
-export async function getProfile(): Promise<ProfileResponse> {
-  return fetchAPI<ProfileResponse>('/profile?populate=*');
+export async function getProfile(): Promise<ProfileResponse | null> {
+  try {
+    // ⭐️ 해결책: 'populate=deep' 대신 가장 안정적인 'populate=*'를 사용합니다.
+    return await fetchAPI<ProfileResponse>('/profile?populate=*');
+  } catch (e) {
+    return null;
+  }
 }
 
 export async function getSkills(): Promise<SkillsResponse> {
