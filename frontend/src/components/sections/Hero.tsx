@@ -29,9 +29,6 @@ export function Hero({ profile }: HeroProps) {
         <svg width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="mx-auto text-gray-400 dark:text-gray-500 mb-4"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
         <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">등록된 프로필 정보가 없습니다.</h2>
         <p className="text-gray-600 dark:text-gray-400 mb-6">아직 프로필이 등록되지 않았습니다.<br />관리자 페이지에서 프로필을 등록해 주세요.</p>
-        <Link href="/">
-          <Button size="lg" variant="gradient">홈으로 돌아가기</Button>
-        </Link>
       </section>
     );
   }
