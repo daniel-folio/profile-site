@@ -623,7 +623,7 @@ export interface ApiOtherExperienceOtherExperience
   collectionName: 'other_experiences';
   info: {
     description: '\uAE30\uD0C0\uACBD\uD5D8(Class/ETC) \uC815\uBCF4';
-    displayName: '40. OtherExperience(\uAE30\uD0C0\uACBD\uD5D8)';
+    displayName: '11. OtherExperience(\uAE30\uD0C0\uACBD\uD5D8)';
     pluralName: 'other-experiences';
     singularName: 'other-experience';
   };
