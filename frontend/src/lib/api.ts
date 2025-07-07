@@ -6,34 +6,29 @@ import { EducationResponse } from '@/types/education';
 import { CareerDetailResponse } from '@/types/career-detail';
 
 // Vercel에 설정된 환경 변수 값을 가져옵니다.
-let strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://127.0.0.1:1337';
+let STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://127.0.0.1:1337';
 
 // 사용자가 실수로 URL 끝에 '/'나 '/api'를 붙이는 경우를 대비해,
 // 코드가 알아서 불필요한 부분을 제거하도록 보강합니다.
-if (strapiUrl.endsWith('/')) {
-  strapiUrl = strapiUrl.slice(0, -1);
+if (STRAPI_URL.endsWith('/')) {
+  STRAPI_URL = STRAPI_URL.slice(0, -1);
 }
-if (strapiUrl.endsWith('/api')) {
-  strapiUrl = strapiUrl.slice(0, -4);
+if (STRAPI_URL.endsWith('/api')) {
+  STRAPI_URL = STRAPI_URL.slice(0, -4);
 }
-const STRAPI_URL = 'http://localhost:1337';
 
 // Vercel에 등록한 API 토큰을 가져옵니다.
 const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN;
 
 console.log('ENV:', process.env.NEXT_PUBLIC_STRAPI_API_URL);
-console.log('STRAPI_URL:', strapiUrl);
+console.log('STRAPI_URL:', STRAPI_URL);
 
 /**
  * Strapi 미디어 파일의 전체 URL을 반환하는 함수
  */
 export function getStrapiMedia(url: string | null | undefined): string | null {
-  if (!url) {
-    return null;
-  }
-  if (url.startsWith('http')) {
-    return url;
-  }
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
   return `${STRAPI_URL}${url}`;
 }
 
