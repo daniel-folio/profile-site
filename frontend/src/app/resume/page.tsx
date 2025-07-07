@@ -126,6 +126,13 @@ export default async function ResumePage() {
     });
   };
 
+  const CATEGORY_ORDER = ["Backend", "Frontend", "Database", "Tools", "Server", "Other"];
+  const skillsByCategory = skills.reduce((acc, skill) => {
+    if (!acc[skill.category]) acc[skill.category] = [];
+    acc[skill.category].push(skill);
+    return acc;
+  }, {} as Record<string, Skill[]>);
+
   return (
     <main className="max-w-6xl mx-auto pt-24 md:pt-32 pb-12 px-4">
       <div className="bg-white/80 dark:bg-black/50 rounded-xl p-8 flex flex-col gap-8">
@@ -309,47 +316,38 @@ export default async function ResumePage() {
           </>
         )}
 
-        <hr className='my-8 border border-gray-500/40 dark:border-gray-300/20' />
-        {/* 전체 스킬 하단에 표시 */}
         {skills && skills.length > 0 && (
-          <section className="mb-0">
-            <h2 className="text-xl font-semibold mb-4 text-orange-500 dark:text-orange-300">
-              기술 스택 (Skills)
-            </h2>
-            {(() => {
-              const CATEGORY_ORDER = ["Backend", "Frontend", "Database", "Tools", "Server", "Other"];
-              const skillsByCategory = skills.reduce((acc, skill) => {
-                if (!acc[skill.category]) acc[skill.category] = [];
-                acc[skill.category].push(skill);
-                return acc;
-              }, {} as Record<string, Skill[]>);
-              return (
-                <div className="space-y-1">
-                  <ul className="ml-8">
-                    {CATEGORY_ORDER.filter(category => skillsByCategory[category]).map((category) => (
-                      <li key={category} className="grid grid-cols-[max-content_1fr] items-start mb-2">
-                        <span className="font-bold text-gray-700 dark:text-gray-200 whitespace-nowrap pr-2">
-                          {category} :
-                        </span>
-                        <div className="flex flex-wrap gap-2 min-w-0">
-                          {skillsByCategory[category]
-                            .sort((a, b) => (b.order ?? 0) - (a.order ?? 0))
-                            .map((skill) => (
-                              <span
-                                key={skill.id}
-                                className="inline-block bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded px-3 py-1 text-sm"
-                              >
-                                {skill.name}
-                              </span>
-                            ))}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })()}
-          </section>
+          <>
+            <hr className='my-8 border border-gray-500/40 dark:border-gray-300/20' />
+            <section className="mb-0">
+              <h2 className="text-xl font-semibold mb-4 text-orange-500 dark:text-orange-300">
+                기술 스택 (Skills)
+              </h2>
+              <div className="space-y-1">
+                <ul className="ml-8">
+                  {CATEGORY_ORDER.filter(category => skillsByCategory[category]).map((category) => (
+                    <li key={category} className="grid grid-cols-[max-content_1fr] items-start mb-2">
+                      <span className="font-bold text-gray-700 dark:text-gray-200 whitespace-nowrap pr-2">
+                        {category} :
+                      </span>
+                      <div className="flex flex-wrap gap-2 min-w-0">
+                        {skillsByCategory[category]
+                          .sort((a, b) => (b.order ?? 0) - (a.order ?? 0))
+                          .map((skill) => (
+                            <span
+                              key={skill.id}
+                              className="inline-block bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded px-3 py-1 text-sm"
+                            >
+                              {skill.name}
+                            </span>
+                          ))}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </section>
+          </>
         )}
 
         <hr className='my-8 border border-gray-500/40 dark:border-gray-300/20' />
