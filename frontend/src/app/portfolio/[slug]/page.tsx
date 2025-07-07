@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/Button';
 import { InfoItem, InfoSection } from '@/components/ui/InfoItem';
 import { Skill } from '@/types/skill';
 import { StrapiMedia } from '@/types/media';
+import { marked } from 'marked';
+import { RichTextRenderer } from '@/components/ui/RichTextRenderer';
 
 // --- 타입 정의: 각 데이터의 형태를 명확하게 정의합니다 ---
 
@@ -117,10 +119,7 @@ export default async function ProjectPage(props: any) {
             <div className="space-y-8">
               <div>
                 <h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">{title}</h1>
-                <div
-                  className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 whitespace-pre-line"
-                  dangerouslySetInnerHTML={{ __html: (fullDescription || '').replace(/\n/g, '<br />') }}
-                />
+                <RichTextRenderer text={fullDescription} className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300" />
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-sm">

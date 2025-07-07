@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { marked } from 'marked';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -60,7 +61,11 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
         className={cn('text-lg font-semibold leading-none tracking-tight', className)}
         {...props}
       >
-        {children}
+        {typeof children === 'string' ? (
+          <span dangerouslySetInnerHTML={{ __html: marked(children) }} />
+        ) : (
+          children
+        )}
       </h3>
     );
   }
@@ -80,7 +85,11 @@ const CardDescription = React.forwardRef<HTMLParagraphElement, CardDescriptionPr
         className={cn('text-sm text-gray-500', className)}
         {...props}
       >
-        {children}
+        {typeof children === 'string' ? (
+          <span dangerouslySetInnerHTML={{ __html: marked(children) }} />
+        ) : (
+          children
+        )}
       </p>
     );
   }

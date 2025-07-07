@@ -1,6 +1,9 @@
 import { ProfileResponse } from '@/types/profile';
 import { SkillsResponse } from '@/types/skill';
 import { ProjectsResponse, ProjectResponse, Project } from '@/types/project';
+import { CompanyResponse } from '@/types/company';
+import { EducationResponse } from '@/types/education';
+import { CareerDetailResponse } from '@/types/career-detail';
 
 // Vercel에 설정된 환경 변수 값을 가져옵니다.
 let strapiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://127.0.0.1:1337';
@@ -13,10 +16,13 @@ if (strapiUrl.endsWith('/')) {
 if (strapiUrl.endsWith('/api')) {
   strapiUrl = strapiUrl.slice(0, -4);
 }
-const STRAPI_URL = strapiUrl;
+const STRAPI_URL = 'http://localhost:1337';
 
 // Vercel에 등록한 API 토큰을 가져옵니다.
 const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN;
+
+console.log('ENV:', process.env.NEXT_PUBLIC_STRAPI_API_URL);
+console.log('STRAPI_URL:', strapiUrl);
 
 /**
  * Strapi 미디어 파일의 전체 URL을 반환하는 함수
@@ -52,6 +58,7 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
 
   try {
     const requestUrl = `${STRAPI_URL}/api${path}`;
+    console.log('Requesting:', requestUrl);
     const response = await fetch(requestUrl, defaultOptions);
 
     if (!response.ok) {
@@ -97,4 +104,24 @@ export async function getProjectBySlug(slug: string): Promise<ProjectsResponse> 
 export async function getAllProjectSlugs(): Promise<{ data: { attributes: { slug: string } }[] }> {
   const path = `/projects?fields=slug`;
   return fetchAPI<{ data: { attributes: { slug: string } }[] }>(path);
+}
+
+export async function getCompanies(): Promise<CompanyResponse> {
+  return fetchAPI<CompanyResponse>('/companies?populate=*&sort=startDate:desc');
+}
+
+export async function getEducations(): Promise<EducationResponse> {
+  return fetchAPI<EducationResponse>('/educations?populate=*&sort=order:asc');
+}
+
+export async function getCareerDetails() {
+  try {
+    return await fetchAPI('/career-details?populate=*');
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function getOtherExperiences() {
+  return fetchAPI('/other-experiences?pagination[pageSize]=100');
 }

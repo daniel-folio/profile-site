@@ -1,0 +1,53 @@
+{
+  "kind": "collectionType",
+  "collectionName": "career_details",
+  "info": {
+    "singularName": "career-detail",
+    "pluralName": "career-details",
+    "displayName": "23. CareerDetail(경력기술서)",
+    "description": "경력 기술서"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "project": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::project.project",
+      "displayName": "Project(프로젝트)",
+      "required": true
+    },
+    "companyName": {
+      "type": "string"
+    },
+    "teamSize": {
+      "type": "integer"
+    },
+    "myRole": {
+      "type": "text"
+    },
+    "responsibilities": {
+      "type": "richtext"
+    },
+    "challenges": {
+      "type": "richtext"
+    },
+    "solutions": {
+      "type": "richtext"
+    },
+    "results": {
+      "type": "richtext"
+    },
+    "lessonsLearned": {
+      "type": "richtext"
+    },
+    "metrics": {
+      "type": "text"
+    },
+    "order": {
+      "type": "integer"
+    }
+  }
+}

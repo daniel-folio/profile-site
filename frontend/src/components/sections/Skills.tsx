@@ -30,6 +30,8 @@ export function Skills({ skills }: SkillsProps) {
     return acc;
   }, {} as Record<string, Skill[]>);
 
+  const CATEGORY_ORDER = ["Backend", "Frontend", "Database", "Tools", "Server", "Other"];
+
   return (
     <motion.section
       id="skills"
@@ -44,42 +46,44 @@ export function Skills({ skills }: SkillsProps) {
           기술 스택
         </h2>
         <div className="space-y-12">
-          {Object.entries(skillsByCategory).map(([category, skills]) => (
+          {CATEGORY_ORDER.filter(category => skillsByCategory[category]).map(category => (
             <div key={category}>
               <h3 className="text-2xl font-semibold mb-6 capitalize text-gray-800 dark:text-gray-200">{category}</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                {skills.map((skill) => {
-                  let iconUrl: string | undefined;
+                {skillsByCategory[category]
+                  .sort((a, b) => (b.order ?? 0) - (a.order ?? 0))
+                  .map((skill) => {
+                    let iconUrl: string | undefined;
 
-                  if (skill.icon) {
-                    if ('data' in skill.icon && skill.icon.data) {
-                      iconUrl = skill.icon.data.attributes.url;
-                    } else if ('url' in skill.icon) {
-                      iconUrl = skill.icon.url;
+                    if (skill.icon) {
+                      if ('data' in skill.icon && skill.icon.data) {
+                        iconUrl = skill.icon.data.attributes.url;
+                      } else if ('url' in skill.icon) {
+                        iconUrl = skill.icon.url;
+                      }
                     }
-                  }
 
-                  return (
-                    <div key={skill.id} className="text-center">
-                      <div className="bg-white shadow-md rounded-lg p-4 h-32 w-32 mx-auto flex items-center justify-center transition-transform duration-300 hover:scale-110">
-                        {iconUrl ? (
-                          <div className="relative w-24 h-24">
-                            <Image
-                              src={getImageUrl(iconUrl)}
-                              alt={`${skill.name} icon`}
-                              fill
-                              sizes="6rem"
-                              className="object-contain"
-                            />
-                          </div>
-                        ) : (
-                          <span className="text-4xl font-bold text-gray-400">{skill.name.slice(0, 2)}</span>
-                        )}
+                    return (
+                      <div key={skill.id} className="text-center">
+                        <div className="bg-white shadow-md rounded-lg p-4 h-32 w-32 mx-auto flex items-center justify-center transition-transform duration-300 hover:scale-110">
+                          {iconUrl ? (
+                            <div className="relative w-24 h-24">
+                              <Image
+                                src={getImageUrl(iconUrl)}
+                                alt={`${skill.name} icon`}
+                                fill
+                                sizes="6rem"
+                                className="object-contain"
+                              />
+                            </div>
+                          ) : (
+                            <span className="text-4xl font-bold text-gray-400">{skill.name.slice(0, 2)}</span>
+                          )}
+                        </div>
+                        <p className="mt-4 font-semibold text-gray-900 dark:text-gray-100">{skill.name}</p>
                       </div>
-                      <p className="mt-4 font-semibold text-gray-900 dark:text-gray-100">{skill.name}</p>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
               </div>
             </div>
           ))}

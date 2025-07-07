@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "blog_posts",
+  "info": {
+    "singularName": "blog-post",
+    "pluralName": "blog-posts",
+    "displayName": "31. BlogPost(블로그글)",
+    "description": "블로그 포스트 | title:제목, slug:슬러그, content:본문, excerpt:요약, featuredImage:대표 이미지, publishedAt:발행일, updatedAt:수정일, status:상태, category:카테고리, tags:태그, readingTime:예상 읽기 시간(분), views:조회수, featured:추천글 여부, seoTitle:SEO 제목, seoDescription:SEO 설명, tableOfContents:목차, relatedPosts:관련 글, order:정렬 순서"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": { "type": "string", "required": true, "displayName": "Title(제목)" },
+    "slug": { "type": "uid", "targetField": "title", "required": true, "displayName": "Slug(슬러그)" },
+    "content": { "type": "richtext", "displayName": "Content(본문)" },
+    "excerpt": { "type": "text", "displayName": "Excerpt(요약)" },
+    "featuredImage": { "type": "media", "multiple": false, "displayName": "Featured Image(대표 이미지)" },
+    "publishedAt": { "type": "datetime", "displayName": "Published At(발행일)" },
+    "updatedAt": { "type": "datetime", "displayName": "Updated At(수정일)" },
+    "status": { "type": "enumeration", "enum": ["draft", "published", "archived"], "default": "draft", "displayName": "Status(상태)" },
+    "category": { "type": "relation", "relation": "manyToOne", "target": "api::blog-category.blog-category", "displayName": "Category(카테고리)" },
+    "tags": { "type": "json", "displayName": "Tags(태그)" },
+    "readingTime": { "type": "integer", "displayName": "Reading Time(예상 읽기 시간)" },
+    "views": { "type": "integer", "displayName": "Views(조회수)" },
+    "featured": { "type": "boolean", "default": false, "displayName": "Featured(추천글 여부)" },
+    "seoTitle": { "type": "string", "displayName": "SEO Title(SEO 제목)" },
+    "seoDescription": { "type": "string", "displayName": "SEO Description(SEO 설명)" },
+    "tableOfContents": { "type": "json", "displayName": "Table of Contents(목차)" },
+    "relatedPosts": { "type": "relation", "relation": "oneToMany", "target": "api::blog-post.blog-post", "displayName": "Related Posts(관련 글)" },
+    "order": { "type": "integer", "displayName": "Order(정렬 순서)" }
+  }
+} 

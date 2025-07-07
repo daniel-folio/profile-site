@@ -10,6 +10,8 @@ import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TypeAnimation } from 'react-type-animation';
 import { useState, useEffect } from "react";
+import { marked } from 'marked';
+import { RichTextRenderer } from '@/components/ui/RichTextRenderer';
 
 const VantaBackground = dynamic(() => import('@/components/layout/VantaBackground'), {
   ssr: false,
@@ -33,10 +35,9 @@ export function Hero({ profile }: HeroProps) {
     );
   }
   
-  const { name, title, bio, socialLinks, profileImage, email, resumeFile } = profile;
+  const { name, title, mainBio, socialLinks, profileImage, email, resumeFile } = profile;
   const profileImageUrl = profileImage?.url ? getStrapiMedia(profileImage.url) : null;
   const resumeUrl = resumeFile?.url ? getStrapiMedia(resumeFile.url) : null;
-  const bioLines = bio.split(/\n|\. /).filter(Boolean);
 
   // 애니메이션 variants
   const fadeUpVariant = {
@@ -108,13 +109,10 @@ export function Hero({ profile }: HeroProps) {
         <motion.div variants={fadeUpVariant} className="mt-4 text-xl font-semibold text-gray-800 dark:text-white/80">
           {title}
         </motion.div>
-        <div className="mt-6 space-y-2">
-          {bioLines.map((line, idx) => (
-            <motion.p key={idx} variants={fadeUpVariant} className="text-lg text-gray-700 dark:text-gray-300">
-              {line}
-            </motion.p>
-          ))}
-        </div>
+        {/* 자기소개 */}
+        {mainBio && (
+          <RichTextRenderer text={mainBio} className="mt-6 text-lg text-gray-700 dark:text-gray-300 prose dark:prose-invert max-w-none" />
+        )}
         <motion.div variants={fadeUpVariant} className="flex gap-4 mt-8 flex-wrap">
           <Link href="/#projects">
             <Button size="lg" variant="gradient" className="shadow-lg shadow-blue-400/30 hover:scale-105 transition-transform">

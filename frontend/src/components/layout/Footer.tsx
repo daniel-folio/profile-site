@@ -35,6 +35,11 @@ export function Footer() {
                   프로젝트
                 </Link>
               </li>
+              <li>
+                <Link href="/resume" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">
+                  이력서
+                </Link>
+              </li>
             </ul>
           </div>
 

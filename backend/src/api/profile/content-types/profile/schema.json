@@ -5,7 +5,7 @@
     "singularName": "profile",
     "pluralName": "profiles",
     "displayName": "Profile",
-    "description": "개인 프로필 정보"
+    "description": "프로필 정보"
   },
   "options": {
     "draftAndPublish": true
@@ -27,17 +27,22 @@
     "phone": {
       "type": "string"
     },
+    "mainBio": {
+      "type": "richtext"
+    },
+    "resumeBio": {
+      "type": "richtext"
+    },
     "location": {
       "type": "string"
-    },
-    "bio": {
-      "type": "richtext"
     },
     "profileImage": {
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "socialLinks": {
       "type": "json"
@@ -46,7 +51,9 @@
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["files"]
+      "allowedTypes": [
+        "files"
+      ]
     }
   }
-} 
+}

@@ -1,0 +1,22 @@
+{
+  "kind": "collectionType",
+  "collectionName": "blog_categories",
+  "info": {
+    "singularName": "blog-category",
+    "pluralName": "blog-categories",
+    "displayName": "30. BlogCategory(블로그카테고리)",
+    "description": "블로그 카테고리 | name:카테고리명, slug:슬러그, description:설명, color:색상, icon:아이콘, order:정렬 순서"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": { "type": "string", "required": true, "displayName": "Name(카테고리명)" },
+    "slug": { "type": "uid", "targetField": "name", "required": true, "displayName": "Slug(슬러그)" },
+    "description": { "type": "text", "displayName": "Description(설명)" },
+    "color": { "type": "string", "displayName": "Color(색상)" },
+    "icon": { "type": "media", "multiple": false, "displayName": "Icon(아이콘)" },
+    "order": { "type": "integer", "displayName": "Order(정렬 순서)" }
+  }
+} 

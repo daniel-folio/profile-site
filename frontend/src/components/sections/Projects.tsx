@@ -7,6 +7,7 @@ import { getImageUrl, getStatusColor, getProjectTypeIcon, formatDateRange } from
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { motion } from 'framer-motion';
+import { marked } from 'marked';
 
 interface ProjectsProps {
   projects: Project[] | null;
@@ -90,7 +91,9 @@ export function Projects({ projects, featured = false }: ProjectsProps) {
                   </div>
                   <CardTitle className="text-xl text-gray-900 dark:text-gray-100">{project.title}</CardTitle>
                   <CardDescription className="text-gray-700 dark:text-gray-300">
-                    {project.shortDescription}
+                    {project.shortDescription && (
+                      <span dangerouslySetInnerHTML={{ __html: marked(project.shortDescription) }} />
+                    )}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

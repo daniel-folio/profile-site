@@ -20,6 +20,8 @@ export interface Project {
   liveUrl?: string;
   featured?: boolean;
   order?: number;
+  company?: number | null;
+  visible?: boolean;
 }
 
 export interface ProjectsResponse {

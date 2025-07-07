@@ -1,0 +1,87 @@
+{
+  "kind": "collectionType",
+  "collectionName": "experiences",
+  "info": {
+    "singularName": "company",
+    "pluralName": "companies",
+    "displayName": "20. Company(경력)",
+    "description": "회사/경력 정보"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "company": {
+      "type": "string",
+      "required": true,
+      "displayName": "Company(회사명)"
+    },
+    "position": {
+      "type": "string",
+      "required": true,
+      "displayName": "Position(직책)"
+    },
+    "employmentType": {
+      "type": "enumeration",
+      "default": "Full-time",
+      "enum": [
+        "Full-time",
+        "Part-time",
+        "Contract",
+        "Freelance"
+      ],
+      "displayName": "Employment Type(고용형태)"
+    },
+    "startDate": {
+      "type": "string",
+      "required": true,
+      "displayName": "Start Date(입사년월)"
+    },
+    "endDate": {
+      "type": "string",
+      "displayName": "End Date(퇴사년월)"
+    },
+    "isCurrent": {
+      "type": "boolean",
+      "default": false,
+      "displayName": "Is Current(재직중)"
+    },
+    "location": {
+      "type": "string",
+      "displayName": "Location(지역)"
+    },
+    "companyLogo": {
+      "type": "media",
+      "multiple": false,
+      "displayName": "Company Logo(회사로고)"
+    },
+    "description": {
+      "type": "richtext",
+      "displayName": "Description(설명)"
+    },
+    "achievements": {
+      "type": "text",
+      "displayName": "Achievements(성과)"
+    },
+    "order": {
+      "type": "integer",
+      "displayName": "Order(정렬순서)"
+    },
+    "skills": {
+      "name": "skills",
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::skill.skill",
+      "through": {
+        "name": "company_skills_links",
+        "fields": [
+          {
+            "name": "order",
+            "type": "integer"
+          }
+        ]
+      }
+    }
+  }
+}

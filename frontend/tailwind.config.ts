@@ -19,9 +19,24 @@ const config: Config = {
         foreground: 'rgb(var(--foreground) / <alpha-value>)',
         'primary-gradient-start': '#5D5FEF',
         'primary-gradient-end': '#E15A8B',
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            'u': { 'text-decoration': 'underline' },
+            's, del': { 'text-decoration': 'line-through' },
+            'mark': { 'background-color': '#fff3cd', 'color': '#856404' },
+            'span[style*="color"]': { 'color': 'inherit' },
+            'code': { 'background-color': '#f3f4f6', 'padding': '2px 4px', 'border-radius': '4px', 'font-size': '0.95em' },
+            'pre': { 'background-color': '#f3f4f6', 'padding': '12px', 'border-radius': '8px' },
+          }
+        }
       }
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [
+    require('tailwindcss-animate'),
+    require('@tailwindcss/typography'),
+  ],
 }
 export default config 

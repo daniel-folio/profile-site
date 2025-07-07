@@ -4,8 +4,8 @@
   "info": {
     "singularName": "skill",
     "pluralName": "skills",
-    "displayName": "Skill",
-    "description": "기술 스택 정보"
+    "displayName": "21. Skill(기술)",
+    "description": "기술 스택"
   },
   "options": {
     "draftAndPublish": true
@@ -18,28 +18,29 @@
     },
     "category": {
       "type": "enumeration",
+      "required": true,
       "enum": [
         "Frontend",
         "Backend",
         "Database",
-        "DevOps",
-        "Mobile",
-        "Design",
+        "Tools",
+        "Server",
         "Other"
-      ],
-      "required": true
+      ]
     },
     "proficiency": {
       "type": "integer",
+      "required": true,
       "min": 1,
-      "max": 5,
-      "required": true
+      "max": 5
     },
     "icon": {
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "description": {
       "type": "text"
@@ -52,7 +53,8 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::project.project",
+      "displayName": "Projects(프로젝트)",
       "mappedBy": "technologies"
     }
   }
-} 
+}

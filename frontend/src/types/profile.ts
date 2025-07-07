@@ -17,6 +17,8 @@ export interface Profile {
     [key: string]: string | undefined;
   };
   resumeFile?: StrapiMedia;
+  mainBio?: string;
+  resumeBio?: string;
 }
 
 export interface ProfileResponse {

@@ -25,6 +25,9 @@ export default async function Home() {
           <Projects projects={projects ? projects.data : null} />
         </section>
       </div>
+      {profile?.mainBio && (
+        <div className="mt-2 text-gray-700 whitespace-pre-line">{profile.mainBio}</div>
+      )}
     </div>
   );
 }

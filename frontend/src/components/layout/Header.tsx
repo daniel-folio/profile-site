@@ -59,6 +59,8 @@ export function Header() {
     { href: '/#hero', label: '홈' },
     { href: '/#skills', label: '기술 스택' },
     { href: '/#projects', label: '프로젝트' },
+    { href: '/resume', label: '이력서' },
+    { href: '/career-detail', label: '경력기술서' },
   ];
 
   return (

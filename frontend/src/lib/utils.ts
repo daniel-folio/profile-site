@@ -8,6 +8,13 @@ export function cn(...inputs: ClassValue[]) {
 
 // 날짜 포맷팅
 export function formatDate(dateString: string): string {
+  if (!dateString) return '';
+  // YYYY-MM만 입력된 경우
+  if (/^\d{4}-\d{2}$/.test(dateString)) {
+    const [year, month] = dateString.split('-');
+    return `${year}년 ${parseInt(month, 10)}월`;
+  }
+  // YYYY-MM-DD까지 입력된 경우
   const date = new Date(dateString);
   return date.toLocaleDateString('ko-KR', {
     year: 'numeric',

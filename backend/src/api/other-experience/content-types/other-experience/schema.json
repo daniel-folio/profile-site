@@ -1,0 +1,23 @@
+{
+  "kind": "collectionType",
+  "collectionName": "other_experiences",
+  "info": {
+    "singularName": "other-experience",
+    "pluralName": "other-experiences",
+    "displayName": "40. OtherExperience(기타경험)",
+    "description": "기타경험(Class/ETC) 정보"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": { "type": "string", "required": true, "displayName": "제목" },
+    "category": { "type": "enumeration", "enum": ["Class", "ETC"], "required": true, "displayName": "카테고리" },
+    "startDate": { "type": "string", "required": true, "displayName": "시작일" },
+    "endDate": { "type": "string", "displayName": "종료일" },
+    "visible": { "type": "boolean", "default": true, "displayName": "노출여부" },
+    "order": { "type": "integer", "displayName": "정렬순서(수동)" },
+    "description": { "type": "text", "displayName": "설명" }
+  }
+} 
