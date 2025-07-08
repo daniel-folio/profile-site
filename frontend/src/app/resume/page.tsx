@@ -19,10 +19,12 @@ function getMonthDiff(start: string, end: string): number {
 
 // 'N년 M개월' 또는 'N개월'로 표기하는 함수
 function getPeriodText(months: number): string {
-  if (months < 12) return `${months}개월`;
   const years = Math.floor(months / 12);
-  const remain = months % 12;
-  return remain === 0 ? `${years}년` : `${years}년 ${remain}개월`;
+  const remainMonths = months % 12;
+  let result = '';
+  if (years > 0) result += `${years}년`;
+  if (remainMonths > 0) result += ` ${remainMonths}개월`;
+  return result.trim();
 }
 
 export default async function ResumePage() {
@@ -190,7 +192,7 @@ export default async function ResumePage() {
                     </div>
                     <div className="text-xs text-gray-500 ml-10">
                       {start} ~ {end}
-                      {months && <span> ({months}개월)</span>}
+                      {months && <span> ({getPeriodText(months)})</span>}
                     </div>
                     {/* 회사 설명 */}
                     {companyDesc && <div className="text-sm text-gray-700 dark:text-gray-300 ml-10 mb-1">{companyDesc}</div>}
@@ -394,7 +396,9 @@ export default async function ResumePage() {
                       <li key={act.id}>
                         {act.title}
                         {act.startDate && (
-                          <span className="text-xs text-gray-500 ml-2">{act.startDate}{act.endDate ? `~${act.endDate}` : ''}</span>
+                          <span className="text-xs text-gray-500 ml-2">
+                            {act.startDate}{act.endDate ? ` ~ ${act.endDate}` : ''}
+                          </span>
                         )}
                         {act.description && (
                           <div className="text-sm text-gray-700 dark:text-gray-200">{act.description}</div>
@@ -416,7 +420,9 @@ export default async function ResumePage() {
                       <li key={act.id}>
                         {act.title}
                         {act.startDate && (
-                          <span className="text-xs text-gray-500 ml-2">{act.startDate}{act.endDate ? `~${act.endDate}` : ''}</span>
+                          <span className="text-xs text-gray-500 ml-2">
+                            {act.startDate}{act.endDate ? ` ~ ${act.endDate}` : ''}
+                          </span>
                         )}
                         {act.description && (
                           <div className="text-sm text-gray-700 dark:text-gray-200">{act.description}</div>
