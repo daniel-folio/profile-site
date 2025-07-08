@@ -51,7 +51,7 @@ export function Skills({ skills }: SkillsProps) {
               <h3 className="text-2xl font-semibold mb-6 capitalize text-gray-800 dark:text-gray-200">{category}</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                 {skillsByCategory[category]
-                  .sort((a, b) => (b.order ?? 0) - (a.order ?? 0))
+                  .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
                   .map((skill) => {
                     let iconUrl: string | undefined;
 

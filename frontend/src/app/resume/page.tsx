@@ -334,7 +334,7 @@ export default async function ResumePage() {
                       </span>
                       <div className="flex flex-wrap gap-2 min-w-0">
                         {skillsByCategory[category]
-                          .sort((a, b) => (b.order ?? 0) - (a.order ?? 0))
+                          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
                           .map((skill) => (
                             <span
                               key={skill.id}
