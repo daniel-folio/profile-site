@@ -100,7 +100,9 @@ export function Hero({ profile }: HeroProps) {
         }}
       >
         <motion.div variants={fadeUpVariant}>
-          <span className="text-xs tracking-widest text-blue-500 dark:text-blue-400 font-bold">BACKEND DEVELOPER</span>
+          {profile.headline && (
+            <span className="text-xs tracking-widest text-blue-500 dark:text-blue-400 font-bold">{profile.headline}</span>
+          )}
         </motion.div>
         <motion.h1 variants={fadeUpVariant} className="text-4xl lg:text-5xl font-extrabold mt-2 leading-tight text-gray-900 dark:text-white">
           안녕하세요,<br />

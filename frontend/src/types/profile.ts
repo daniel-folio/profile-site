@@ -19,6 +19,7 @@ export interface Profile {
   resumeFile?: StrapiMedia;
   mainBio?: string;
   resumeBio?: string;
+  headline?: string;
 }
 
 export interface ProfileResponse {

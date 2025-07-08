@@ -54,6 +54,10 @@
       "allowedTypes": [
         "files"
       ]
+    },
+    "headline": {
+      "type": "string",
+      "required": false
     }
   }
 }
