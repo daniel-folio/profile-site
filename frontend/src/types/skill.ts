@@ -7,6 +7,7 @@ export interface Skill {
   proficiency: number;
   description?: string;
   order: number;
+  visible?: boolean;
   icon?: StrapiMediaResponse;
 }
 

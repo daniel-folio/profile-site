@@ -84,7 +84,7 @@ export default async function CareerDetailPage() {
       <div className="bg-white/80 dark:bg-black/50 rounded-xl p-8 flex flex-col gap-8">
         <h1 className="text-3xl font-bold mb-8">경력기술서</h1>
         {/* 회사별로 그룹화 */}
-        {companies.length > 0 ? (
+        {careerDetails.length > 0 ? (
           <ul className="space-y-8">
             {sortedCompanies.map((comp, idx) => {
               // 회사에 속한 프로젝트들
@@ -143,7 +143,7 @@ export default async function CareerDetailPage() {
             })}
           </ul>
         ) : (
-          <div className="text-gray-500">경력 정보가 없습니다.</div>
+          <div className="text-gray-500">경력기술서가 없습니다.</div>
         )}
       </div>
     </main>

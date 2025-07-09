@@ -20,6 +20,8 @@ export interface Profile {
   mainBio?: string;
   resumeBio?: string;
   headline?: string;
+  showProfileImage?: boolean;
+  showPhone?: boolean;
 }
 
 export interface ProfileResponse {

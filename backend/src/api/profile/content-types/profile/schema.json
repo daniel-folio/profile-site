@@ -58,6 +58,14 @@
     "headline": {
       "type": "string",
       "required": false
+    },
+    "showProfileImage": {
+      "type": "boolean",
+      "default": true
+    },
+    "showPhone": {
+      "type": "boolean",
+      "default": true
     }
   }
 }

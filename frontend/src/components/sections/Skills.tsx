@@ -10,7 +10,8 @@ interface SkillsProps {
 }
 
 export function Skills({ skills }: SkillsProps) {
-  if (!skills || skills.length === 0) {
+  const visibleSkills = (skills || []).filter(skill => skill.visible !== false);
+  if (visibleSkills.length === 0) {
     return (
       <motion.section id="skills" className="py-16 md:py-24 text-center" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }} viewport={{ once: false, amount: 0.2 }}>
         <div className="container mx-auto px-4">
@@ -21,7 +22,7 @@ export function Skills({ skills }: SkillsProps) {
     );
   }
   // 카테고리별로 스킬 그룹화
-  const skillsByCategory = skills.reduce((acc, skill) => {
+  const skillsByCategory = visibleSkills.reduce((acc, skill) => {
     const category = skill.category;
     if (!acc[category]) {
       acc[category] = [];

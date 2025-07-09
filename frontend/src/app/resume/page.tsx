@@ -44,7 +44,7 @@ export default async function ResumePage() {
   const educations: Education[] = Array.isArray(educationsRes?.data)
     ? educationsRes.data.map((item: any) => item.attributes ?? item)
     : [];
-  const skills: Skill[] = skillsRes.data;
+  const skills: Skill[] = (skillsRes.data || []).filter((skill: Skill) => skill.visible !== false);
   const projects: Project[] = Array.isArray(projectsRes?.data)
     ? projectsRes.data.map((item: any) => {
         const attrs = item.attributes ?? item;
@@ -84,8 +84,11 @@ export default async function ResumePage() {
   const classExperiences = sortedExperiences.filter(a => a.category === 'Class');
   const etcExperiences = sortedExperiences.filter(a => a.category === 'ETC');
 
-  // 회사 정렬
-  const sortedCompanies = [...companies].sort((a, b) => {
+  // Only include companies with at least one project
+  const filteredCompanies = companies.filter(company => {
+    return projects.some(proj => proj.company === company.id);
+  });
+  const sortedCompanies = [...filteredCompanies].sort((a, b) => {
     if (a.order != null && b.order != null && a.order !== b.order) return b.order - a.order;
     if (a.order != null && b.order == null) return -1;
     if (a.order == null && b.order != null) return 1;
@@ -144,13 +147,13 @@ export default async function ResumePage() {
         {profile ? (
           <section className="mb-0">
             <div className="flex items-center gap-4">
-              {profile.profileImage?.url && (
+              {profile.showProfileImage !== false && profile.profileImage?.url && (
                 <img src={profile.profileImage.url} alt={profile.name} className="w-32 h-40 object-contain bg-white border" style={{ aspectRatio: '3/4' }} />
               )}
               <div>
                 <div className="text-xl font-bold text-gray-900 dark:text-white">{profile.name}</div>
                 <div className="text-gray-700 dark:text-gray-100">{profile.title}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-200">{profile.email} {profile.phone && <>| {profile.phone}</>}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-200">{profile.email} {profile.showPhone !== false && profile.phone && <>| {profile.phone}</>}</div>
                 <div className="text-sm text-gray-600 dark:text-gray-200">{profile.location}</div>
               </div>
             </div>
@@ -175,7 +178,7 @@ export default async function ResumePage() {
                 // 회사 재직 기간/개월수
                 const start = comp.startDate;
                 const end = comp.endDate || '현재';
-                const months = comp.endDate ? getMonthDiff(comp.startDate, comp.endDate) : null;
+                const months = getMonthDiff(comp.startDate, comp.endDate || new Date().toISOString().slice(0, 7));
                 // 회사 설명
                 const companyDesc = comp.description;
                 return (
@@ -216,7 +219,7 @@ export default async function ResumePage() {
                                   <span className="font-semibold text-base text-gray-900 dark:text-white">{proj.title}</span>
                                 )}
                                 <span className="ml-2 text-xs text-gray-500">
-                                  {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~' : ''}
+                                  {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
                                 </span>
                               </div>
                               {/* 기간, 요약, 스킬을 같은 들여쓰기에서 block으로 배치 */}
@@ -287,7 +290,7 @@ export default async function ResumePage() {
                         <span className="text-black dark:text-white text-lg font-bold">●</span>
                         {proj.title}
                         <span className="ml-2 text-xs text-gray-500">
-                          {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~' : ''}
+                          {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
                         </span>
                       </div>
                       {proj.shortDescription && (

@@ -686,6 +686,9 @@ export interface ApiProfileProfile extends Struct.SingleTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     resumeBio: Schema.Attribute.RichText;
     resumeFile: Schema.Attribute.Media<'files'>;
+    showPhone: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    showProfileImage: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<true>;
     socialLinks: Schema.Attribute.JSON;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
@@ -786,6 +789,7 @@ export interface ApiSkillSkill extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    visible: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
   };
 }
 
