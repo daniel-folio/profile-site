@@ -1,0 +1,583 @@
+"use client";
+import ResumePdfDownloadButton from "@/components/ResumePdfDownloadButton";
+import ResumeContentWithDownload from "@/components/ResumeContentWithDownload";
+import { RichTextRenderer } from "@/components/ui/RichTextRenderer";
+import Link from "next/link";
+import { Profile } from "@/types/profile";
+import { Company } from "@/types/company";
+import { Education } from "@/types/education";
+import { Skill } from "@/types/skill";
+import { Project } from "@/types/project";
+import { CareerDetail } from "@/types/career-detail";
+import { OtherExperience } from "@/types/other-experience";
+import { useEffect, useState } from 'react';
+import React from 'react';
+
+function getMonthDiff(start: string, end: string): number {
+  if (!start || !end) return 0;
+  const [sy, sm] = start.split('-').map(Number);
+  const [ey, em] = end.split('-').map(Number);
+  return (ey - sy) * 12 + (em - sm) + 1;
+}
+function getPeriodText(months: number): string {
+  const years = Math.floor(months / 12);
+  const remainMonths = months % 12;
+  let result = '';
+  if (years > 0) result += `${years}년`;
+  if (remainMonths > 0) result += ` ${remainMonths}개월`;
+  return result.trim();
+}
+
+export default function ResumePageClient({
+  profile,
+  companies,
+  educations,
+  skills,
+  projects,
+  careerDetails,
+  otherExperiences,
+}: {
+  profile: Profile | null;
+  companies: Company[];
+  educations: Education[];
+  skills: Skill[];
+  projects: Project[];
+  careerDetails: CareerDetail[];
+  otherExperiences: OtherExperience[];
+}) {
+  // 기존 resume/page.tsx의 데이터 가공 및 렌더링 로직 복사
+  const visibleExperiences = otherExperiences.filter(a => a.visible);
+  const sortedExperiences = [...visibleExperiences].sort((a, b) => b.startDate.localeCompare(a.startDate));
+  const classExperiences = sortedExperiences.filter(a => a.category === 'Class');
+  const etcExperiences = sortedExperiences.filter(a => a.category === 'ETC');
+  const filteredCompanies = companies.filter(company => {
+    return projects.some(proj => proj.company === company.id);
+  });
+  const sortedCompanies = [...filteredCompanies].sort((a, b) => {
+    if (a.order != null && b.order != null && a.order !== b.order) return b.order - a.order;
+    if (a.order != null && b.order == null) return -1;
+    if (a.order == null && b.order != null) return 1;
+    const aDate = a.endDate || a.startDate || '';
+    const bDate = b.endDate || b.startDate || '';
+    if (aDate !== bDate) return bDate.localeCompare(aDate);
+    return (b.id || 0) - (a.id || 0);
+  });
+  const getSortedProjects = (companyId: number) => {
+    return projects.filter((proj) => proj.company === companyId).sort((a, b) => {
+      if (a.order != null && b.order != null && a.order !== b.order) return b.order - a.order;
+      if (a.order != null && b.order == null) return -1;
+      if (a.order == null && b.order != null) return 1;
+      const aDate = a.endDate || a.startDate || '';
+      const bDate = b.endDate || b.startDate || '';
+      if (aDate !== bDate) return bDate.localeCompare(aDate);
+      return (b.id || 0) - (a.id || 0);
+    });
+  };
+  const getSortedCareerDetails = (projectId: number) => {
+    return careerDetails.filter((cd) => {
+      if (typeof cd.project === 'object' && cd.project !== null && 'id' in cd.project) {
+        return cd.project.id === projectId;
+      }
+      return cd.project === projectId;
+    }).sort((a, b) => {
+      if (a.order != null && b.order != null && a.order !== b.order) return b.order - a.order;
+      if (a.order != null && b.order == null) return -1;
+      if (a.order == null && b.order != null) return 1;
+      const aDate = a.endDate || a.startDate || '';
+      const bDate = b.endDate || b.startDate || '';
+      if (aDate !== bDate) return bDate.localeCompare(aDate);
+      return (b.id || 0) - (a.id || 0);
+    });
+  };
+  const CATEGORY_ORDER = ["Backend", "Frontend", "Database", "Tools", "Server", "Other"];
+  const skillsByCategory = skills.reduce((acc, skill) => {
+    if (!acc[skill.category]) acc[skill.category] = [];
+    acc[skill.category].push(skill);
+    return acc;
+  }, {} as Record<string, Skill[]>);
+  const hasCareer = sortedCompanies.length > 0 || projects.length > 0;
+  const showDownload = !!profile?.resumeDownloadEnabled && hasCareer;
+
+  console.log('프로젝트 전체 리스트', projects.map(proj => ({ title: proj.title, company: proj.company, visible: proj.visible, skills: proj.skills })));
+
+  return (
+    <>
+      <style jsx global>{`
+        @media print {
+          #resume-print { display: block !important; }
+          main, header, footer, .only-screen { display: none !important; }
+          .resume-skill-badge {
+            background: none !important;
+            color: #111 !important;
+            border-radius: 0 !important;
+            padding: 0 4px !important;
+            font-size: 11px !important;
+            margin-right: 2px !important;
+          }
+          .resume-skill-label::before {
+            content: 'skill : ';
+            color: #111;
+            font-weight: 500;
+            margin-right: 4px;
+          }
+        }
+        @media screen {
+          #resume-print { display: none; }
+        }
+      `}</style>
+      {/* 글로벌 프린트 스타일 */}
+      <style>{`
+        @media print {
+          .resume-skill-print-label {
+            display: inline !important;
+            color: #111 !important;
+            font-weight: 500 !important;
+            margin-right: 4px !important;
+          }
+        }
+        @media screen {
+          .resume-skill-print-label {
+            display: none !important;
+          }
+        }
+      `}</style>
+      {/* 화면용 이력서 */}
+      <main id="resume-content" className="max-w-6xl mx-auto pt-24 md:pt-32 pb-12 px-4">
+        <div className="bg-white/80 dark:bg-black/50 rounded-xl p-8 flex flex-col gap-8">
+          <ResumeContentWithDownload downloadButton={showDownload ? <ResumePdfDownloadButton /> : null}>
+            {/* 프로필 요약 */}
+            {profile ? (
+              <section className="mb-0">
+                <div className="flex items-center gap-4">
+                  {/* 프로필 사진 */}
+                  {profile.showProfileImage === true && profile.profileImage?.url && (
+                    <img src={profile.profileImage.url} alt={profile.name} className="w-32 h-40 object-contain bg-white border" style={{ aspectRatio: '3/4' }} />
+                  )}
+                  <div>
+                    <div className="text-xl font-bold" style={{ color: '#111' }}>{profile.name}</div>
+                    <div className="text-gray-700" style={{ color: '#222' }}>{profile.title}</div>
+                    <div className="text-sm" style={{ color: '#222' }}>{profile.email} {profile.showPhone === true && profile.phone && <>| {profile.phone}</>}</div>
+                    <div className="text-sm" style={{ color: '#222' }}>{profile.location}</div>
+                  </div>
+                </div>
+                {profile.resumeBio && (
+                  <div style={{ color: '#222' }}>
+                    <RichTextRenderer text={profile.resumeBio} className="mt-2 text-gray-900 dark:text-gray-100 prose dark:prose-invert max-w-none" />
+                  </div>
+                )}
+              </section>
+            ) : (
+              <div className="text-gray-500 mb-8">프로필 정보가 없습니다.</div>
+            )}
+            <hr className='my-8 border border-gray-500/40 dark:border-gray-300/20' />
+
+            {/* 경력 */}
+            <section className="mb-0">
+              <h2 className="text-xl font-semibold mb-4" style={{ color: '#FF8000' }}>경력 (Company)</h2>
+              {sortedCompanies.length > 0 ? (
+                <ul className="space-y-4">
+                  {sortedCompanies.map((comp, idx) => {
+                    const companyProjects = getSortedProjects(comp.id);
+                    const start = comp.startDate;
+                    const end = comp.endDate || '현재';
+                    const months = getMonthDiff(comp.startDate, comp.endDate || new Date().toISOString().slice(0, 7));
+                    const companyDesc = comp.description;
+                    return (
+                      <li key={idx} className="pb-4 ml-8">
+                        <div className="flex items-center gap-2 mb-1">
+                          {comp.companyLogo?.url && (
+                            <img src={comp.companyLogo.url} alt={comp.company + ' 로고'} className="w-8 h-8 rounded bg-white object-contain border" />
+                          )}
+                          <span className="font-bold text-lg" style={{ color: '#111' }}>{comp.company}</span>
+                          {comp.position && <span className="ml-1 text-base text-gray-700 dark:text-gray-200">- {comp.position}</span>}
+                        </div>
+                        <div className="text-xs text-gray-500 ml-10">
+                          {start} ~ {end}
+                          {months && <span> ({getPeriodText(months)})</span>}
+                        </div>
+                        {companyDesc && <div className="text-sm text-gray-700 dark:text-gray-300 ml-10 mb-1">{companyDesc}</div>}
+                        {companyProjects.length > 0 && (
+                          <ul style={{ marginLeft: 24, marginTop: 4 }}>
+                            {companyProjects.map((proj, idx) => {
+                              console.log('프로젝트', proj);
+                              const matchedCareerDetails = getSortedCareerDetails(proj.id);
+                              const hasCareerDetail = matchedCareerDetails.length > 0;
+                              const careerHref = hasCareerDetail ? `/career-detail#cd-${matchedCareerDetails[0].id}` : undefined;
+                              return (
+                                <React.Fragment key={proj.id}>
+                                  <li style={{ marginBottom: 6 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                      <span style={{ color: '#111', fontWeight: 700 }}>●</span>
+                                      {hasCareerDetail ? (
+                                        <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
+                                      ) : (
+                                        <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
+                                      )}
+                                      <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>
+                                        {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
+                                      </span>
+                                    </div>
+                                  </li>
+                                  {idx < companyProjects.length - 1 && <hr className="my-4 border border-gray-400/20 w-full" />}
+                                </React.Fragment>
+                              );
+                            })}
+                          </ul>
+                        )}
+                        {/* 회사와 회사 사이에 얇은 구분선 추가 (마지막 회사 제외) */}
+                        {idx < sortedCompanies.length - 1 && (
+                          <hr
+                            style={{
+                              marginTop: 24,         // 위 회사와의 간격을 넓힘
+                              marginBottom: 0,      // 아래 회사와의 간격을 줄임
+                              border: '0.5px solid #ddd',
+                              width: '100%',
+                            }}
+                          />
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <div className="text-gray-500 ml-8">경력 정보가 없습니다.</div>
+              )}
+            </section>
+            <hr className='my-8 border border-gray-500/40 dark:border-gray-300/20' />
+
+            {/* 개인 프로젝트 (Personal Project) */}
+            <section className="mb-0">
+              <h2 className="text-xl font-semibold mb-4" style={{ color: '#FF8000' }}>개인 프로젝트 (Personal Project)</h2>
+              {projects.filter((proj) => proj.company == null && proj.visible !== false).length > 0 ? (
+                <ul className="space-y-4">
+                  {projects.filter((proj) => proj.company == null && proj.visible !== false).map((proj, idx, arr) => {
+                    const matchedCareerDetail = careerDetails.find(cd => {
+                      if (typeof cd.project === 'object' && cd.project !== null && 'id' in cd.project) {
+                        return cd.project.id === proj.id;
+                      }
+                      return cd.project === proj.id;
+                    });
+                    return (
+                      <li key={proj.id} className="ml-8">
+                        <div className="font-semibold text-base" style={{ color: '#111' }}>
+                          <span className="text-black text-lg font-bold">●</span> {proj.title}
+                          <span className="ml-2 text-xs" style={{ color: '#222' }}>
+                            {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
+                          </span>
+                        </div>
+                        {proj.shortDescription && (
+                          <div style={{ color: '#222' }}>
+                            <RichTextRenderer text={proj.shortDescription} className="mt-1" />
+                          </div>
+                        )}
+                        {matchedCareerDetail && (
+                          <div className="ml-8 mt-2 border-l-2 border-gray-200 pl-4">
+                            <span className="font-semibold" style={{ color: '#111' }}>
+                              경력기술서 있음
+                            </span>
+                          </div>
+                        )}
+                        {idx < arr.length - 1 && <hr className="my-4 border border-gray-400/20 w-full" />}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <div className="text-gray-500 ml-8">개인 프로젝트가 없습니다.</div>
+              )}
+            </section>
+            <hr className='my-8 border border-gray-500/40 dark:border-gray-300/20' />
+
+            {/* 기술스택 (Skills) */}
+            <section className="mb-0">
+              <h2 className="text-xl font-semibold mb-4" style={{ color: '#FF8000' }}>기술스택 (Skills)</h2>
+              {skills.length > 0 ? (
+                <div className="space-y-1">
+                  <ul className="ml-8">
+                    {CATEGORY_ORDER.filter(category => skillsByCategory[category]).map((category) => (
+                      <li key={category} className="mb-2">
+                        <span className="font-bold" style={{ color: '#111' }}>
+                          {`${category} : `}
+                        </span>
+                        <span style={{ color: '#111' }}>
+                          {skillsByCategory[category]
+                            .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                            .map((skill, i, arr) => (
+                              <span key={skill.id}>
+                                {skill.name}{i < arr.length - 1 ? ', ' : ''}
+                              </span>
+                            ))}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <div className="text-gray-500 ml-8">기술스택 정보가 없습니다.</div>
+              )}
+            </section>
+            <hr className='my-8 border border-gray-500/40 dark:border-gray-300/20' />
+
+            {/* 학력 (Education) */}
+            <section className="mb-0">
+              <h2 className="text-xl font-semibold mb-4 text-orange-500 dark:text-orange-300">학력 (Education)</h2>
+              {educations.length > 0 ? (
+                <ul className="space-y-2">
+                  {educations.map((edu, idx) => {
+                    const liClass = edu.logo?.url ? "pb-2 flex items-start gap-3 ml-8" : "pb-2";
+                    return (
+                      <li key={idx} className={liClass}>
+                        {edu.logo?.url && (
+                          <img src={edu.logo.url} alt={edu.institution + ' 로고'} className="w-8 h-8 rounded bg-white object-contain border mt-1" />
+                        )}
+                        <div className="flex flex-col justify-center">
+                          <div className="font-bold" style={{ color: '#111' }}>{edu.institution}{edu.field && ` ${edu.field}`}</div>
+                          <div className="text-sm" style={{ color: '#222' }}>{edu.startDate} ~ {edu.endDate || '현재'}</div>
+                          {edu.description && (
+                            <div style={{ color: '#222' }}>
+                              <RichTextRenderer text={edu.description} className="mt-1" />
+                            </div>
+                          )}
+                        </div>
+                        {idx < educations.length - 1 && <hr className="my-4 border border-gray-400/20 dark:border-gray-300/10 col-span-2 w-full" />}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <div className="text-gray-500 ml-8">학력 정보가 없습니다.</div>
+              )}
+            </section>
+            <hr className='my-8 border border-gray-500/40 dark:border-gray-300/20' />
+
+            {/* 기타 경험 (Other Experience) */}
+            <section className="mb-0">
+              <h2 className="text-xl font-semibold mb-4 text-orange-500 dark:text-orange-300">기타 경험 (Other Experience)</h2>
+              {visibleExperiences.length > 0 ? (
+                <ul className="space-y-2">
+                  {visibleExperiences.map((exp, idx) => (
+                    <li key={idx} className="pb-2 flex flex-col ml-8">
+                      <div className="font-bold text-gray-900 dark:text-white">{exp.title}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-300">{exp.startDate} ~ {exp.endDate || '현재'}</div>
+                      {exp.description && (
+                        <div style={{ color: '#222' }}>
+                          <RichTextRenderer text={exp.description} className="mt-1 text-gray-700 dark:text-gray-200" />
+                        </div>
+                      )}
+                      {idx < visibleExperiences.length - 1 && <hr className="my-4 border border-gray-400/20 dark:border-gray-300/10 w-full" />}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-gray-500 ml-8">기타 경험 정보가 없습니다.</div>
+              )}
+            </section>
+          </ResumeContentWithDownload>
+        </div>
+      </main>
+      {/* 출력 전용 이력서: 화면에는 렌더링하지 않고, PDF/출력용으로만 사용 */}
+      <div id="resume-print" style={{ display: 'none', background: '#fff', color: '#111', margin: 20, padding: 20, WebkitFontSmoothing: 'antialiased', MozOsxFontSmoothing: 'grayscale', fontWeight: 500, textRendering: 'optimizeLegibility' }}>
+        <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 24 }}>이력서 (Resume)</h1>
+        {/* 프로필 요약 */}
+        {profile ? (
+          <section style={{ marginBottom: 32 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div>
+                <div style={{ fontSize: 20, fontWeight: 700 }}>{profile.name}</div>
+                <div style={{ color: '#222' }}>{profile.title}</div>
+                <div style={{ color: '#222', fontSize: 14 }}>{profile.email} {profile.showPhone === true && profile.phone && <>| {profile.phone}</>}</div>
+                <div style={{ color: '#222', fontSize: 14 }}>{profile.location}</div>
+              </div>
+            </div>
+            {profile.resumeBio && (
+              <div style={{ color: '#222', marginTop: 8 }}>
+                <RichTextRenderer text={profile.resumeBio} className="mt-2 text-gray-900 prose max-w-none" />
+              </div>
+            )}
+          </section>
+        ) : (
+          <div style={{ color: '#888', marginBottom: 24 }}>프로필 정보가 없습니다.</div>
+        )}
+        <hr style={{ margin: '32px 0', border: '1px solid #aaa' }} />
+        {/* 경력 (Company) */}
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>경력 (Company)</h2>
+          {sortedCompanies.length > 0 ? (
+            <ul style={{ marginLeft: 32 }}>
+              {sortedCompanies.map((comp, idx) => {
+                const companyProjects = getSortedProjects(comp.id);
+                const start = comp.startDate;
+                const end = comp.endDate || '현재';
+                const months = getMonthDiff(comp.startDate, comp.endDate || new Date().toISOString().slice(0, 7));
+                const companyDesc = comp.description;
+                return (
+                  <li key={idx} style={{ marginBottom: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                      <span style={{ fontWeight: 700, fontSize: 16 }}>{comp.company}</span>
+                      {comp.position && <span style={{ marginLeft: 4, fontSize: 15, color: '#444' }}>- {comp.position}</span>}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#666', marginLeft: 24 }}>
+                      {start} ~ {end}
+                      {months && <span> ({getPeriodText(months)})</span>}
+                    </div>
+                    {companyDesc && <div style={{ fontSize: 13, color: '#444', marginLeft: 24, marginBottom: 4 }}>{companyDesc}</div>}
+                    {companyProjects.length > 0 && (
+                      <ul style={{ marginLeft: 24, marginTop: 4 }}>
+                        {companyProjects.map((proj, idx) => {
+                          console.log('프로젝트', proj);
+                          const matchedCareerDetails = getSortedCareerDetails(proj.id);
+                          const hasCareerDetail = matchedCareerDetails.length > 0;
+                          return (
+                            <React.Fragment key={proj.id}>
+                              <li style={{ marginBottom: 6 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                  <span style={{ color: '#111', fontWeight: 700 }}>●</span>
+                                  {hasCareerDetail ? (
+                                    <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
+                                  ) : (
+                                    <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
+                                  )}
+                                  <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>
+                                    {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
+                                  </span>
+                                </div>
+                              </li>
+                              {idx < companyProjects.length - 1 && <hr className="my-4 border border-gray-400/20 w-full" />}
+                            </React.Fragment>
+                          );
+                        })}
+                      </ul>
+                    )}
+                    {/* 회사와 회사 사이에 얇은 구분선 추가 (마지막 회사 제외) */}
+                    {idx < sortedCompanies.length - 1 && (
+                      <hr
+                        style={{
+                          marginTop: 24,
+                          marginBottom: 0,
+                          border: '0.5px solid #ddd',
+                          width: '100%',
+                        }}
+                      />
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <div style={{ color: '#888', marginLeft: 32 }}>경력 정보가 없습니다.</div>
+          )}
+        </section>
+        <hr style={{ margin: '32px 0', border: '1px solid #aaa' }} />
+        {/* 개인 프로젝트 (Personal Project) */}
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>개인 프로젝트 (Personal Project)</h2>
+          {projects.filter((proj) => proj.company == null && proj.visible !== false).length > 0 ? (
+            <ul style={{ marginLeft: 32 }}>
+              {projects.filter((proj) => proj.company == null && proj.visible !== false).map((proj, idx, arr) => {
+                const matchedCareerDetail = careerDetails.find(cd => {
+                  if (typeof cd.project === 'object' && cd.project !== null && 'id' in cd.project) {
+                    return cd.project.id === proj.id;
+                  }
+                  return cd.project === proj.id;
+                });
+                return (
+                  <li key={proj.id} style={{ marginBottom: 12 }}>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: '#111', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ color: '#111', fontWeight: 700 }}>●</span> {proj.title}
+                      <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>
+                        {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
+                      </span>
+                    </div>
+                    {proj.shortDescription && (
+                      <div style={{ color: '#222', fontSize: 13, marginLeft: 24 }}>
+                        <RichTextRenderer text={proj.shortDescription} className="mt-1" />
+                      </div>
+                    )}
+                    {matchedCareerDetail && (
+                      <div style={{ marginLeft: 24, marginTop: 8, borderLeft: '2px solid #eee', paddingLeft: 12 }}>
+                        <span style={{ fontWeight: 600, color: '#111' }}>경력기술서 있음</span>
+                      </div>
+                    )}
+                    {idx < arr.length - 1 && <hr style={{ margin: '12px 0', border: '1px solid #ddd' }} />}
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <div style={{ color: '#888', marginLeft: 32 }}>개인 프로젝트가 없습니다.</div>
+          )}
+        </section>
+        <hr style={{ margin: '32px 0', border: '1px solid #aaa' }} />
+        {/* 기술스택 (Skills) */}
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>기술스택 (Skills)</h2>
+          {skills.length > 0 ? (
+            <ul style={{ marginLeft: 32 }}>
+              {CATEGORY_ORDER.filter(category => skillsByCategory[category]).map((category) => (
+                <li key={category} style={{ marginBottom: 8 }}>
+                  <span style={{ fontWeight: 700 }}>{`${category} : `}</span>
+                  <span>
+                    {skillsByCategory[category]
+                      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                      .map((skill, i, arr) => (
+                        <span key={skill.id}>{skill.name}{i < arr.length - 1 ? ', ' : ''}</span>
+                      ))}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div style={{ color: '#888', marginLeft: 32 }}>기술스택 정보가 없습니다.</div>
+          )}
+        </section>
+        <hr style={{ margin: '32px 0', border: '1px solid #aaa' }} />
+        {/* 학력 (Education) */}
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>학력 (Education)</h2>
+          {educations.length > 0 ? (
+            <ul style={{ marginLeft: 32 }}>
+              {educations.map((edu, idx) => (
+                <li key={idx} style={{ marginBottom: 12 }}>
+                  {/* 학교 로고 이미지는 출력용에서 제외 */}
+                  <div style={{ fontWeight: 700, fontSize: 15 }}>{edu.institution}{edu.field && ` ${edu.field}`}</div>
+                  <div style={{ fontSize: 12, color: '#666' }}>{edu.startDate} ~ {edu.endDate || '현재'}</div>
+                  {edu.description && (
+                    <div style={{ color: '#222', fontSize: 13, marginTop: 2 }}>
+                      <RichTextRenderer text={edu.description} className="mt-1" />
+                    </div>
+                  )}
+                  {idx < educations.length - 1 && <hr style={{ margin: '12px 0', border: '1px solid #ddd' }} />}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div style={{ color: '#888', marginLeft: 32 }}>학력 정보가 없습니다.</div>
+          )}
+        </section>
+        <hr style={{ margin: '32px 0', border: '1px solid #aaa' }} />
+        {/* 기타 경험 (Other Experience) */}
+        <section style={{ marginBottom: 32 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>기타 경험 (Other Experience)</h2>
+          {visibleExperiences.length > 0 ? (
+            <ul style={{ marginLeft: 32 }}>
+              {visibleExperiences.map((exp, idx) => (
+                <li key={idx} style={{ marginBottom: 12 }}>
+                  <div style={{ fontWeight: 700, fontSize: 15 }}>{exp.title}</div>
+                  <div style={{ fontSize: 12, color: '#666' }}>{exp.startDate} ~ {exp.endDate || '현재'}</div>
+                  {exp.description && (
+                    <div style={{ color: '#222', fontSize: 13, marginTop: 2 }}>
+                      <RichTextRenderer text={exp.description} className="mt-1 text-gray-700" />
+                    </div>
+                  )}
+                  {idx < visibleExperiences.length - 1 && <hr style={{ margin: '12px 0', border: '1px solid #ddd' }} />}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div style={{ color: '#888', marginLeft: 32 }}>기타 경험 정보가 없습니다.</div>
+          )}
+        </section>
+      </div>
+    </>
+  );
+} 

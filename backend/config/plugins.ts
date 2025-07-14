@@ -11,7 +11,9 @@ export default ({ env }) => ({
         folder: env('CLOUDINARY_FOLDER'),
       },
       actionOptions: {
-        upload: {},
+        upload: {
+          resource_type: 'auto',
+        },
         delete: {},
       },
     },

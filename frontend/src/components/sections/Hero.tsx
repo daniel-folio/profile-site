@@ -35,9 +35,8 @@ export function Hero({ profile }: HeroProps) {
     );
   }
   
-  const { name, title, mainBio, socialLinks, profileImage, email, resumeFile } = profile;
+  const { name, title, mainBio, socialLinks, profileImage, email, resumeDownloadEnabled } = profile;
   const profileImageUrl = profileImage?.url ? getStrapiMedia(profileImage.url) : null;
-  const resumeUrl = resumeFile?.url ? getStrapiMedia(resumeFile.url) : null;
 
   // 애니메이션 variants
   const fadeUpVariant = {
@@ -121,11 +120,8 @@ export function Hero({ profile }: HeroProps) {
               내 프로젝트 보기
             </Button>
           </Link>
-          {resumeUrl && (
-            <a href={resumeUrl} target="_blank" rel="noopener noreferrer">
-              <Button size="lg" variant="secondary" className="shadow-lg shadow-purple-400/30 hover:scale-105 transition-transform">이력서 다운로드</Button>
-            </a>
-          )}
+          {/* 이력서 다운로드 버튼: resumeDownloadEnabled가 true이고 경력/프로젝트가 있을 때만 노출 (구현은 resume 페이지에서) */}
+          {/* <Button size="lg" variant="secondary" className="shadow-lg shadow-purple-400/30 hover:scale-105 transition-transform">이력서 다운로드</Button> */}
         </motion.div>
         {socialLinks && (
           <motion.div variants={fadeUpVariant} className="flex gap-6 mt-8">

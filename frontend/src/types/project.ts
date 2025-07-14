@@ -22,6 +22,7 @@ export interface Project {
   order?: number;
   company?: number | null;
   visible?: boolean;
+  skills?: { data: any[] };
 }
 
 export interface ProjectsResponse {

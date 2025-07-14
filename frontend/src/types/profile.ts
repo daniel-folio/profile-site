@@ -16,12 +16,12 @@ export interface Profile {
     instagram?: string;
     [key: string]: string | undefined;
   };
-  resumeFile?: StrapiMedia;
   mainBio?: string;
   resumeBio?: string;
   headline?: string;
   showProfileImage?: boolean;
   showPhone?: boolean;
+  resumeDownloadEnabled?: boolean;
 }
 
 export interface ProfileResponse {

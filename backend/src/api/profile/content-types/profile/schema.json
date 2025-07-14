@@ -47,14 +47,6 @@
     "socialLinks": {
       "type": "json"
     },
-    "resumeFile": {
-      "type": "media",
-      "multiple": false,
-      "required": false,
-      "allowedTypes": [
-        "files"
-      ]
-    },
     "headline": {
       "type": "string",
       "required": false
@@ -66,6 +58,10 @@
     "showPhone": {
       "type": "boolean",
       "default": true
+    },
+    "resumeDownloadEnabled": {
+      "type": "boolean",
+      "default": false
     }
   }
 }
