@@ -30,7 +30,9 @@ export default function CareerDetailPdfDownloadButton() {
         className="ml-4 px-5 py-2 bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-white rounded-full shadow-md hover:from-primary-gradient-end hover:to-primary-gradient-start focus:outline-none focus:ring-2 focus:ring-primary-gradient-start transition-all text-base flex items-center gap-2"
         type="button"
       >
-        <FaPrint /> 경력기술서 다운로드
+        <FaPrint />
+        <span className="hidden sm:inline">경력기술서 다운로드</span>
+        <span className="inline sm:hidden">다운로드</span>
       </button>
     </div>
   );

@@ -667,6 +667,8 @@ export interface ApiProfileProfile extends Struct.SingleTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    careerDetailDownloadEnabled: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -685,8 +687,8 @@ export interface ApiProfileProfile extends Struct.SingleTypeSchema {
     profileImage: Schema.Attribute.Media<'images'>;
     publishedAt: Schema.Attribute.DateTime;
     resumeBio: Schema.Attribute.RichText;
-    resumeDownloadEnabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    careerDetailDownloadEnabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    resumeDownloadEnabled: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     showPhone: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     showProfileImage: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<true>;

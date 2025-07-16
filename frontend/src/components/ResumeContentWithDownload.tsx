@@ -7,10 +7,10 @@ export default function ResumeContentWithDownload({
 }) {
   return (
     <>
-      <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white flex items-center gap-4">
+      {/* <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white flex items-center gap-4">
         이력서 (Resume)
         {downloadButton}
-      </h1>
+      </h1> */}
       <div id="resume-content">{children}</div>
     </>
   );

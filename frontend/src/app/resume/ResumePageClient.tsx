@@ -174,7 +174,13 @@ export default function ResumePageClient({
                                   <li style={{ marginBottom: 6 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                       <span style={{ color: '#111', fontWeight: 700 }}>●</span>
-                                      <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
+                                      {hasCareerDetail ? (
+                                        <Link href={careerHref!} style={{ fontWeight: 700, fontSize: 15, color: '#111', textDecoration: 'none', cursor: 'pointer' }}>
+                                          {proj.title}
+                                        </Link>
+                                      ) : (
+                                        <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
+                                      )}
                                       <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>
                                         {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
                                       </span>
@@ -190,7 +196,7 @@ export default function ResumePageClient({
                                       <div style={{ marginLeft: 24, marginTop: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
                                         <span style={{ fontWeight: 500, color: '#111', marginRight: 4 }}>skill :</span>
                                         {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number) => (
-                                          <span key={skill.id || skill.name || i} className="resume-skill-badge">{skill.name}</span>
+                                          <span key={skill.id || skill.name || i} className="resume-skill-badge bg-sky-100 text-sky-700 px-2 py-0.5 rounded text-[13px] font-semibold border border-sky-200">{skill.name}</span>
                                         ))}
                                       </div>
                                     )}
@@ -404,12 +410,19 @@ export default function ResumePageClient({
                           console.log('프로젝트', proj);
                           const matchedCareerDetails = getSortedCareerDetails(proj.id);
                           const hasCareerDetail = matchedCareerDetails.length > 0;
+                          const careerHref = hasCareerDetail ? `/career-detail#cd-${matchedCareerDetails[0].id}` : undefined;
                           return (
                             <React.Fragment key={proj.id}>
                               <li style={{ marginBottom: 6 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                   <span style={{ color: '#111', fontWeight: 700 }}>●</span>
-                                  <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
+                                  {hasCareerDetail ? (
+                                    <Link href={careerHref!} style={{ fontWeight: 700, fontSize: 15, color: '#111', textDecoration: 'none', cursor: 'pointer' }}>
+                                      {proj.title}
+                                    </Link>
+                                  ) : (
+                                    <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
+                                  )}
                                   <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>
                                     {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
                                   </span>
