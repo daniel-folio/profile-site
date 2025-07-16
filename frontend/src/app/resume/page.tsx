@@ -38,7 +38,7 @@ export default async function ResumePage() {
         return {
           ...attrs,
           id: item.id,
-          company: attrs.company?.id ?? null,
+          company: attrs.company?.data?.id ?? attrs.company?.id ?? null,
           isPersonal: !!attrs.isPersonal,
         };
       })

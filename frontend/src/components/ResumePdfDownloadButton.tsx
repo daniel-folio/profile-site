@@ -28,10 +28,30 @@ export default function ResumePdfDownloadButton() {
     }
   }, []);
 
+  function handlePrintOrDownload() {
+    const printDiv = document.getElementById('resume-print');
+    if (!printDiv) return;
+    printDiv.style.display = 'block';
+
+    const img = printDiv.querySelector('img');
+    if (img && img.src.startsWith('data:image/')) {
+      if (!img.complete) {
+        img.onload = () => {
+          handleDownloadPDF();
+        };
+      } else {
+        handleDownloadPDF();
+      }
+    } else {
+      // 사진이 없거나 Base64 변환 실패
+      handleDownloadPDF();
+    }
+  }
+
   return (
     <div style={{ display: 'flex', gap: 8 }}>
       <button
-        onClick={handleDownloadPDF}
+        onClick={handlePrintOrDownload}
         className="ml-4 px-5 py-2 bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-white rounded-full shadow-md hover:from-primary-gradient-end hover:to-primary-gradient-start focus:outline-none focus:ring-2 focus:ring-primary-gradient-start transition-all text-base flex items-center gap-2"
         type="button"
       >
