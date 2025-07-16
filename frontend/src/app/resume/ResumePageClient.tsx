@@ -120,14 +120,14 @@ export default function ResumePageClient({
                     <img src={profile.profileImage.url} alt={profile.name} className="w-32 h-40 object-contain bg-white border" style={{ aspectRatio: '3/4' }} />
                   )}
                   <div>
-                    <div className="text-xl font-bold" style={{ color: '#111' }}>{profile.name}</div>
-                    <div className="text-gray-700" style={{ color: '#222' }}>{profile.title}</div>
-                    <div className="text-sm" style={{ color: '#222' }}>{profile.email} {profile.showPhone === true && profile.phone && <>| {profile.phone}</>}</div>
-                    <div className="text-sm" style={{ color: '#222' }}>{profile.location}</div>
+                    <div className="text-xl font-bold text-gray-900 dark:text-gray-100">{profile.name}</div>
+                    <div className="text-gray-700 dark:text-gray-200">{profile.title}</div>
+                    <div className="text-sm text-gray-700 dark:text-gray-200">{profile.email} {profile.showPhone === true && profile.phone && <>| {profile.phone}</>}</div>
+                    <div className="text-sm text-gray-700 dark:text-gray-200">{profile.location}</div>
                   </div>
                 </div>
                 {profile.resumeBio && (
-                  <div style={{ color: '#222' }}>
+                  <div>
                     <RichTextRenderer text={profile.resumeBio} className="mt-2 text-gray-900 dark:text-gray-100 prose dark:prose-invert max-w-none" />
                   </div>
                 )}
@@ -154,10 +154,10 @@ export default function ResumePageClient({
                           {comp.companyLogo?.url && (
                             <img src={comp.companyLogo.url} alt={comp.company + ' 로고'} className="w-8 h-8 rounded bg-white object-contain border" />
                           )}
-                          <span className="font-bold text-lg" style={{ color: '#111' }}>{comp.company}</span>
+                          <span className="font-bold text-lg text-gray-900 dark:text-gray-100">{comp.company}</span>
                           {comp.position && <span className="ml-1 text-base text-gray-700 dark:text-gray-200">- {comp.position}</span>}
                         </div>
-                        <div className="text-xs text-gray-500 ml-10">
+                        <div className="text-xs text-gray-500 dark:text-gray-300 ml-10">
                           {start} ~ {end}
                           {months && <span> ({getPeriodText(months)})</span>}
                         </div>
@@ -175,11 +175,11 @@ export default function ResumePageClient({
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                       <span style={{ color: '#111', fontWeight: 700 }}>●</span>
                                       {hasCareerDetail ? (
-                                        <Link href={careerHref!} style={{ fontWeight: 700, fontSize: 15, color: '#111', textDecoration: 'none', cursor: 'pointer' }}>
+                                        <Link href={careerHref!} className="font-bold text-[15px] text-gray-900 dark:text-gray-100 hover:text-blue-500 dark:hover:text-blue-400" style={{ textDecoration: 'none', cursor: 'pointer' }}>
                                           {proj.title}
                                         </Link>
                                       ) : (
-                                        <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
+                                        <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">{proj.title}</span>
                                       )}
                                       <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>
                                         {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
@@ -187,14 +187,14 @@ export default function ResumePageClient({
                                     </div>
                                     {/* 웹용 프로젝트 설명 */}
                                     {proj.shortDescription && (
-                                      <div style={{ color: '#222', fontSize: 14, marginLeft: 24, marginTop: 2 }}>
-                                        <RichTextRenderer text={proj.shortDescription} className="mt-1 prose-project-desc" />
+                                      <div className="mt-1 text-gray-700 dark:text-gray-200 text-[14px] ml-6">
+                                        <RichTextRenderer text={proj.shortDescription} className="prose-project-desc text-gray-700 dark:text-gray-200" />
                                       </div>
                                     )}
                                     {/* 스킬: 프린트에서는 뱃지 없이 텍스트만 */}
                                     {Array.isArray(proj.skills) && proj.skills.length > 0 && (
                                       <div style={{ marginLeft: 24, marginTop: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-                                        <span style={{ fontWeight: 500, color: '#111', marginRight: 4 }}>skill :</span>
+                                        <span className="font-medium text-gray-900 dark:text-gray-100 mr-2">skill :</span>
                                         {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number) => (
                                           <span key={skill.id || skill.name || i} className="resume-skill-badge bg-sky-100 text-sky-700 px-2 py-0.5 rounded text-[13px] font-semibold border border-sky-200">{skill.name}</span>
                                         ))}
@@ -242,20 +242,20 @@ export default function ResumePageClient({
                     });
                     return (
                       <li key={proj.id} className="ml-8">
-                        <div className="font-semibold text-base" style={{ color: '#111' }}>
-                          <span className="text-black text-lg font-bold">●</span> {proj.title}
-                          <span className="ml-2 text-xs" style={{ color: '#222' }}>
+                        <div className="font-semibold text-base text-gray-900 dark:text-gray-100">
+                          <span className="text-black dark:text-gray-100 text-lg font-bold">●</span> <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">{proj.title}</span>
+                          <span className="ml-2 text-xs text-gray-700 dark:text-gray-200">
                             {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
                           </span>
                         </div>
                         {proj.shortDescription && (
-                          <div style={{ color: '#222' }}>
-                            <RichTextRenderer text={proj.shortDescription} className="mt-1" />
+                          <div className="text-gray-700 dark:text-gray-200">
+                            <RichTextRenderer text={proj.shortDescription} className="mt-1 text-gray-700 dark:text-gray-200" />
                           </div>
                         )}
                         {matchedCareerDetail && (
                           <div className="ml-8 mt-2 border-l-2 border-gray-200 pl-4">
-                            <span className="font-semibold" style={{ color: '#111' }}>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">
                               경력기술서 있음
                             </span>
                           </div>
@@ -279,10 +279,10 @@ export default function ResumePageClient({
                   <ul className="ml-8">
                     {CATEGORY_ORDER.filter(category => skillsByCategory[category]).map((category) => (
                       <li key={category} className="mb-2">
-                        <span className="font-bold" style={{ color: '#111' }}>
+                        <span className="font-bold text-gray-900 dark:text-gray-100">
                           {`${category} : `}
                         </span>
-                        <span style={{ color: '#111' }}>
+                        <span className="text-gray-900 dark:text-gray-100">
                           {skillsByCategory[category]
                             .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
                             .map((skill, i, arr) => (
@@ -314,11 +314,11 @@ export default function ResumePageClient({
                           <img src={edu.logo.url} alt={edu.institution + ' 로고'} className="w-8 h-8 rounded bg-white object-contain border mt-1" />
                         )}
                         <div className="flex flex-col justify-center">
-                          <div className="font-bold" style={{ color: '#111' }}>{edu.institution}{edu.field && ` ${edu.field}`}</div>
-                          <div className="text-sm" style={{ color: '#222' }}>{edu.startDate} ~ {edu.endDate || '현재'}</div>
+                          <div className="font-bold text-gray-900 dark:text-gray-100">{edu.institution}{edu.field && ` ${edu.field}`}</div>
+                          <div className="text-sm text-gray-700 dark:text-gray-200">{edu.startDate} ~ {edu.endDate || '현재'}</div>
                           {edu.description && (
-                            <div style={{ color: '#222' }}>
-                              <RichTextRenderer text={edu.description} className="mt-1" />
+                            <div className="text-gray-700 dark:text-gray-200">
+                              <RichTextRenderer text={edu.description} className="mt-1 text-gray-700 dark:text-gray-200" />
                             </div>
                           )}
                         </div>
@@ -343,7 +343,7 @@ export default function ResumePageClient({
                       <div className="font-bold text-gray-900 dark:text-white">{exp.title}</div>
                       <div className="text-sm text-gray-500 dark:text-gray-300">{exp.startDate} ~ {exp.endDate || '현재'}</div>
                       {exp.description && (
-                        <div style={{ color: '#222' }}>
+                        <div className="text-gray-700 dark:text-gray-200">
                           <RichTextRenderer text={exp.description} className="mt-1 text-gray-700 dark:text-gray-200" />
                         </div>
                       )}
@@ -417,11 +417,11 @@ export default function ResumePageClient({
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                   <span style={{ color: '#111', fontWeight: 700 }}>●</span>
                                   {hasCareerDetail ? (
-                                    <Link href={careerHref!} style={{ fontWeight: 700, fontSize: 15, color: '#111', textDecoration: 'none', cursor: 'pointer' }}>
+                                    <Link href={careerHref!} className="font-bold text-[15px] text-gray-900 dark:text-gray-100 hover:text-blue-500 dark:hover:text-blue-400" style={{ textDecoration: 'none', cursor: 'pointer' }}>
                                       {proj.title}
                                     </Link>
                                   ) : (
-                                    <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
+                                    <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">{proj.title}</span>
                                   )}
                                   <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>
                                     {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
@@ -484,7 +484,7 @@ export default function ResumePageClient({
                 return (
                   <li key={proj.id} style={{ marginBottom: 12 }}>
                     <div style={{ fontWeight: 700, fontSize: 15, color: '#111', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ color: '#111', fontWeight: 700 }}>●</span> {proj.title}
+                      <span style={{ color: '#111', fontWeight: 700 }}>●</span> <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">{proj.title}</span>
                       <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>
                         {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
                       </span>
@@ -581,4 +581,4 @@ export default function ResumePageClient({
       </div>
     </>
   );
-} 
+}
