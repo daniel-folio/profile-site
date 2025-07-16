@@ -28,3 +28,18 @@
     @apply absolute -bottom-2 left-1/2 w-20 h-1 bg-sky-300 -translate-x-1/2;
   }
 }
+
+/* --- 기존 코드 --- */
+
+/* --- resume badge style: always last! --- */
+.resume-skill-badge {
+  background: #FFE0B2;
+  color: #FF8000;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-right: 4px;
+  margin-bottom: 2px;
+  display: inline-block;
+}

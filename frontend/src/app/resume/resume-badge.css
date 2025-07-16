@@ -1,0 +1,11 @@
+.resume-skill-badge {
+  background: #FFE0B2 !important;
+  color: #FF8000 !important;
+  border-radius: 4px !important;
+  padding: 2px 8px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  margin-right: 4px !important;
+  margin-bottom: 2px !important;
+  display: inline-block !important;
+} 

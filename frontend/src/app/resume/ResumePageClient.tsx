@@ -12,6 +12,8 @@ import { CareerDetail } from "@/types/career-detail";
 import { OtherExperience } from "@/types/other-experience";
 import { useEffect, useState } from 'react';
 import React from 'react';
+import './resume-print.css';
+import './resume-badge.css';
 
 function getMonthDiff(start: string, end: string): number {
   if (!start || !end) return 0;
@@ -102,49 +104,14 @@ export default function ResumePageClient({
 
   return (
     <>
-      <style jsx global>{`
-        @media print {
-          #resume-print { display: block !important; }
-          main, header, footer, .only-screen { display: none !important; }
-          .resume-skill-badge {
-            background: none !important;
-            color: #111 !important;
-            border-radius: 0 !important;
-            padding: 0 4px !important;
-            font-size: 11px !important;
-            margin-right: 2px !important;
-          }
-          .resume-skill-label::before {
-            content: 'skill : ';
-            color: #111;
-            font-weight: 500;
-            margin-right: 4px;
-          }
-        }
-        @media screen {
-          #resume-print { display: none; }
-        }
-      `}</style>
-      {/* 글로벌 프린트 스타일 */}
-      <style>{`
-        @media print {
-          .resume-skill-print-label {
-            display: inline !important;
-            color: #111 !important;
-            font-weight: 500 !important;
-            margin-right: 4px !important;
-          }
-        }
-        @media screen {
-          .resume-skill-print-label {
-            display: none !important;
-          }
-        }
-      `}</style>
       {/* 화면용 이력서 */}
       <main id="resume-content" className="max-w-6xl mx-auto pt-24 md:pt-32 pb-12 px-4">
         <div className="bg-white/80 dark:bg-black/50 rounded-xl p-8 flex flex-col gap-8">
-          <ResumeContentWithDownload downloadButton={showDownload ? <ResumePdfDownloadButton /> : null}>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl font-bold">이력서</h1>
+            {showDownload && <ResumePdfDownloadButton />}
+          </div>
+          <ResumeContentWithDownload>
             {/* 프로필 요약 */}
             {profile ? (
               <section className="mb-0">
@@ -208,15 +175,26 @@ export default function ResumePageClient({
                                   <li style={{ marginBottom: 6 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                       <span style={{ color: '#111', fontWeight: 700 }}>●</span>
-                                      {hasCareerDetail ? (
-                                        <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
-                                      ) : (
-                                        <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
-                                      )}
+                                      <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
                                       <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>
                                         {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
                                       </span>
                                     </div>
+                                    {/* 웹용 프로젝트 설명 */}
+                                    {proj.shortDescription && (
+                                      <div style={{ color: '#222', fontSize: 14, marginLeft: 24, marginTop: 2 }}>
+                                        <RichTextRenderer text={proj.shortDescription} className="mt-1 prose-project-desc" />
+                                      </div>
+                                    )}
+                                    {/* 스킬: 프린트에서는 뱃지 없이 텍스트만 */}
+                                    {Array.isArray(proj.skills) && proj.skills.length > 0 && (
+                                      <div style={{ marginLeft: 24, marginTop: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                                        <span style={{ fontWeight: 500, color: '#111', marginRight: 4 }}>skill :</span>
+                                        {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number) => (
+                                          <span key={skill.id || skill.name || i} className="resume-skill-badge">{skill.name}</span>
+                                        ))}
+                                      </div>
+                                    )}
                                   </li>
                                   {idx < companyProjects.length - 1 && <hr className="my-4 border border-gray-400/20 w-full" />}
                                 </React.Fragment>
@@ -432,15 +410,26 @@ export default function ResumePageClient({
                               <li style={{ marginBottom: 6 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                   <span style={{ color: '#111', fontWeight: 700 }}>●</span>
-                                  {hasCareerDetail ? (
-                                    <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
-                                  ) : (
-                                    <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
-                                  )}
+                                  <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
                                   <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>
                                     {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
                                   </span>
                                 </div>
+                                {/* 웹용 프로젝트 설명 */}
+                                {proj.shortDescription && (
+                                  <div style={{ color: '#222', fontSize: 14, marginLeft: 24, marginTop: 2 }}>
+                                    <RichTextRenderer text={proj.shortDescription} className="mt-1 prose-project-desc" />
+                                  </div>
+                                )}
+                                {/* 스킬: 프린트에서는 뱃지 없이 텍스트만 */}
+                                {Array.isArray(proj.skills) && proj.skills.length > 0 && (
+                                  <div style={{ marginLeft: 24, marginTop: 4 }}>
+                                    <span style={{ fontWeight: 500, color: '#111', marginLeft: 0 }}>skill : </span>
+                                    <span style={{ color: '#111', fontSize: 12 }}>
+                                      {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number, arr: any[]) => `${skill.name}${i < arr.length - 1 ? ', ' : ''}`)}
+                                    </span>
+                                  </div>
+                                )}
                               </li>
                               {idx < companyProjects.length - 1 && <hr className="my-4 border border-gray-400/20 w-full" />}
                             </React.Fragment>
@@ -489,8 +478,8 @@ export default function ResumePageClient({
                       </span>
                     </div>
                     {proj.shortDescription && (
-                      <div style={{ color: '#222', fontSize: 13, marginLeft: 24 }}>
-                        <RichTextRenderer text={proj.shortDescription} className="mt-1" />
+                      <div style={{ color: '#222', fontSize: 14, marginLeft: 24, marginTop: 2 }}>
+                        <RichTextRenderer text={proj.shortDescription} className="mt-1 prose-project-desc" />
                       </div>
                     )}
                     {matchedCareerDetail && (

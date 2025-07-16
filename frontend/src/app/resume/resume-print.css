@@ -1,0 +1,22 @@
+/* Resume 전용 프린트/웹 분리 CSS */
+@media print {
+  .resume-only-screen { display: none !important; }
+  .resume-skill-badge { display: none !important; }
+  .resume-only-print { display: inline !important; }
+  #resume-print, #resume-print * {
+    font-family: 'Noto Sans KR', 'Pretendard', 'Roboto', Arial, sans-serif !important;
+  }
+}
+@media screen {
+  .resume-only-print { display: none !important; }
+  .resume-only-screen { display: inline !important; }
+}
+.prose-project-desc {
+  font-size: 14px !important;
+}
+.prose-career-desc, .prose-career-desc * {
+  font-size: 14px !important;
+}
+.career-desc-indent {
+  padding-left: 16px;
+} 
