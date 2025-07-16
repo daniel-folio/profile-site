@@ -18,7 +18,13 @@ export default async function ResumePage() {
     getCareerDetails({ next: { revalidate: 3600 } }),
     getOtherExperiences({ next: { revalidate: 3600 } }),
   ]);
-  const profile: Profile | null = profileRes?.data ?? null;
+  let profile: Profile | null = null;
+  if (profileRes?.data) {
+    const data = Array.isArray(profileRes.data) ? profileRes.data[0] : profileRes.data;
+    if (data) {
+      profile = data.attributes ? { ...data.attributes, id: data.id } : data;
+    }
+  }
   const companies: Company[] = Array.isArray(companiesRes?.data)
     ? companiesRes.data.map((item: any) => item.attributes ?? item)
     : [];
