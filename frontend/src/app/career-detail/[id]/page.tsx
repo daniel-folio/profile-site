@@ -10,7 +10,7 @@ interface CareerDetailPageProps {
 
 export default async function CareerDetailPage({ params }: CareerDetailPageProps) {
   const { id } = params;
-  const detailsRes: any = await getCareerDetails();
+  const detailsRes: any = await getCareerDetails({ cache: 'no-store' });
   const detail: CareerDetail | undefined = detailsRes && Array.isArray(detailsRes.data)
     ? detailsRes.data.map((item: any) => item.attributes ?? item).find((cd: any) => String(cd.id) === id)
     : undefined;
@@ -21,7 +21,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
     <main className="max-w-2xl mx-auto pt-24 md:pt-32 pb-12 px-4">
       <h1 className="text-2xl font-bold mb-6">{detail.title}</h1>
       <div className="mb-2 text-gray-600">
-        {detail.company?.company && <span>회사: {detail.company.company} </span>}
+        {typeof detail.company === 'object' && (detail.company as any)?.company && <span>회사: {(detail.company as any).company} </span>}
         {detail.project?.title && <span>프로젝트: {detail.project.title} </span>}
         {detail.period && <span>기간: {detail.period} </span>}
         {detail.teamSize && <span>팀 규모: {detail.teamSize} </span>}

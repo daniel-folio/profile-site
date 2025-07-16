@@ -8,10 +8,10 @@ import CareerDetailPdfDownloadButton from '@/components/CareerDetailPdfDownloadB
 
 export default async function CareerDetailPage() {
   const [companiesRes, projectsRes, careerDetailsRes, profileRes]: any[] = await Promise.all([
-    getCompanies(),
-    getProjects(),
-    getCareerDetails(),
-    getProfile(),
+    getCompanies({ cache: 'no-store' }),
+    getProjects(undefined, { cache: 'no-store' }),
+    getCareerDetails({ cache: 'no-store' }),
+    getProfile(undefined, { cache: 'no-store' }),
   ]);
   const companies: Company[] = Array.isArray(companiesRes?.data)
     ? companiesRes.data.map((item: any) => item.attributes ?? item)
@@ -88,7 +88,7 @@ export default async function CareerDetailPage() {
       <div className="bg-white/80 dark:bg-black/50 rounded-xl p-8 flex flex-col gap-8">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold">경력기술서</h1>
-          <CareerDetailPdfDownloadButton />
+          {profile?.careerDetailDownloadEnabled && <CareerDetailPdfDownloadButton />}
         </div>
         {/* 회사별로 그룹화 */}
         {careerDetails.length > 0 ? (
@@ -117,10 +117,10 @@ export default async function CareerDetailPage() {
                           {/* 환경(스킬) 한 줄, 역할은 줄 바꿈하여 아래에 */}
                           {matchedCareerDetails.length > 0 && matchedCareerDetails.map(cd => (
                             <div key={cd.id} className="ml-8 mt-2 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
-                              {Array.isArray(proj.technologies) && proj.technologies.length > 0 && (
+                              {proj.technologies?.data?.length > 0 && (
                                 <div className="flex items-center flex-wrap gap-2 mb-1">
                                   <b className="text-gray-900 dark:text-white">환경:</b>
-                                  {proj.technologies.map((skill) => (
+                                  {proj.technologies.data.map((skill: any) => (
                                     <span key={skill.id} className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded px-2 py-1 text-xs">
                                       {skill.name}
                                     </span>
@@ -196,11 +196,11 @@ export default async function CareerDetailPage() {
                         </div>
                         {matchedCareerDetails.length > 0 && matchedCareerDetails.map(cd => (
                           <div key={cd.id} style={{ marginLeft: 24, marginTop: 8, borderLeft: '2px solid #eee', paddingLeft: 12 }}>
-                            {Array.isArray(proj.technologies) && proj.technologies.length > 0 && (
+                            {proj.technologies?.data?.length > 0 && (
                               <div style={{ marginBottom: 4 }}>
                                 <span style={{ fontWeight: 500, color: '#111' }}>환경: </span>
                                 <span style={{ color: '#111', fontSize: 13 }}>
-                                  {proj.technologies.map((skill, i) => `${skill.name}${i < proj.technologies.length - 1 ? ', ' : ''}`)}
+                                  {proj.technologies.data.map((skill: any, i: number) => `${skill.name}${i < proj.technologies.data.length - 1 ? ', ' : ''}`)}
                                 </span>
                               </div>
                             )}

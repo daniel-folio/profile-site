@@ -7,13 +7,13 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "개발자 포트폴리오",
-  description: "개발자로서의 성장 과정과 프로젝트들을 공유하는 개인 포트폴리오입니다.",
-  keywords: ["개발자", "포트폴리오", "프론트엔드", "백엔드", "풀스택"],
-  authors: [{ name: "Portfolio Owner" }],
+  title: "DaeSung Han",
+  description: "DaeSung Han's developer portfolio and project showcase.",
+  keywords: ["Developer", "Portfolio", "Frontend", "Backend", "Fullstack"],
+  authors: [{ name: "DaeSung Han" }],
   openGraph: {
-    title: "개발자 포트폴리오",
-    description: "개발자로서의 성장 과정과 프로젝트들을 공유하는 개인 포트폴리오입니다.",
+    title: "DaeSung Han",
+    description: "DaeSung Han's developer portfolio and project showcase.",
     type: "website",
   },
 };
@@ -21,6 +21,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko" suppressHydrationWarning>
+      <head>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        {/* <link rel="icon" type="image/x-icon" href="/favicon.ico" /> */}
+      </head>
       <body className={GeistSans.className}>
         <ThemeProvider
           attribute="class"

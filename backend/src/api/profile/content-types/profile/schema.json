@@ -62,6 +62,10 @@
     "resumeDownloadEnabled": {
       "type": "boolean",
       "default": false
+    },
+    "careerDetailDownloadEnabled": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

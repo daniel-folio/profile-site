@@ -73,50 +73,50 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
 
 // --- API 함수들 ---
 
-export async function getProfile(): Promise<ProfileResponse | null> {
+export async function getProfile(params?: any, options?: RequestInit): Promise<ProfileResponse | null> {
   try {
     // ⭐️ 해결책: 'populate=deep' 대신 가장 안정적인 'populate=*'를 사용합니다.
-    return await fetchAPI<ProfileResponse>('/profile?populate=*');
+    return await fetchAPI<ProfileResponse>(`/profile?populate=*`, options);
   } catch (e) {
     return null;
   }
 }
 
-export async function getSkills(): Promise<SkillsResponse> {
-  return fetchAPI<SkillsResponse>('/skills?populate=*&sort=order:asc');
+export async function getSkills(options?: RequestInit): Promise<SkillsResponse> {
+  return fetchAPI<SkillsResponse>('/skills?populate=*&sort=order:asc', options);
 }
 
-export async function getProjects(featured?: boolean): Promise<ProjectsResponse> {
+export async function getProjects(featured?: boolean, options?: RequestInit): Promise<ProjectsResponse> {
   const filters = featured ? '&filters[featured][$eq]=true' : '';
-  return fetchAPI<ProjectsResponse>(`/projects?populate=*&sort=order:asc${filters}`);
+  return fetchAPI<ProjectsResponse>(`/projects?populate=*&sort=order:asc${filters}`, options);
 }
 
-export async function getProjectBySlug(slug: string): Promise<ProjectsResponse> {
+export async function getProjectBySlug(slug: string, options?: RequestInit): Promise<ProjectsResponse> {
   const path = `/projects?filters[slug][$eq]=${slug}&populate=*`;
-  return fetchAPI<ProjectsResponse>(path);
+  return fetchAPI<ProjectsResponse>(path, options);
 }
 
-export async function getAllProjectSlugs(): Promise<{ data: { attributes: { slug: string } }[] }> {
+export async function getAllProjectSlugs(options?: RequestInit): Promise<{ data: { attributes: { slug: string } }[] }> {
   const path = `/projects?fields=slug`;
-  return fetchAPI<{ data: { attributes: { slug: string } }[] }>(path);
+  return fetchAPI<{ data: { attributes: { slug: string } }[] }>(path, options);
 }
 
-export async function getCompanies(): Promise<CompanyResponse> {
-  return fetchAPI<CompanyResponse>('/companies?populate=*&sort=startDate:desc');
+export async function getCompanies(options?: RequestInit): Promise<CompanyResponse> {
+  return fetchAPI<CompanyResponse>('/companies?populate=*&sort=startDate:desc', options);
 }
 
-export async function getEducations(): Promise<EducationResponse> {
-  return fetchAPI<EducationResponse>('/educations?populate=*&sort=order:asc');
+export async function getEducations(options?: RequestInit): Promise<EducationResponse> {
+  return fetchAPI<EducationResponse>('/educations?populate=*&sort=order:asc', options);
 }
 
-export async function getCareerDetails() {
+export async function getCareerDetails(options?: RequestInit) {
   try {
-    return await fetchAPI('/career-details?populate=*');
+    return await fetchAPI('/career-details?populate=*', options);
   } catch (e) {
     return null;
   }
 }
 
-export async function getOtherExperiences() {
-  return fetchAPI('/other-experiences?pagination[pageSize]=100');
+export async function getOtherExperiences(options?: RequestInit) {
+  return fetchAPI('/other-experiences?pagination[pageSize]=100', options);
 }

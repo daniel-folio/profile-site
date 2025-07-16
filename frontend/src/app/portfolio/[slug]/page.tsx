@@ -43,7 +43,7 @@ export default async function ProjectPage(props: any) {
   const slug = params.slug;
   console.log('상세페이지 slug:', slug);
 
-  const response = await getProjectBySlug(slug);
+  const response = await getProjectBySlug(slug, { cache: 'no-store' });
   console.log('상세페이지 response:', JSON.stringify(response, null, 2));
 
   // 유연하게 flat/attributes 구조 모두 지원

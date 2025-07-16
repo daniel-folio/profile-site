@@ -22,6 +22,7 @@ export interface Profile {
   showProfileImage?: boolean;
   showPhone?: boolean;
   resumeDownloadEnabled?: boolean;
+  careerDetailDownloadEnabled?: boolean;
 }
 
 export interface ProfileResponse {

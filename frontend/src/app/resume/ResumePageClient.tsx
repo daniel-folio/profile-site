@@ -97,8 +97,7 @@ export default function ResumePageClient({
     acc[skill.category].push(skill);
     return acc;
   }, {} as Record<string, Skill[]>);
-  const hasCareer = sortedCompanies.length > 0 || projects.length > 0;
-  const showDownload = !!profile?.resumeDownloadEnabled && hasCareer;
+  const showDownload = !!profile?.resumeDownloadEnabled;
 
   console.log('프로젝트 전체 리스트', projects.map(proj => ({ title: proj.title, company: proj.company, visible: proj.visible, skills: proj.skills })));
 

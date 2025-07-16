@@ -8,9 +8,9 @@ import { getProjects } from "@/lib/api";
 export const revalidate = 0; // 이 페이지를 항상 동적으로 렌더링하도록 설정 (SSR)
 
 export default async function Home() {
-  const profile = await getProfile();
-  const skills = await getSkills();
-  const projects = await getProjects(true);
+  const profile = await getProfile(undefined, { cache: 'no-store' });
+  const skills = await getSkills({ cache: 'no-store' });
+  const projects = await getProjects(true, { cache: 'no-store' });
 
   return (
     <div className="container mx-auto px-4">
@@ -25,8 +25,8 @@ export default async function Home() {
           <Projects projects={projects ? projects.data : null} />
         </section>
       </div>
-      {profile?.mainBio && (
-        <div className="mt-2 text-gray-700 whitespace-pre-line">{profile.mainBio}</div>
+      {profile?.data?.mainBio && (
+        <div className="mt-2 text-gray-700 whitespace-pre-line">{profile.data.mainBio}</div>
       )}
     </div>
   );
