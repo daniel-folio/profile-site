@@ -10,13 +10,13 @@ import ResumePageClient from './ResumePageClient';
 
 export default async function ResumePage() {
   const [profileRes, companiesRes, educationsRes, skillsRes, projectsRes, careerDetailsResRaw, otherExperiencesRes]: any[] = await Promise.all([
-    getProfile(undefined, { cache: 'no-store' }),
-    getCompanies({ cache: 'no-store' }),
-    getEducations({ cache: 'no-store' }),
-    getSkills({ cache: 'no-store' }),
-    getProjects(undefined, { cache: 'no-store' }),
-    getCareerDetails({ cache: 'no-store' }),
-    getOtherExperiences({ cache: 'no-store' }),
+    getProfile(undefined, { next: { revalidate: 3600 } }),
+    getCompanies({ next: { revalidate: 3600 } }),
+    getEducations({ next: { revalidate: 3600 } }),
+    getSkills({ next: { revalidate: 3600 } }),
+    getProjects(undefined, { next: { revalidate: 3600 } }),
+    getCareerDetails({ next: { revalidate: 3600 } }),
+    getOtherExperiences({ next: { revalidate: 3600 } }),
   ]);
   const profile: Profile | null = profileRes?.data ?? null;
   const companies: Company[] = Array.isArray(companiesRes?.data)

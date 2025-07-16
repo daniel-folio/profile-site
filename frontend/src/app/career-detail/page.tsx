@@ -10,10 +10,10 @@ import CareerDetailClient from './CareerDetailClient';
 
 export default async function CareerDetailPage() {
   const [companiesRes, projectsRes, careerDetailsRes, profileRes]: any[] = await Promise.all([
-    getCompanies({ cache: 'no-store' }),
-    getProjects(undefined, { cache: 'no-store' }),
-    getCareerDetails({ cache: 'no-store' }),
-    getProfile(undefined, { cache: 'no-store' }),
+    getCompanies({ next: { revalidate: 3600 } }),
+    getProjects(undefined, { next: { revalidate: 3600 } }),
+    getCareerDetails({ next: { revalidate: 3600 } }),
+    getProfile(undefined, { next: { revalidate: 3600 } }),
   ]);
   const companies = Array.isArray(companiesRes?.data)
     ? companiesRes.data.map((item: any) => item.attributes ?? item)
