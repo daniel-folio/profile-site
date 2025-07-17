@@ -91,9 +91,7 @@ export function Projects({ projects, featured = false }: ProjectsProps) {
                   </div>
                   <CardTitle className="text-xl text-gray-900 dark:text-gray-100">{project.title}</CardTitle>
                   <CardDescription className="text-gray-700 dark:text-gray-300">
-                    {project.shortDescription && (
-                      <span dangerouslySetInnerHTML={{ __html: marked(project.shortDescription) }} />
-                    )}
+                    {project.shortDescription}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

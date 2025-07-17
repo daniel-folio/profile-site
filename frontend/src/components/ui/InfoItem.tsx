@@ -10,7 +10,7 @@ export function InfoItem({ label, value }: InfoItemProps) {
   return (
     <div>
       <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">{label}</p>
-      <p className="text-base text-gray-800 dark:text-gray-200" dangerouslySetInnerHTML={{ __html: typeof value === 'string' ? marked(value) : '' }} />
+      <p className="text-base text-gray-800 dark:text-gray-200">{value}</p>
     </div>
   );
 }
