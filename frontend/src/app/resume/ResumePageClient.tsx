@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import React from 'react';
 import './resume-print.css';
 import './resume-badge.css';
+import { useTheme } from 'next-themes';
 
 function getMonthDiff(start: string, end: string): number {
   if (!start || !end) return 0;
@@ -47,6 +48,7 @@ export default function ResumePageClient({
   careerDetails: CareerDetail[];
   otherExperiences: OtherExperience[];
 }) {
+  const { resolvedTheme } = useTheme();
   // 기존 resume/page.tsx의 데이터 가공 및 렌더링 로직 복사
   const visibleExperiences = otherExperiences.filter(a => a.visible);
   const sortedExperiences = [...visibleExperiences].sort((a, b) => b.startDate.localeCompare(a.startDate));
@@ -213,7 +215,7 @@ export default function ResumePageClient({
                                   <React.Fragment key={proj.id}>
                                     <li style={{ marginBottom: 6 }}>
                                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                        <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">●</span>
+                                        <span style={{ fontWeight: 700, fontSize: 7, color: resolvedTheme === 'dark' ? '#fff' : '#111' }}>●</span>
                                         {hasCareerDetail ? (
                                           <Link
                                             href={careerHref!}
@@ -286,7 +288,7 @@ export default function ResumePageClient({
                     return (
                       <li key={proj.id} style={{ marginBottom: 12 }}>
                         <div className="font-bold text-[15px] text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                          <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">●</span> <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">{proj.title}</span>
+                          <span style={{ fontWeight: 700, fontSize: 7, color: resolvedTheme === 'dark' ? '#fff' : '#111' }}>●</span> <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">{proj.title}</span>
                           <span className="ml-2 text-[12px] text-gray-600 dark:text-gray-200">{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
                         </div>
                         {proj.shortDescription && (
@@ -386,6 +388,7 @@ export default function ResumePageClient({
                             <ul style={{ marginLeft: 16, padding: 0, listStyle: 'none' }}>
                               {categoryExps[0].map((exp, idx) => (
                                 <li key={exp.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, marginLeft: 16 }}>
+                                  <span style={{ fontWeight: 700, fontSize: 7, color: resolvedTheme === 'dark' ? '#fff' : '#111' }}>●</span>
                                   <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">{exp.title}</span>
                                   <span className="ml-4 text-[12px] text-gray-600 dark:text-gray-200">{exp.startDate} ~ {exp.endDate || '현재'}</span>
                                   {exp.description && (
@@ -407,6 +410,7 @@ export default function ResumePageClient({
                             <ul style={{ marginLeft: 16, padding: 0, listStyle: 'none' }}>
                               {categoryExps[1].map((exp, idx) => (
                                 <li key={exp.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, marginLeft: 16 }}>
+                                  <span style={{ fontWeight: 700, fontSize: 7, color: resolvedTheme === 'dark' ? '#fff' : '#111' }}>●</span>
                                   <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">{exp.title}</span>
                                   <span className="ml-4 text-[12px] text-gray-600 dark:text-gray-200">{exp.startDate} ~ {exp.endDate || '현재'}</span>
                                   {exp.description && (
@@ -440,14 +444,14 @@ export default function ResumePageClient({
                 src={profileImageBase64 || profile.profileImage?.url}
                 alt={profile.name}
                 style={{ width: 96, height: 120, objectFit: 'contain', background: '#fff', border: '1px solid #eee', borderRadius: 8, marginRight: 16 }}
-                onLoad={() => { /* console.log('출력용 img onLoad:', profileImageBase64); */ }}
+                onLoad={() => { console.log('출력용 img onLoad:', profileImageBase64); }}
               />
             )}
             <div>
               <div style={{ fontSize: 20, fontWeight: 700 }}>{profile.name}</div>
-              <div className="text-gray-900 dark:text-gray-100">{profile.title}</div>
-              <div className="text-gray-900 dark:text-gray-100 text-[14px]">{profile.email} {profile.showPhone === true && profile.phone && <>| {profile.phone}</>}</div>
-              <div className="text-gray-900 dark:text-gray-100 text-[14px]">{profile.location}</div>
+              <div style={{ color: '#222' }}>{profile.title}</div>
+              <div style={{ color: '#222', fontSize: 14 }}>{profile.email} {profile.showPhone === true && profile.phone && <>| {profile.phone}</>}</div>
+              <div style={{ color: '#222', fontSize: 14 }}>{profile.location}</div>
             </div>
           </div>
         )}
@@ -457,8 +461,8 @@ export default function ResumePageClient({
             <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
             <section style={{ marginBottom: 32 }}>
               <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>소개 (Introduce)</h2>
-              <div style={{ marginLeft: 32, color: '#222', marginTop: 8 }} className="text-gray-900 dark:text-gray-100 prose max-w-none">
-                <RichTextRenderer text={profile.resumeBio} className="mt-2 prose max-w-none dark:prose-invert" />
+              <div style={{ marginLeft: 32, color: '#222', marginTop: 8 }}>
+                <RichTextRenderer text={profile.resumeBio} className="mt-2 text-gray-900 prose max-w-none" />
               </div>
             </section>
           </>
@@ -498,24 +502,22 @@ export default function ResumePageClient({
                               <React.Fragment key={proj.id}>
                                 <li style={{ marginBottom: 6 }}>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                    <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">●</span>
+                                    <span style={{ fontWeight: 700, fontSize: 7, color: '#111', verticalAlign: 'middle', lineHeight: 1}}>●</span>
                                     {hasCareerDetail ? (
-                                      <Link
-                                        href={careerHref!}
-                                        className="font-bold text-[15px] text-gray-900 dark:text-white hover:text-sky-500 dark:hover:text-sky-500 transition-colors cursor-pointer"
-                                        style={{ textDecoration: 'none' }}
-                                      >
+                                      <Link href={careerHref!} className="font-bold text-[15px]" style={{ textDecoration: 'none', cursor: 'pointer', color: '#000' }}>
                                         {proj.title}
                                       </Link>
                                     ) : (
-                                      <span className="font-bold text-[15px] text-gray-900 dark:text-white">{proj.title}</span>
+                                      <span className="font-bold text-[15px]" style={{ color: '#000' }}>{proj.title}</span>
                                     )}
-                                    <span className="ml-2 text-[12px] text-gray-600 dark:text-gray-200">{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
+                                    <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>
+                                      {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
+                                    </span>
                                   </div>
                                   {/* 웹용 프로젝트 설명 */}
                                   {proj.shortDescription && (
-                                    <div style={{ color: '#222', fontSize: 14, marginLeft: 24, marginTop: 2 }} className="prose dark:prose-invert">
-                                      <RichTextRenderer text={proj.shortDescription} className="mt-1 prose-project-desc text-gray-700 dark:text-gray-200" />
+                                    <div style={{ color: '#222', fontSize: 14, marginLeft: 24, marginTop: 2 }}>
+                                      <RichTextRenderer text={proj.shortDescription} className="mt-1 prose-project-desc" />
                                     </div>
                                   )}
                                   {/* 스킬: 프린트에서는 뱃지 없이 텍스트만 */}
@@ -569,11 +571,11 @@ export default function ResumePageClient({
                   return (
                     <li key={proj.id} style={{ marginBottom: 12 }}>
                       <div style={{ fontWeight: 700, fontSize: 15, color: '#111', display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ color: '#111', fontWeight: 700 }}>●</span> <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
+                        <span style={{ fontWeight: 700, fontSize: 7, color: '#111', verticalAlign: 'middle', lineHeight: 1 }}>●</span> <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
                         <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
                       </div>
                       {proj.shortDescription && (
-                        <div style={{ color: '#222', fontSize: 14, marginLeft: 24, marginTop: 2 }} className="prose dark:prose-invert">
+                        <div style={{ color: '#222', fontSize: 14, marginLeft: 24, marginTop: 2 }}>
                           <RichTextRenderer text={proj.shortDescription} className="mt-1 prose-project-desc" />
                         </div>
                       )}
@@ -654,10 +656,11 @@ export default function ResumePageClient({
                           <ul style={{ marginLeft: 16, padding: 0, listStyle: 'none' }}>
                             {categoryExps[0].map((exp, idx) => (
                               <li key={exp.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, marginLeft: 16 }}>
+                                <span style={{ fontWeight: 700, fontSize: 7, color: '#111', verticalAlign: 'middle', lineHeight: 1, marginRight: 6 }}>●</span>
                                 <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{exp.title}</span>
                                 <span style={{ marginLeft: 16, fontSize: 12, color: '#666' }}>{exp.startDate} ~ {exp.endDate || '현재'}</span>
                                 {exp.description && (
-                                  <div style={{ color: '#222', fontSize: 13, marginTop: 2, marginLeft: 24 }} className="prose dark:prose-invert">
+                                  <div style={{ color: '#222', fontSize: 13, marginTop: 2, marginLeft: 24 }}>
                                     <RichTextRenderer text={exp.description} />
                                   </div>
                                 )}
@@ -675,10 +678,11 @@ export default function ResumePageClient({
                           <ul style={{ marginLeft: 16, padding: 0, listStyle: 'none' }}>
                             {categoryExps[1].map((exp, idx) => (
                               <li key={exp.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, marginLeft: 16 }}>
+                                <span style={{ fontWeight: 700, fontSize: 7, color: '#111', verticalAlign: 'middle', lineHeight: 1, marginRight: 6 }}>●</span>
                                 <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{exp.title}</span>
                                 <span style={{ marginLeft: 16, fontSize: 12, color: '#666' }}>{exp.startDate} ~ {exp.endDate || '현재'}</span>
                                 {exp.description && (
-                                  <div style={{ color: '#222', fontSize: 13, marginTop: 2, marginLeft: 24 }} className="prose dark:prose-invert">
+                                  <div style={{ color: '#222', fontSize: 13, marginTop: 2, marginLeft: 24 }}>
                                     <RichTextRenderer text={exp.description} />
                                   </div>
                                 )}
