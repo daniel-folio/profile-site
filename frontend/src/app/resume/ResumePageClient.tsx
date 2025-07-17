@@ -211,11 +211,11 @@ export default function ResumePageClient({
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                     <span style={{ color: '#111', fontWeight: 700 }}>●</span>
                                     {hasCareerDetail ? (
-                                      <Link href={careerHref!} className="font-bold text-[15px] text-gray-900 dark:text-gray-100 hover:text-blue-500 dark:hover:text-blue-400" style={{ textDecoration: 'none', cursor: 'pointer' }}>
+                                      <Link href={careerHref!} className="font-bold text-[15px]" style={{ textDecoration: 'none', cursor: 'pointer', color: '#000' }}>
                                         {proj.title}
                                       </Link>
                                     ) : (
-                                      <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">{proj.title}</span>
+                                      <span className="font-bold text-[15px]" style={{ color: '#000' }}>{proj.title}</span>
                                     )}
                                     <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>
                                       {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
@@ -489,11 +489,11 @@ export default function ResumePageClient({
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                     <span style={{ color: '#111', fontWeight: 700 }}>●</span>
                                     {hasCareerDetail ? (
-                                      <Link href={careerHref!} className="font-bold text-[15px] text-gray-900 dark:text-gray-100 hover:text-blue-500 dark:hover:text-blue-400" style={{ textDecoration: 'none', cursor: 'pointer' }}>
+                                      <Link href={careerHref!} className="font-bold text-[15px]" style={{ textDecoration: 'none', cursor: 'pointer', color: '#000' }}>
                                         {proj.title}
                                       </Link>
                                     ) : (
-                                      <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">{proj.title}</span>
+                                      <span className="font-bold text-[15px]" style={{ color: '#000' }}>{proj.title}</span>
                                     )}
                                     <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>
                                       {proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}
