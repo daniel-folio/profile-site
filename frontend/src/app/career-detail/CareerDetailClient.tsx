@@ -87,7 +87,7 @@ export default function CareerDetailClient({ companies, projects, careerDetails,
   return (
     <>
       <main className="max-w-6xl mx-auto pt-24 md:pt-32 pb-12 px-4">
-        <div className="bg-white/80 dark:bg-black/50 rounded-xl p-8 flex flex-col gap-8">
+        <div className="bg-white/80 dark:bg-black/80 rounded-xl p-8 flex flex-col gap-8">
           <div className="flex items-center justify-between mb-4 flex-nowrap gap-4">
             <h1 className="text-3xl font-bold truncate min-w-0">경력기술서</h1>
             {showDownload && <div className="whitespace-nowrap"> <CareerDetailPdfDownloadButton /> </div>}
