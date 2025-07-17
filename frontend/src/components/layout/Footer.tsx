@@ -40,6 +40,11 @@ export function Footer() {
                   이력서
                 </Link>
               </li>
+              <li>
+                <Link href="/career-detail" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">
+                  경력기술서
+                </Link>
+              </li>
             </ul>
           </div>
 

@@ -50,7 +50,11 @@ export default function ResumePageClient({
 }) {
   const { resolvedTheme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => { setIsMounted(true); }, []);
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+    setIsMobile(window.innerWidth <= 640);
+  }, []);
   // 기존 resume/page.tsx의 데이터 가공 및 렌더링 로직 복사
   const visibleExperiences = otherExperiences.filter(a => a.visible);
   const sortedExperiences = [...visibleExperiences].sort((a, b) => b.startDate.localeCompare(a.startDate));
@@ -142,7 +146,10 @@ export default function ResumePageClient({
       <main id="resume-content" className="max-w-6xl mx-auto pt-24 md:pt-32 pb-12 px-4">
         <div className="bg-white/80 dark:bg-black/80 rounded-xl p-8 flex flex-col gap-8">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold">이력서 (Resume)</h1>
+            <h1 className="text-3xl font-bold">
+              <span className="hidden sm:inline">이력서 (Resume)</span>
+              <span className="inline sm:hidden">이력서</span>
+            </h1>
             {showDownload && <ResumePdfDownloadButton />}
           </div>
           {/* 프로필 정보: 사진+이름+연락처 등 */}
