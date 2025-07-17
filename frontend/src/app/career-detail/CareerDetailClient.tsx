@@ -216,22 +216,62 @@ export default function CareerDetailClient({ companies, projects, careerDetails,
                         )}
                         {cd.challenges && (
                           <div style={{ marginBottom: 4 }}><strong>과제 : </strong>
-                            <div style={{ marginLeft: 16, fontSize: 14, fontWeight: 400 }}><RichTextRenderer text={cd.challenges} /></div>
+                            {
+                              Array.isArray(cd.challenges) ? (
+                                <ul style={{ marginLeft: 16, fontSize: 14, fontWeight: 400 }}>
+                                  {cd.challenges.map((r, i) => <li key={i}>{r}</li>)}
+                                </ul>
+                              ) : (
+                                (cd.challenges ?? '').split('\n').map((line: string, idx: number) => (
+                                  <div key={idx} style={{ marginLeft: 16, fontSize: 14, fontWeight: 400 }}>{line}</div>
+                                ))
+                              )
+                            }
                           </div>
                         )}
                         {cd.solutions && (
                           <div style={{ marginBottom: 4 }}><strong>해결 : </strong>
-                            <div style={{ marginLeft: 16, fontSize: 14, fontWeight: 400 }}><RichTextRenderer text={cd.solutions} /></div>
+                            {
+                              Array.isArray(cd.solutions) ? (
+                                <ul style={{ marginLeft: 16, fontSize: 14, fontWeight: 400 }}>
+                                  {cd.solutions.map((r, i) => <li key={i}>{r}</li>)}
+                                </ul>
+                              ) : (
+                                (cd.solutions ?? '').split('\n').map((line: string, idx: number) => (
+                                  <div key={idx} style={{ marginLeft: 16, fontSize: 14, fontWeight: 400 }}>{line}</div>
+                                ))
+                              )
+                            }
                           </div>
                         )}
                         {cd.results && (
                           <div style={{ marginBottom: 4 }}><strong>성과 : </strong>
-                            <div style={{ marginLeft: 16, fontSize: 14, fontWeight: 400 }}><RichTextRenderer text={cd.results} /></div>
+                            {
+                              Array.isArray(cd.results) ? (
+                                <ul style={{ marginLeft: 16, fontSize: 14, fontWeight: 400 }}>
+                                  {cd.results.map((r, i) => <li key={i}>{r}</li>)}
+                                </ul>
+                              ) : (
+                                (cd.results ?? '').split('\n').map((line: string, idx: number) => (
+                                  <div key={idx} style={{ marginLeft: 16, fontSize: 14, fontWeight: 400 }}>{line}</div>
+                                ))
+                              )
+                            }
                           </div>
                         )}
                         {cd.lessonsLearned && (
                           <div style={{ marginBottom: 4 }}><strong>배운점 : </strong>
-                            <div style={{ marginLeft: 16, fontSize: 14, fontWeight: 400 }}><RichTextRenderer text={cd.lessonsLearned} /></div>
+                            {
+                              Array.isArray(cd.lessonsLearned) ? (
+                                <ul style={{ marginLeft: 16, fontSize: 14, fontWeight: 400 }}>
+                                  {cd.lessonsLearned.map((r, i) => <li key={i}>{r}</li>)}
+                                </ul>
+                              ) : (
+                                (cd.lessonsLearned ?? '').split('\n').map((line: string, idx: number) => (
+                                  <div key={idx} style={{ marginLeft: 16, fontSize: 14, fontWeight: 400 }}>{line}</div>
+                                ))
+                              )
+                            }
                           </div>
                         )}
                       </div>

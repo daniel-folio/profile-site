@@ -49,6 +49,8 @@ export default function ResumePageClient({
   otherExperiences: OtherExperience[];
 }) {
   const { resolvedTheme } = useTheme();
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => { setIsMounted(true); }, []);
   // 기존 resume/page.tsx의 데이터 가공 및 렌더링 로직 복사
   const visibleExperiences = otherExperiences.filter(a => a.visible);
   const sortedExperiences = [...visibleExperiences].sort((a, b) => b.startDate.localeCompare(a.startDate));
@@ -215,7 +217,7 @@ export default function ResumePageClient({
                                   <React.Fragment key={proj.id}>
                                     <li style={{ marginBottom: 6 }}>
                                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                        <span style={{ fontWeight: 700, fontSize: 7, color: resolvedTheme === 'dark' ? '#fff' : '#111' }}>●</span>
+                                        <span style={{ fontWeight: 700, fontSize: 7, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
                                         {hasCareerDetail ? (
                                           <Link
                                             href={careerHref!}
@@ -288,7 +290,7 @@ export default function ResumePageClient({
                     return (
                       <li key={proj.id} style={{ marginBottom: 12 }}>
                         <div className="font-bold text-[15px] text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                          <span style={{ fontWeight: 700, fontSize: 7, color: resolvedTheme === 'dark' ? '#fff' : '#111' }}>●</span> <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">{proj.title}</span>
+                          <span style={{ fontWeight: 700, fontSize: 7, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span> <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">{proj.title}</span>
                           <span className="ml-2 text-[12px] text-gray-600 dark:text-gray-200">{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
                         </div>
                         {proj.shortDescription && (
@@ -388,7 +390,7 @@ export default function ResumePageClient({
                             <ul style={{ marginLeft: 16, padding: 0, listStyle: 'none' }}>
                               {categoryExps[0].map((exp, idx) => (
                                 <li key={exp.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, marginLeft: 16 }}>
-                                  <span style={{ fontWeight: 700, fontSize: 7, color: resolvedTheme === 'dark' ? '#fff' : '#111' }}>●</span>
+                                  <span style={{ fontWeight: 700, fontSize: 7, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
                                   <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">{exp.title}</span>
                                   <span className="ml-4 text-[12px] text-gray-600 dark:text-gray-200">{exp.startDate} ~ {exp.endDate || '현재'}</span>
                                   {exp.description && (
@@ -410,7 +412,7 @@ export default function ResumePageClient({
                             <ul style={{ marginLeft: 16, padding: 0, listStyle: 'none' }}>
                               {categoryExps[1].map((exp, idx) => (
                                 <li key={exp.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, marginLeft: 16 }}>
-                                  <span style={{ fontWeight: 700, fontSize: 7, color: resolvedTheme === 'dark' ? '#fff' : '#111' }}>●</span>
+                                  <span style={{ fontWeight: 700, fontSize: 7, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
                                   <span className="font-bold text-[15px] text-gray-900 dark:text-gray-100">{exp.title}</span>
                                   <span className="ml-4 text-[12px] text-gray-600 dark:text-gray-200">{exp.startDate} ~ {exp.endDate || '현재'}</span>
                                   {exp.description && (
@@ -502,7 +504,7 @@ export default function ResumePageClient({
                               <React.Fragment key={proj.id}>
                                 <li style={{ marginBottom: 6 }}>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                    <span style={{ fontWeight: 700, fontSize: 7, color: '#111', verticalAlign: 'middle', lineHeight: 1}}>●</span>
+                                    <span style={{ fontWeight: 700, fontSize: 7, color: '#111' , marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
                                     {hasCareerDetail ? (
                                       <Link href={careerHref!} className="font-bold text-[15px]" style={{ textDecoration: 'none', cursor: 'pointer', color: '#000' }}>
                                         {proj.title}
@@ -571,7 +573,7 @@ export default function ResumePageClient({
                   return (
                     <li key={proj.id} style={{ marginBottom: 12 }}>
                       <div style={{ fontWeight: 700, fontSize: 15, color: '#111', display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontWeight: 700, fontSize: 7, color: '#111', verticalAlign: 'middle', lineHeight: 1 }}>●</span> <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
+                        <span style={{ fontWeight: 700, fontSize: 7, color: '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span> <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
                         <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
                       </div>
                       {proj.shortDescription && (
@@ -656,7 +658,7 @@ export default function ResumePageClient({
                           <ul style={{ marginLeft: 16, padding: 0, listStyle: 'none' }}>
                             {categoryExps[0].map((exp, idx) => (
                               <li key={exp.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, marginLeft: 16 }}>
-                                <span style={{ fontWeight: 700, fontSize: 7, color: '#111', verticalAlign: 'middle', lineHeight: 1, marginRight: 6 }}>●</span>
+                                <span style={{ fontWeight: 700, fontSize: 7, color: '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
                                 <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{exp.title}</span>
                                 <span style={{ marginLeft: 16, fontSize: 12, color: '#666' }}>{exp.startDate} ~ {exp.endDate || '현재'}</span>
                                 {exp.description && (
@@ -678,7 +680,7 @@ export default function ResumePageClient({
                           <ul style={{ marginLeft: 16, padding: 0, listStyle: 'none' }}>
                             {categoryExps[1].map((exp, idx) => (
                               <li key={exp.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, marginLeft: 16 }}>
-                                <span style={{ fontWeight: 700, fontSize: 7, color: '#111', verticalAlign: 'middle', lineHeight: 1, marginRight: 6 }}>●</span>
+                                <span style={{ fontWeight: 700, fontSize: 7, color: '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
                                 <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{exp.title}</span>
                                 <span style={{ marginLeft: 16, fontSize: 12, color: '#666' }}>{exp.startDate} ~ {exp.endDate || '현재'}</span>
                                 {exp.description && (
