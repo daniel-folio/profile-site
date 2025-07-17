@@ -99,13 +99,13 @@ export default function ResumePageClient({
   }, {} as Record<string, Skill[]>);
   const showDownload = !!profile?.resumeDownloadEnabled;
 
-  console.log('프로젝트 전체 리스트', projects.map(proj => ({ title: proj.title, company: proj.company, visible: proj.visible, skills: proj.skills })));
+  // console.log('프로젝트 전체 리스트', projects.map(proj => ({ title: proj.title, company: proj.company, visible: proj.visible, skills: proj.skills })));
 
   // 출력용 프로필 사진 Base64 변환
   const [profileImageBase64, setProfileImageBase64] = useState<string | null>(null);
   const [profileImageReady, setProfileImageReady] = useState(false);
   useEffect(() => {
-    console.log('Base64 변환 useEffect 실행', profile);
+    // console.log('Base64 변환 useEffect 실행', profile);
     async function fetchAndConvertProfileImage() {
       setProfileImageReady(false);
       if (profile?.showProfileImage && profile.profileImage?.url) {
@@ -116,13 +116,13 @@ export default function ResumePageClient({
           reader.onloadend = () => {
             setProfileImageBase64(reader.result as string);
             setProfileImageReady(true);
-            console.log('Base64 변환 성공:', reader.result);
+            // console.log('Base64 변환 성공:', reader.result);
           };
           reader.readAsDataURL(blob);
         } catch (e) {
           setProfileImageBase64(null);
           setProfileImageReady(true);
-          console.error('Base64 변환 실패:', e);
+          // console.error('Base64 변환 실패:', e);
         }
       } else {
         setProfileImageBase64(null);
@@ -150,7 +150,7 @@ export default function ResumePageClient({
                   src={profileImageBase64 || profile.profileImage?.url}
                   alt={profile.name}
                   style={{ width: 96, height: 120, objectFit: 'contain', background: '#fff', border: '1px solid #eee', borderRadius: 8, marginRight: 16 }}
-                  onLoad={() => { console.log('출력용 img onLoad:', profileImageBase64); }}
+                  onLoad={() => { /* console.log('출력용 img onLoad:', profileImageBase64); */ }}
                 />
               )}
               <div>
@@ -205,7 +205,7 @@ export default function ResumePageClient({
                           {companyProjects.length > 0 && (
                             <ul style={{ marginLeft: 24, marginTop: 4 }}>
                               {companyProjects.map((proj, idx) => {
-                                console.log('프로젝트', proj);
+                                // console.log('프로젝트', proj);
                                 const matchedCareerDetails = getSortedCareerDetails(proj.id);
                                 const hasCareerDetail = matchedCareerDetails.length > 0;
                                 const careerHref = hasCareerDetail ? `/career-detail#cd-${matchedCareerDetails[0].id}` : undefined;
@@ -440,7 +440,7 @@ export default function ResumePageClient({
                 src={profileImageBase64 || profile.profileImage?.url}
                 alt={profile.name}
                 style={{ width: 96, height: 120, objectFit: 'contain', background: '#fff', border: '1px solid #eee', borderRadius: 8, marginRight: 16 }}
-                onLoad={() => { console.log('출력용 img onLoad:', profileImageBase64); }}
+                onLoad={() => { /* console.log('출력용 img onLoad:', profileImageBase64); */ }}
               />
             )}
             <div>
@@ -490,7 +490,7 @@ export default function ResumePageClient({
                       {companyProjects.length > 0 && (
                         <ul style={{ marginLeft: 24, marginTop: 4 }}>
                           {companyProjects.map((proj, idx) => {
-                            console.log('프로젝트', proj);
+                            // console.log('프로젝트', proj);
                             const matchedCareerDetails = getSortedCareerDetails(proj.id);
                             const hasCareerDetail = matchedCareerDetails.length > 0;
                             const careerHref = hasCareerDetail ? `/career-detail#cd-${matchedCareerDetails[0].id}` : undefined;
