@@ -1,7 +1,9 @@
 'use client';
 
 import { Profile } from "@/types/profile";
-import { FaGithub, FaLinkedin, FaEnvelope } from 'react-icons/fa';
+import { FaGithub, FaLinkedin, FaEnvelope, FaInstagram, FaFacebook, FaYoutube, FaBlogger, FaMedium, FaGlobe } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
+import { SiVelog, SiTistory, SiNotion } from 'react-icons/si';
 import { getStrapiMedia } from "@/lib/api";
 import Image from "next/image";
 import Link from "next/link";
@@ -133,6 +135,56 @@ export function Hero({ profile }: HeroProps) {
             {socialLinks.linkedin && (
               <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-gray-500 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-300">
                 <FaLinkedin size={32} />
+              </a>
+            )}
+            {socialLinks.x && (
+              <a href={socialLinks.x} target="_blank" rel="noopener noreferrer" aria-label="X" className="text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors duration-300">
+                <FaXTwitter size={32} />
+              </a>
+            )}
+            {socialLinks.instagram && (
+              <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gray-500 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400 transition-colors duration-300">
+                <FaInstagram size={32} />
+              </a>
+            )}
+            {socialLinks.facebook && (
+              <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-gray-500 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-500 transition-colors duration-300">
+                <FaFacebook size={32} />
+              </a>
+            )}
+            {socialLinks.youtube && (
+              <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-gray-500 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-300">
+                <FaYoutube size={32} />
+              </a>
+            )}
+            {socialLinks.blog && (
+              <a href={socialLinks.blog} target="_blank" rel="noopener noreferrer" aria-label="Blog" className="text-gray-500 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors duration-300">
+                <FaBlogger size={32} />
+              </a>
+            )}
+            {socialLinks.velog && (
+              <a href={socialLinks.velog} target="_blank" rel="noopener noreferrer" aria-label="Velog" className="text-gray-500 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400 transition-colors duration-300">
+                <SiVelog size={32} />
+              </a>
+            )}
+            {socialLinks.tistory && (
+              <a href={socialLinks.tistory} target="_blank" rel="noopener noreferrer" aria-label="Tistory" className="text-gray-500 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-300">
+                <SiTistory size={32} />
+              </a>
+            )}
+            {socialLinks.notion && (
+              <a href={socialLinks.notion} target="_blank" rel="noopener noreferrer" aria-label="Notion" className="text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors duration-300">
+                <SiNotion size={32} />
+              </a>
+            )}
+            {socialLinks.medium && (
+              <a href={socialLinks.medium} target="_blank" rel="noopener noreferrer" aria-label="Medium" className="text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors duration-300">
+                <FaMedium size={32} />
+              </a>
+            )}
+            {socialLinks.website && (
+              <a href={socialLinks.website} target="_blank" rel="noopener noreferrer" aria-label="Website" className="text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+                <FaGlobe size={32} />
               </a>
             )}
             {email && (

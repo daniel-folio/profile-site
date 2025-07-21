@@ -167,6 +167,87 @@ npm run dev
 ### BlogPost/BlogCategory (블로그)
 - 블로그 포스트 및 카테고리 (준비됨)
 
+### socialLinks 입력 안내
+
+**socialLinks 필드는 다양한 소셜 미디어 링크를 JSON 형식으로 입력할 수 있습니다.**
+
+#### 지원하는 소셜 미디어 키 목록
+- github: GitHub
+- x: X(Twitter)
+- linkedin: LinkedIn
+- instagram: Instagram
+- facebook: Facebook
+- youtube: YouTube
+- blog: Blogger/개인 블로그
+- velog: Velog
+- tistory: Tistory
+- notion: Notion
+- medium: Medium
+- website: 개인 웹사이트
+
+#### 입력 예시
+```json
+{
+  "github": "https://github.com/yourid",
+  "x": "https://x.com/yourid",
+  "linkedin": "https://www.linkedin.com/in/yourid",
+  "instagram": "https://instagram.com/yourid",
+  "facebook": "https://facebook.com/yourid",
+  "youtube": "https://youtube.com/@yourid",
+  "blog": "https://yourblog.com",
+  "velog": "https://velog.io/@yourid",
+  "tistory": "https://yourid.tistory.com",
+  "notion": "https://notion.so/yourid",
+  "medium": "https://medium.com/@yourid",
+  "website": "https://yourwebsite.com"
+}
+```
+
+- 원하는 소셜만 입력해도 되고, 모두 입력해도 됩니다.
+- 각 키에 해당하는 URL만 입력하면 아이콘이 자동으로 표시됩니다.
+- 이메일은 별도 필드로 입력하면 이메일 아이콘이 함께 표시됩니다.
+- Strapi Admin에서는 JSON 타입 필드에 Description(설명) 안내문구를 직접 넣을 수 없으니, 이 README를 참고해 입력해 주세요.
+
+### Profile 노출여부 관련 필드 안내
+
+Profile(프로필)에는 아래와 같이 어드민에서 각종 정보의 노출 여부를 제어할 수 있는 Boolean 필드가 있습니다.
+
+- showProfileImage: 프로필 이미지를 화면에 노출할지 여부 (true/false)
+- showPhone: 전화번호를 화면에 노출할지 여부 (true/false)
+- resumeDownloadEnabled: 이력서 PDF 다운로드 버튼 노출 여부 (true/false)
+- careerDetailDownloadEnabled: 경력기술서 PDF 다운로드 버튼 노출 여부 (true/false)
+
+이 필드들은 Strapi Admin에서 체크박스(스위치)로 설정할 수 있으며,
+각 값에 따라 실제 사이트에서 해당 정보가 노출/비노출됩니다.
+
+### 데이터 노출여부 및 관리 팁 안내
+
+#### Skill(기술)
+- visible: **홈 화면(메인)에서** 해당 기술을 노출할지 여부 (true/false)
+  - false로 설정해도 관리 페이지(어드민)나 이력서 PDF 등에는 포함될 수 있습니다.
+- order: 기술의 정렬 순서(숫자가 작을수록 먼저 노출)
+
+#### Project(프로젝트)
+- visible: **홈 화면(메인)에서** 해당 프로젝트를 노출할지 여부 (true/false)
+  - false로 설정해도 프로젝트 상세 페이지 등에는 접근이 가능할 수 있습니다.
+- featured: 메인/추천 프로젝트로 강조할지 여부 (true/false)
+- order: 프로젝트의 정렬 순서
+
+#### Company(회사)
+- order: 회사의 정렬 순서
+
+#### CareerDetail(경력 상세)
+- order: 경력 상세의 정렬 순서
+- project: 연결된 프로젝트가 있을 경우, 프로젝트 상세에서 함께 노출
+
+#### Education(학력)
+- order: 학력의 정렬 순서
+
+#### 공통 안내
+- 모든 order 필드는 숫자가 작을수록 먼저 노출(오름차순)
+- visible, show~ 등 Boolean 필드는 false로 설정 시 프론트엔드에서 해당 항목이 숨겨집니다.
+- 관리자는 각 항목의 노출여부와 순서를 주기적으로 점검해 주세요.
+
 ## 🌐 배포
 
 ### Frontend (Vercel)
@@ -225,4 +306,24 @@ MIT License
 
 ---
 
-*이 프로젝트는 완전한 포트폴리오 시스템으로 구현되었으며, 지속적인 개선과 확장을 통해 더욱 발전시킬 예정입니다.* 
+*이 프로젝트는 완전한 포트폴리오 시스템으로 구현되었으며, 지속적인 개선과 확장을 통해 더욱 발전시킬 예정입니다.*
+
+## 무료 서버 환경 안내 및 사용자 알림 방법
+
+본 프로젝트는 무료 서버(Vercel, Render 등) 환경에서 운영될 수 있습니다. 이 경우, 서버 슬립/웨이크업 등으로 인해 **첫 접속 시 반응속도가 느릴 수 있습니다.**
+
+### 사용자에게 안내하는 방법
+
+1. **로딩 스피너/로더 + 안내 메시지**
+   - 예시: `서버를 깨우는 중입니다. 무료 서버 환경으로 인해 첫 접속 시 최대 1분 정도 소요될 수 있습니다. 잠시만 기다려 주세요!`
+   - 로딩 컴포넌트에 안내 메시지를 함께 표시
+
+2. **상단/하단 배너 안내**
+   - 예시: `⚡️ 안내: 본 사이트는 무료 서버 환경에서 운영되어 첫 접속 시 로딩이 느릴 수 있습니다.`
+   - 사이트 상단 또는 하단에 배너 형태로 안내
+
+3. **FAQ/소개 페이지에 안내**
+   - 예시: `무료 서버 환경으로 인해 첫 접속 시 최대 1분 정도 소요될 수 있습니다.`
+   - FAQ, About, 소개 페이지 등에 안내 문구 추가
+
+> **권장:** 로딩 중 안내 메시지 + 상단/하단 배너를 함께 적용하면 사용자 이탈을 줄이고 신뢰도를 높일 수 있습니다. 
