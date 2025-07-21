@@ -5,7 +5,7 @@ import developerAnimation from "@/../public/lottie/developer.json";
 
 export default function GlobalLoading() {
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-white/80 via-yellow-50/80 to-yellow-100/80 dark:from-black/80 dark:via-gray-900/80 dark:to-yellow-900/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white dark:bg-white">
       <div className="flex items-center gap-2 mb-4 px-6 py-3 rounded-xl shadow-lg bg-yellow-50/90 dark:bg-yellow-900/80 border border-yellow-200 dark:border-yellow-700">
         <FaBolt className="text-yellow-500 animate-pulse" size={22} />
         <span className="font-semibold text-yellow-900 dark:text-yellow-100 text-base">
