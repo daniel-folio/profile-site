@@ -191,7 +191,7 @@ export default function ResumePageClient({
               <>
                 <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
                 <section style={{ marginBottom: 32 }}>
-                  <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>경력1 (Company)</h2>
+                  <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>경력 (Company)</h2>
                   <ul className="space-y-4">
                     {sortedCompanies.map((comp, idx) => {
                       const companyProjects = getSortedProjects(comp.id);
