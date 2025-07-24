@@ -5,25 +5,27 @@ name: Sync to B Repository
 on:
   push:
     branches:
-      - main   # A 저장소의 메인 브랜치 이름
+      - main   # A 저장소의 메인 브랜치
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      # 1. A 저장소의 코드를 가져온다
+      # 1. A 저장소 코드를 가져옴
       - name: Checkout A Repo
         uses: actions/checkout@v4
 
-      # 2. 검증된 액션을 사용하여 B 저장소로 push 한다
+      # 2. SSH 배포키를 사용하여 B 저장소로 Push
       - name: Push to B Repo
-        uses: ad-m/github-push-action@master
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          # A 저장소의 Secrets에 저장한 PAT를 사용합니다.
-          github_token: ${{ secrets.PAT_FOR_B_REPO }}
+          # 3단계에서 A 저장소에 등록한 개인키 Secret
+          deploy_key: ${{ secrets.DEPLOY_KEY_FOR_B }}
           # B 저장소의 '사용자이름/저장소이름'
-          repository: daniel-works0001/portfolio
-          # B 저장소에 push할 브랜치 이름
-          branch: main
-          # 강제 푸시 옵션
-          force: true
+          external_repository: daniel-works0001/portfolio
+          # B 저장소에 push할 브랜치
+          publish_branch: main
+          # A 저장소의 모든 내용을 B 저장소에 덮어씀
+          publish_dir: .
+          # B 저장소의 히스토리를 새로 씀 (미러링을 위해)
+          force_orphan: true
