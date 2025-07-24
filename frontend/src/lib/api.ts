@@ -5,54 +5,50 @@ import { CompanyResponse } from '@/types/company';
 import { EducationResponse } from '@/types/education';
 import { CareerDetailResponse } from '@/types/career-detail';
 
-// Vercel에 설정된 환경 변수 값을 가져옵니다.
-let STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://127.0.0.1:1337';
-
-// 사용자가 실수로 URL 끝에 '/'나 '/api'를 붙이는 경우를 대비해,
-// 코드가 알아서 불필요한 부분을 제거하도록 보강합니다.
-if (STRAPI_URL.endsWith('/')) {
-  STRAPI_URL = STRAPI_URL.slice(0, -1);
-}
-if (STRAPI_URL.endsWith('/api')) {
-  STRAPI_URL = STRAPI_URL.slice(0, -4);
-}
-
 // Vercel에 등록한 API 토큰을 가져옵니다.
 const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN;
-
-console.log('ENV:', process.env.NEXT_PUBLIC_STRAPI_API_URL);
-console.log('STRAPI_URL:', STRAPI_URL);
 
 /**
  * Strapi 미디어 파일의 전체 URL을 반환하는 함수
  */
 export function getStrapiMedia(url: string | null | undefined): string | null {
+  // Failover 로직을 위해 현재 사용 중인 API URL을 동적으로 결정해야 합니다.
+  // 이 함수는 서버 컴포넌트에서만 사용되므로, 환경 변수를 직접 읽을 수 있습니다.
+  const failoverEnabled = process.env.FAILOVER_MODE_ENABLED === 'true';
+  let baseUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL_PRIMARY;
+
+  // Failover 모드가 켜져 있고, Primary URL이 응답하지 않을 경우를 대비해 Secondary를 사용할 수 있지만,
+  // 이 함수의 단순성을 위해 우선 Primary를 기준으로 합니다.
+  // 더 복잡한 로직이 필요하다면 API 응답 상태를 전역으로 관리해야 합니다.
+
   if (!url) return null;
   if (url.startsWith('http')) return url;
-  return `${STRAPI_URL}${url}`;
+  return `${baseUrl}${url}`;
 }
 
-
 /**
- * API 호출을 위한 중앙 집중식 헬퍼 함수
+ * API 호출을 위한 중앙 집중식 헬퍼 함수 (Failover 로직 통합)
  */
 async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> {
-  
+  const primaryApiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL_PRIMARY;
+  const secondaryApiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL_SECONDARY;
+  const failoverEnabled = process.env.FAILOVER_MODE_ENABLED === 'true';
+
   const defaultOptions: RequestInit = {
-    // ⭐️ 해결책: cache: 'no-store' 옵션을 제거하고,
-    //    Next.js의 기본 캐싱 동작(정적 생성)을 따르도록 합니다.
-    //    revalidate 옵션을 통해 주기적으로 데이터를 업데이트할 수 있습니다.
-    next: { revalidate: 60 }, // 60초마다 데이터를 새로 가져오도록 설정
+    next: { revalidate: 60 },
     headers: {
       'Content-Type': 'application/json',
-      // API 토큰이 있을 경우에만 인증 헤더를 추가합니다.
       ...(STRAPI_API_TOKEN && { 'Authorization': `Bearer ${STRAPI_API_TOKEN}` }),
     },
     ...options,
   };
 
-  try {
-    const requestUrl = `${STRAPI_URL}/api${path}`;
+  // 실제 요청을 수행하는 내부 함수
+  const tryFetch = async (apiUrl: string | undefined) => {
+    if (!apiUrl) {
+      throw new Error("API URL is not defined.");
+    }
+    const requestUrl = `${apiUrl}/api${path}`;
     console.log('Requesting:', requestUrl);
     const response = await fetch(requestUrl, defaultOptions);
 
@@ -61,21 +57,39 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
       console.error('API Error Response:', errorBody);
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
-    
-    const data = await response.json();
-    return data;
+    return response.json();
+  };
+
+  // --- Failover 로직 실행 ---
+
+  // Failover 기능이 비활성화된 경우 (B 사이트), Primary URL만 사용합니다.
+  if (!failoverEnabled) {
+    console.log("Failover disabled. Fetching from PRIMARY backend only...");
+    return tryFetch(primaryApiUrl);
+  }
+
+  // Failover 기능이 활성화된 경우 (A 사이트)
+  try {
+    console.log("Attempting to fetch from PRIMARY backend...");
+    return await tryFetch(primaryApiUrl);
   } catch (error) {
-    console.error("Error fetching API:", error);
-    throw new Error(`Error fetching API: ${error instanceof Error ? error.message : String(error)}`);
+    console.error("PRIMARY backend fetch failed:", error instanceof Error ? error.message : String(error));
+    console.log("Switching to SECONDARY backend...");
+    
+    try {
+        return await tryFetch(secondaryApiUrl);
+    } catch (secondaryError) {
+        console.error("SECONDARY backend fetch also failed:", secondaryError instanceof Error ? secondaryError.message : String(secondaryError));
+        throw new Error("Both primary and secondary backends failed.");
+    }
   }
 }
 
-
-// --- API 함수들 ---
+// --- 기존 API 함수들은 수정할 필요가 없습니다. ---
+// 아래 함수들은 자동으로 Failover 기능이 적용된 fetchAPI를 사용하게 됩니다.
 
 export async function getProfile(params?: any, options?: RequestInit): Promise<ProfileResponse | null> {
   try {
-    // ⭐️ 해결책: 'populate=deep' 대신 가장 안정적인 'populate=*'를 사용합니다.
     return await fetchAPI<ProfileResponse>(`/profile?populate=*`, options);
   } catch (e) {
     return null;
