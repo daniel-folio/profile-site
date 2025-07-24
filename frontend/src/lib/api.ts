@@ -12,14 +12,9 @@ const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN;
  * Strapi 미디어 파일의 전체 URL을 반환하는 함수
  */
 export function getStrapiMedia(url: string | null | undefined): string | null {
-  // Failover 로직을 위해 현재 사용 중인 API URL을 동적으로 결정해야 합니다.
   // 이 함수는 서버 컴포넌트에서만 사용되므로, 환경 변수를 직접 읽을 수 있습니다.
-  const failoverEnabled = process.env.FAILOVER_MODE_ENABLED === 'true';
-  let baseUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL_PRIMARY;
-
-  // Failover 모드가 켜져 있고, Primary URL이 응답하지 않을 경우를 대비해 Secondary를 사용할 수 있지만,
-  // 이 함수의 단순성을 위해 우선 Primary를 기준으로 합니다.
-  // 더 복잡한 로직이 필요하다면 API 응답 상태를 전역으로 관리해야 합니다.
+  // 항상 Primary URL을 기준으로 이미지를 제공합니다.
+  const baseUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL_PRIMARY;
 
   if (!url) return null;
   if (url.startsWith('http')) return url;
@@ -32,6 +27,7 @@ export function getStrapiMedia(url: string | null | undefined): string | null {
 async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> {
   const primaryApiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL_PRIMARY;
   const secondaryApiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL_SECONDARY;
+  // FAILOVER_MODE_ENABLED 변수가 'true'일 때만 failover 기능을 활성화합니다.
   const failoverEnabled = process.env.FAILOVER_MODE_ENABLED === 'true';
 
   const defaultOptions: RequestInit = {
@@ -46,7 +42,7 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
   // 실제 요청을 수행하는 내부 함수
   const tryFetch = async (apiUrl: string | undefined) => {
     if (!apiUrl) {
-      throw new Error("API URL is not defined.");
+      throw new Error("API URL is not defined for this environment.");
     }
     const requestUrl = `${apiUrl}/api${path}`;
     console.log('Requesting:', requestUrl);
@@ -60,15 +56,15 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
     return response.json();
   };
 
-  // --- Failover 로직 실행 ---
+  // --- 로직 실행 ---
 
-  // Failover 기능이 비활성화된 경우 (B 사이트), Primary URL만 사용합니다.
+  // Failover 기능이 비활성화된 경우 (B 사이트 또는 A 사이트의 dev 환경), Primary URL만 사용합니다.
   if (!failoverEnabled) {
-    console.log("Failover disabled. Fetching from PRIMARY backend only...");
+    console.log("Failover disabled for this environment. Fetching from PRIMARY backend only...");
     return tryFetch(primaryApiUrl);
   }
 
-  // Failover 기능이 활성화된 경우 (A 사이트)
+  // Failover 기능이 활성화된 경우 (A 사이트의 Production 환경)
   try {
     console.log("Attempting to fetch from PRIMARY backend...");
     return await tryFetch(primaryApiUrl);
