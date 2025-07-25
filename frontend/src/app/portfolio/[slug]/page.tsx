@@ -115,7 +115,7 @@ export default async function ProjectPage(props: any) {
           </main>
           
           {/* ----- 오른쪽 사이드바 정보 ----- */}
-          <aside className="lg:sticky lg:top-24 h-fit">
+          <aside className="h-fit">
             <div className="space-y-8">
               <div>
                 <h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">{title}</h1>
