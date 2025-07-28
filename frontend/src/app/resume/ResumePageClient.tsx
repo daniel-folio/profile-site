@@ -107,13 +107,10 @@ export default function ResumePageClient({
   }, {} as Record<string, Skill[]>);
   const showDownload = !!profile?.resumeDownloadEnabled;
 
-  // console.log('프로젝트 전체 리스트', projects.map(proj => ({ title: proj.title, company: proj.company, visible: proj.visible, skills: proj.skills })));
-
   // 출력용 프로필 사진 Base64 변환
   const [profileImageBase64, setProfileImageBase64] = useState<string | null>(null);
   const [profileImageReady, setProfileImageReady] = useState(false);
   useEffect(() => {
-    // console.log('Base64 변환 useEffect 실행', profile);
     async function fetchAndConvertProfileImage() {
       setProfileImageReady(false);
       if (profile?.showProfileImage && profile.profileImage?.url) {
@@ -124,13 +121,11 @@ export default function ResumePageClient({
           reader.onloadend = () => {
             setProfileImageBase64(reader.result as string);
             setProfileImageReady(true);
-            // console.log('Base64 변환 성공:', reader.result);
           };
           reader.readAsDataURL(blob);
         } catch (e) {
           setProfileImageBase64(null);
           setProfileImageReady(true);
-          // console.error('Base64 변환 실패:', e);
         }
       } else {
         setProfileImageBase64(null);
@@ -216,7 +211,6 @@ export default function ResumePageClient({
                           {companyProjects.length > 0 && (
                             <ul style={{ marginLeft: 24, marginTop: 4 }}>
                               {companyProjects.map((proj, idx) => {
-                                // console.log('프로젝트', proj);
                                 const matchedCareerDetails = getSortedCareerDetails(proj.id);
                                 const hasCareerDetail = matchedCareerDetails.length > 0;
                                 const careerHref = hasCareerDetail ? `/career-detail#cd-${matchedCareerDetails[0].id}` : undefined;
@@ -503,7 +497,6 @@ export default function ResumePageClient({
                       {companyProjects.length > 0 && (
                         <ul style={{ marginLeft: 24, marginTop: 4 }}>
                           {companyProjects.map((proj, idx) => {
-                            // console.log('프로젝트', proj);
                             const matchedCareerDetails = getSortedCareerDetails(proj.id);
                             const hasCareerDetail = matchedCareerDetails.length > 0;
                             const careerHref = hasCareerDetail ? `/career-detail#cd-${matchedCareerDetails[0].id}` : undefined;

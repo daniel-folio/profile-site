@@ -51,7 +51,6 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
       throw new Error("API URL is not defined. This should not happen with the default value set.");
     }
     const requestUrl = `${apiUrl}/api${path}`;
-    console.log('Requesting:', requestUrl);
     const response = await fetch(requestUrl, defaultOptions);
 
     if (!response.ok) {
@@ -66,17 +65,14 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
 
   // Failover 기능이 비활성화된 경우 (B 사이트, A 사이트의 dev, 로컬 환경), Primary URL만 사용합니다.
   if (!failoverEnabled) {
-    console.log("Failover disabled for this environment. Fetching from PRIMARY backend only...");
     return tryFetch(primaryApiUrl);
   }
 
   // Failover 기능이 활성화된 경우 (A 사이트의 Production 환경)
   try {
-    console.log("Attempting to fetch from PRIMARY backend...");
     return await tryFetch(primaryApiUrl);
   } catch (error) {
     console.error("PRIMARY backend fetch failed:", error instanceof Error ? error.message : String(error));
-    console.log("Switching to SECONDARY backend...");
     
     try {
         return await tryFetch(secondaryApiUrl);

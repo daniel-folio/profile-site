@@ -9,7 +9,6 @@ export default {
 
 async function setCompanyName(event) {
   const { data } = event.params;
-  console.log('lifecycle: setCompanyName called', data);
 
   let projectId = null;
   if (data.project && typeof data.project === 'object') {
@@ -29,10 +28,9 @@ async function setCompanyName(event) {
     return;
   }
   const project = await strapi.entityService.findOne('api::project.project', projectId, { populate: ['company'] }) as any;
-  console.log('Fetched project:', project);
+  
   if (!project || !project.company) {
     data.companyName = null;
-    console.log('No company found in project');
     return;
   }
   let companyId = null;
@@ -43,11 +41,8 @@ async function setCompanyName(event) {
   }
   if (!companyId) {
     data.companyName = null;
-    console.log('No companyId found');
     return;
   }
   const company = await strapi.entityService.findOne('api::company.company', companyId) as any;
-  console.log('Fetched company:', company);
   data.companyName = company && company.company ? company.company : null;
-  console.log('Set companyName:', data.companyName);
 } 

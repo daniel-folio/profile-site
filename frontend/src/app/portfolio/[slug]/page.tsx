@@ -41,10 +41,8 @@ type PageProps = {
 export default async function ProjectPage(props: any) {
   const params = await props.params;
   const slug = params.slug;
-  console.log('상세페이지 slug:', slug);
 
   const response = await getProjectBySlug(slug, { next: { revalidate: 3600 } });
-  console.log('상세페이지 response:', JSON.stringify(response, null, 2));
 
   // 유연하게 flat/attributes 구조 모두 지원
   const projectData = response?.data?.[0];
