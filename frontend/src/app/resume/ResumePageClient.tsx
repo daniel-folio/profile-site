@@ -447,7 +447,7 @@ export default function ResumePageClient({
                 src={profileImageBase64 || profile.profileImage?.url}
                 alt={profile.name}
                 style={{ width: 96, height: 120, objectFit: 'contain', background: '#fff', border: '1px solid #eee', borderRadius: 8, marginRight: 16 }}
-                onLoad={() => { console.log('출력용 img onLoad:', profileImageBase64); }}
+                onLoad={() => { /*console.log('출력용 img onLoad:', profileImageBase64);*/ }}
               />
             )}
             <div>

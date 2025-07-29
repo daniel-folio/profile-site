@@ -31,7 +31,7 @@ export default async function ResumePage() {
   const educations: Education[] = Array.isArray(educationsRes?.data)
     ? educationsRes.data.map((item: any) => item.attributes ?? item)
     : [];
-  const skills: Skill[] = (skillsRes.data || []).filter((skill: Skill) => skill.visible !== false);
+  const skills: Skill[] = (skillsRes.data || []);
   const projects: Project[] = Array.isArray(projectsRes?.data)
     ? projectsRes.data.map((item: any) => {
         const attrs = item.attributes ?? item;
