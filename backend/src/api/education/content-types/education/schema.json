@@ -15,12 +15,12 @@
     "institution": { "type": "string", "required": true, "displayName": "Institution(학교명)" },
     "degree": { "type": "string", "displayName": "Degree(학위)" },
     "field": { "type": "string", "displayName": "Field(전공)" },
+    "order": { "type": "integer", "displayName": "Order(정렬순서)" },
     "startDate": { "type": "string", "displayName": "Start Date(입학년월)" },
     "endDate": { "type": "string", "displayName": "End Date(졸업년월)" },
     "grade": { "type": "string", "displayName": "Grade(학점)" },
     "description": { "type": "text", "displayName": "Description(설명)" },
     "logo": { "type": "media", "multiple": false, "displayName": "Logo(로고)" },
-    "activities": { "type": "json", "displayName": "Activities(활동)" },
-    "order": { "type": "integer", "displayName": "Order(정렬순서)" }
+    "activities": { "type": "json", "displayName": "Activities(활동)" }
   }
 } 

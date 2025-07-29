@@ -49,16 +49,16 @@
       "type": "integer",
       "default": 0
     },
-    "visible": {
-      "type": "boolean",
-      "default": true
-    },
     "projects": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::project.project",
       "displayName": "Projects(프로젝트)",
       "mappedBy": "technologies"
+    },
+    "visible": {
+      "type": "boolean",
+      "default": true
     }
   }
 }

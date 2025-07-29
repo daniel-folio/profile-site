@@ -20,18 +20,16 @@
       "type": "string",
       "required": true
     },
-    "email": {
-      "type": "email",
-      "required": true
-    },
     "phone": {
       "type": "string"
     },
-    "mainBio": {
-      "type": "richtext"
+    "headline": {
+      "type": "string",
+      "required": false
     },
-    "resumeBio": {
-      "type": "richtext"
+    "email": {
+      "type": "email",
+      "required": true
     },
     "location": {
       "type": "string"
@@ -44,28 +42,36 @@
         "images"
       ]
     },
-    "socialLinks": {
-      "type": "json"
-    },
-    "headline": {
-      "type": "string",
-      "required": false
-    },
     "showProfileImage": {
       "type": "boolean",
-      "default": true
+      "default": true,
+      "displayName": "이력서 사진 노출"
     },
     "showPhone": {
       "type": "boolean",
-      "default": true
+      "default": true,
+      "displayName": "이력서 전화번호 노출"
     },
     "resumeDownloadEnabled": {
       "type": "boolean",
-      "default": false
+      "default": false,
+      "displayName": "이력서 다운로드 버튼 활성화"
     },
     "careerDetailDownloadEnabled": {
       "type": "boolean",
-      "default": false
+      "default": false,
+      "displayName": "경력기술서 다운로드 버튼 활성화"
+    },
+    "mainBio": {
+      "type": "richtext",
+      "displayName": "메인화면 자기소개"
+    },
+    "resumeBio": {
+      "type": "richtext",
+      "displayName": "이력서 자기소개"
+    },
+    "socialLinks": {
+      "type": "json"
     }
   }
 }

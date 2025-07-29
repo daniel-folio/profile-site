@@ -33,6 +33,10 @@
       ],
       "displayName": "Employment Type(고용형태)"
     },
+    "location": {
+      "type": "string",
+      "displayName": "Location(지역)"
+    },
     "startDate": {
       "type": "string",
       "required": true,
@@ -42,31 +46,15 @@
       "type": "string",
       "displayName": "End Date(퇴사년월)"
     },
-    "isCurrent": {
-      "type": "boolean",
-      "default": false,
-      "displayName": "Is Current(재직중)"
-    },
-    "location": {
-      "type": "string",
-      "displayName": "Location(지역)"
-    },
     "companyLogo": {
       "type": "media",
       "multiple": false,
       "displayName": "Company Logo(회사로고)"
     },
-    "description": {
-      "type": "richtext",
-      "displayName": "Description(설명)"
-    },
-    "achievements": {
-      "type": "text",
-      "displayName": "Achievements(성과)"
-    },
-    "order": {
-      "type": "integer",
-      "displayName": "Order(정렬순서)"
+    "isCurrent": {
+      "type": "boolean",
+      "default": false,
+      "displayName": "Is Current(재직중)"
     },
     "skills": {
       "name": "skills",
@@ -82,6 +70,18 @@
           }
         ]
       }
+    },
+    "order": {
+      "type": "integer",
+      "displayName": "Order(정렬순서)"
+    },
+    "description": {
+      "type": "richtext",
+      "displayName": "Description(설명)"
+    },
+    "achievements": {
+      "type": "text",
+      "displayName": "Achievements(성과)"
     }
   }
 }

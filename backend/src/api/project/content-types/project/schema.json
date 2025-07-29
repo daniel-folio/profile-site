@@ -23,38 +23,6 @@
       "required": true,
       "displayName": "Slug(슬러그)"
     },
-    "shortDescription": {
-      "type": "richtext",
-      "displayName": "Short Description(요약설명)"
-    },
-    "fullDescription": {
-      "type": "richtext",
-      "displayName": "Full Description(상세설명)"
-    },
-    "thumbnailImage": {
-      "type": "media",
-      "multiple": false,
-      "required": false,
-      "allowedTypes": [
-        "images"
-      ],
-      "displayName": "Thumbnail(썸네일)"
-    },
-    "images": {
-      "type": "media",
-      "multiple": true,
-      "required": false,
-      "allowedTypes": [
-        "images"
-      ],
-      "displayName": "Images(이미지)"
-    },
-    "technologies": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::skill.skill",
-      "inversedBy": "projects"
-    },
     "projectType": {
       "type": "enumeration",
       "enum": [
@@ -79,6 +47,24 @@
       "required": true,
       "displayName": "Project Status(상태)"
     },
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ],
+      "displayName": "Images(이미지)"
+    },
+    "thumbnailImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ],
+      "displayName": "Thumbnail(썸네일)"
+    },
     "startDate": {
       "type": "string",
       "displayName": "Start Date(시작년월)"
@@ -87,23 +73,36 @@
       "type": "string",
       "displayName": "End Date(종료년월)"
     },
-    "githubUrl": {
-      "type": "string",
-      "displayName": "GitHub URL(깃허브)"
+    "order": {
+      "type": "integer",
+      "default": 0,
+      "displayName": "Order(정렬순서)"
     },
-    "liveUrl": {
-      "type": "string",
-      "displayName": "Live URL(배포주소)"
+    "visible": {
+      "type": "boolean",
+      "default": true,
+      "displayName": "Visible(공개여부)"
     },
     "featured": {
       "type": "boolean",
       "default": false,
       "displayName": "Featured(대표)"
     },
-    "order": {
-      "type": "integer",
-      "default": 0,
-      "displayName": "Order(정렬순서)"
+    "liveUrl": {
+      "type": "string",
+      "displayName": "Live URL(배포주소)"
+    },
+    "githubUrl": {
+      "type": "string",
+      "displayName": "GitHub URL(깃허브)"
+    },
+    "shortDescription": {
+      "type": "richtext",
+      "displayName": "Short Description(요약설명)"
+    },
+    "fullDescription": {
+      "type": "richtext",
+      "displayName": "Full Description(상세설명)"
     },
     "company": {
       "type": "relation",
@@ -119,10 +118,11 @@
       "displayName": "Technologies(기술스택)",
       "required": false
     },
-    "visible": {
-      "type": "boolean",
-      "default": true,
-      "displayName": "Visible(공개여부)"
+    "technologies": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::skill.skill",
+      "inversedBy": "projects"
     }
   }
 }

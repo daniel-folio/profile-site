@@ -20,34 +20,45 @@
       "required": true
     },
     "companyName": {
-      "type": "string"
-    },
-    "teamSize": {
-      "type": "integer"
-    },
-    "myRole": {
-      "type": "text"
+      "type": "string",
+      "displayName": "회사명"
     },
     "responsibilities": {
-      "type": "richtext"
-    },
-    "challenges": {
-      "type": "richtext"
-    },
-    "solutions": {
-      "type": "richtext"
+      "type": "richtext",
+      "displayName": "주요업무"
     },
     "results": {
-      "type": "richtext"
+      "type": "richtext",
+      "displayName": "성과"
     },
+    "teamSize": {
+      "type": "integer",
+      "displayName": "팀원"
+    },
+    "myRole": {
+      "type": "text",
+      "displayName": "역할"
+    },
+    "challenges": {
+      "type": "richtext",
+      "displayName": "과제"
+    },
+    "solutions": {
+      "type": "richtext",
+      "displayName": "해결"
+    },
+    
     "lessonsLearned": {
-      "type": "richtext"
+      "type": "richtext",
+      "displayName": "배운점"
     },
     "metrics": {
-      "type": "text"
+      "type": "text",
+      "displayName": "지표"
     },
     "order": {
-      "type": "integer"
+      "type": "integer",
+      "displayName": "정렬순서"
     }
   }
 }
