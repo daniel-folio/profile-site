@@ -94,12 +94,12 @@ export async function getProfile(params?: any, options?: RequestInit): Promise<P
 }
 
 export async function getSkills(options?: RequestInit): Promise<SkillsResponse> {
-  return fetchAPI<SkillsResponse>('/skills?populate=*&sort=order:asc', options);
+  return fetchAPI<SkillsResponse>('/skills?populate=*&sort=order:asc&pagination[pageSize]=-1', options);
 }
 
 export async function getProjects(featured?: boolean, options?: RequestInit): Promise<ProjectsResponse> {
   const filters = featured ? '&filters[featured][$eq]=true' : '';
-  return fetchAPI<ProjectsResponse>(`/projects?populate=*&sort=order:asc${filters}`, options);
+  return fetchAPI<ProjectsResponse>(`/projects?populate=*&sort=order:asc&pagination[pageSize]=-1${filters}`, options);
 }
 
 export async function getProjectBySlug(slug: string, options?: RequestInit): Promise<ProjectsResponse> {
@@ -113,21 +113,21 @@ export async function getAllProjectSlugs(options?: RequestInit): Promise<{ data:
 }
 
 export async function getCompanies(options?: RequestInit): Promise<CompanyResponse> {
-  return fetchAPI<CompanyResponse>('/companies?populate=*&sort=startDate:desc', options);
+  return fetchAPI<CompanyResponse>('/companies?populate=*&sort=startDate:desc&pagination[pageSize]=-1', options);
 }
 
 export async function getEducations(options?: RequestInit): Promise<EducationResponse> {
-  return fetchAPI<EducationResponse>('/educations?populate=*&sort=order:asc', options);
+  return fetchAPI<EducationResponse>('/educations?populate=*&sort=order:asc&pagination[pageSize]=-1', options);
 }
 
 export async function getCareerDetails(options?: RequestInit) {
   try {
-    return await fetchAPI('/career-details?populate=*', options);
+    return await fetchAPI('/career-details?populate=*&pagination[pageSize]=-1', options);
   } catch (e) {
     return null;
   }
 }
 
 export async function getOtherExperiences(options?: RequestInit) {
-  return fetchAPI('/other-experiences?pagination[pageSize]=100', options);
+  return fetchAPI('/other-experiences?pagination[pageSize]=-1', options);
 }
