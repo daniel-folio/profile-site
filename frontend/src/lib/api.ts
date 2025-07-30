@@ -4,6 +4,7 @@ import { ProjectsResponse, ProjectResponse, Project } from '@/types/project';
 import { CompanyResponse } from '@/types/company';
 import { EducationResponse } from '@/types/education';
 import { CareerDetailResponse } from '@/types/career-detail';
+import qs from 'qs';
 
 // Vercel 환경에서는 환경 변수를, 로컬에서는 null이 됩니다.
 const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN || null;
@@ -23,7 +24,7 @@ export function getStrapiMedia(url: string | null | undefined): string | null {
 /**
  * API 호출을 위한 중앙 집중식 헬퍼 함수 (Failover 로직 통합)
  */
-async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function fetchAPI<T>(path: string, params?: any, options: RequestInit = {}): Promise<T> {
   // Vercel 환경에서는 _PRIMARY를, 로컬에서는 기본 URL을 사용합니다.
   const primaryApiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL_PRIMARY || 'http://127.0.0.1:1337';
   const secondaryApiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL_SECONDARY;
@@ -50,7 +51,11 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
     if (!apiUrl) {
       throw new Error("API URL is not defined. This should not happen with the default value set.");
     }
-    const requestUrl = `${apiUrl}/api${path}`;
+    
+    // 쿼리 파라미터 생성
+    const queryString = params ? `?${qs.stringify(params)}` : '';
+    const requestUrl = `${apiUrl}/api${path}${queryString}`;
+    
     const response = await fetch(requestUrl, defaultOptions);
 
     if (!response.ok) {
@@ -87,47 +92,89 @@ async function fetchAPI<T>(path: string, options: RequestInit = {}): Promise<T> 
 
 export async function getProfile(params?: any, options?: RequestInit): Promise<ProfileResponse | null> {
   try {
-    return await fetchAPI<ProfileResponse>(`/profile?populate=*`, options);
+    return await fetchAPI<ProfileResponse>(
+      '/profile',
+      { populate: '*' },
+      options
+    );
   } catch (e) {
     return null;
   }
 }
 
-export async function getSkills(options?: RequestInit): Promise<SkillsResponse> {
-  return fetchAPI<SkillsResponse>('/skills?populate=*&sort=order:asc&pagination[pageSize]=-1', options);
+export async function getSkills(params?: any, options?: RequestInit): Promise<SkillsResponse> {
+  const defaultParams = { populate: '*', sort: 'order:asc', 'pagination[pageSize]': 1000 };
+  const response = await fetchAPI<SkillsResponse>(
+    '/skills',
+    { ...defaultParams, ...params },
+    options
+  );
+  console.log('Skills API Response:', JSON.stringify(response, null, 2));
+  return response;
 }
 
-export async function getProjects(featured?: boolean, options?: RequestInit): Promise<ProjectsResponse> {
-  const filters = featured ? '&filters[featured][$eq]=true' : '';
-  return fetchAPI<ProjectsResponse>(`/projects?populate=*&sort=order:asc&pagination[pageSize]=-1${filters}`, options);
+export async function getProjects(featured?: boolean, params?: any, options?: RequestInit): Promise<ProjectsResponse> {
+  const defaultParams: any = { populate: '*', sort: 'order:asc', 'pagination[pageSize]': 1000 };
+  if (featured) defaultParams['filters[featured][$eq]'] = true;
+  return fetchAPI<ProjectsResponse>(
+    '/projects',
+    { ...defaultParams, ...params },
+    options
+  );
 }
 
 export async function getProjectBySlug(slug: string, options?: RequestInit): Promise<ProjectsResponse> {
-  const path = `/projects?filters[slug][$eq]=${slug}&populate=*`;
-  return fetchAPI<ProjectsResponse>(path, options);
+  return fetchAPI<ProjectsResponse>(
+    '/projects',
+    { filters: { slug: { $eq: slug } }, populate: '*' },
+    options
+  );
 }
 
 export async function getAllProjectSlugs(options?: RequestInit): Promise<{ data: { attributes: { slug: string } }[] }> {
-  const path = `/projects?fields=slug`;
-  return fetchAPI<{ data: { attributes: { slug: string } }[] }>(path, options);
+  return fetchAPI<{ data: { attributes: { slug: string } }[] }>(
+    '/projects',
+    { fields: ['slug'] },
+    options
+  );
 }
 
-export async function getCompanies(options?: RequestInit): Promise<CompanyResponse> {
-  return fetchAPI<CompanyResponse>('/companies?populate=*&sort=startDate:desc&pagination[pageSize]=-1', options);
+export async function getCompanies(params?: any, options?: RequestInit): Promise<CompanyResponse> {
+  const defaultParams = { populate: '*', sort: 'startDate:desc', 'pagination[pageSize]': 1000 };
+  return fetchAPI<CompanyResponse>(
+    '/companies',
+    { ...defaultParams, ...params },
+    options
+  );
 }
 
-export async function getEducations(options?: RequestInit): Promise<EducationResponse> {
-  return fetchAPI<EducationResponse>('/educations?populate=*&sort=order:asc&pagination[pageSize]=-1', options);
+export async function getEducations(params?: any, options?: RequestInit): Promise<EducationResponse> {
+  const defaultParams = { populate: '*', sort: 'order:asc', 'pagination[pageSize]': 1000 };
+  return fetchAPI<EducationResponse>(
+    '/educations',
+    { ...defaultParams, ...params },
+    options
+  );
 }
 
-export async function getCareerDetails(options?: RequestInit) {
+export async function getCareerDetails(params?: any, options?: RequestInit) {
   try {
-    return await fetchAPI('/career-details?populate=*&pagination[pageSize]=-1', options);
+    const defaultParams = { populate: '*', 'pagination[pageSize]': 1000 };
+    return await fetchAPI(
+      '/career-details',
+      { ...defaultParams, ...params },
+      options
+    );
   } catch (e) {
     return null;
   }
 }
 
-export async function getOtherExperiences(options?: RequestInit) {
-  return fetchAPI('/other-experiences?pagination[pageSize]=-1', options);
+export async function getOtherExperiences(params?: any, options?: RequestInit) {
+  const defaultParams = { 'pagination[pageSize]': 1000 };
+  return fetchAPI(
+    '/other-experiences',
+    { ...defaultParams, ...params },
+    options
+  );
 }
