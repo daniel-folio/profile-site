@@ -10,8 +10,6 @@ export interface Company {
   companyLogo?: { url: string } | null;
   description?: string;
   achievements?: string[];
-  skills?: { data: { id: number; attributes: { name: string } }[] };
-  projects?: { data: { id: number; attributes: { title: string } }[] };
   order?: number;
 }
 

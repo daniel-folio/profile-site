@@ -129,12 +129,12 @@ export default async function ProjectPage(props: any) {
               {technologies?.data && technologies.data.length > 0 && (
                 <InfoSection title="사용 기술">
                   <div className="flex flex-wrap gap-2">
-                    {technologies.data.map((tech: { id: number; attributes: Skill }) => (
+                    {technologies.data.map((skill: { id: number; attributes: Skill }) => (
                       <span
-                        key={tech.id}
+                        key={skill.id}
                         className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm rounded-full"
                       >
-                        {tech.attributes.name}
+                        {skill.attributes.name}
                       </span>
                     ))}
                   </div>

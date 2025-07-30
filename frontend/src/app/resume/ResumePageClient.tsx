@@ -299,6 +299,15 @@ export default function ResumePageClient({
                             <RichTextRenderer text={proj.shortDescription} className="prose-project-desc text-gray-900 dark:text-gray-100" />
                           </div>
                         )}
+                        {/* 스킬: 프린트에서는 뱃지 없이 텍스트만 */}
+                        {Array.isArray(proj.skills) && proj.skills.length > 0 && (
+                          <div style={{ marginLeft: 24, marginTop: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <span className="font-medium text-gray-900 dark:text-gray-100 mr-2">skill :</span>
+                            {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number) => (
+                              <span key={skill.id || skill.name || i} className="resume-skill-badge bg-sky-100 text-sky-700 px-2 py-0.5 rounded text-[13px] font-semibold border border-sky-200">{skill.name}</span>
+                            ))}
+                          </div>
+                        )}
                         {matchedCareerDetail && (
                           <div style={{ marginLeft: 24, marginTop: 8, borderLeft: '2px solid #eee', paddingLeft: 12 }}>
                             <span style={{ fontWeight: 600, color: '#111' }}>경력기술서 있음</span>
@@ -581,6 +590,15 @@ export default function ResumePageClient({
                           <RichTextRenderer text={proj.shortDescription} className="mt-1 prose-project-desc" />
                         </div>
                       )}
+                      {/* 스킬: 프린트에서는 뱃지 없이 텍스트만 */}
+                      {Array.isArray(proj.skills) && proj.skills.length > 0 && (
+                          <div style={{ marginLeft: 24, marginTop: 4 }}>
+                            <span style={{ fontWeight: 500, color: '#111', marginLeft: 0 }}>skill : </span>
+                            <span style={{ color: '#111', fontSize: 12 }}>
+                              {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number, arr: any[]) => `${skill.name}${i < arr.length - 1 ? ', ' : ''}`)}
+                            </span>
+                          </div>
+                        )}
                       {matchedCareerDetail && (
                         <div style={{ marginLeft: 24, marginTop: 8, borderLeft: '2px solid #eee', paddingLeft: 12 }}>
                           <span style={{ fontWeight: 600, color: '#111' }}>경력기술서 있음</span>

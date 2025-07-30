@@ -535,7 +535,6 @@ export interface ApiCompanyCompany extends Struct.CollectionTypeSchema {
     order: Schema.Attribute.Integer;
     position: Schema.Attribute.String & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
-    skills: Schema.Attribute.Relation<'manyToMany', 'api::skill.skill'>;
     startDate: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -705,7 +704,6 @@ export interface ApiProjectProject extends Struct.CollectionTypeSchema {
     skills: Schema.Attribute.Relation<'manyToMany', 'api::skill.skill'>;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     startDate: Schema.Attribute.String;
-    technologies: Schema.Attribute.Relation<'manyToMany', 'api::skill.skill'>;
     thumbnailImage: Schema.Attribute.Media<'images'>;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
@@ -750,7 +748,6 @@ export interface ApiSkillSkill extends Struct.CollectionTypeSchema {
         },
         number
       >;
-    projects: Schema.Attribute.Relation<'manyToMany', 'api::project.project'>;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

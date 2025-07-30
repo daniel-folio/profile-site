@@ -96,9 +96,9 @@ export function Projects({ projects, featured = false }: ProjectsProps) {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2 mb-2">
-                    {Array.isArray(project.technologies) && project.technologies.map((tech: any, idx) => (
-                      <span key={tech?.id ?? idx} className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded px-2 py-1">
-                        {tech?.name ?? tech}
+                    {Array.isArray(project.skills?.data) && project.skills.data.map((skill: any, idx) => (
+                      <span key={skill?.id ?? idx} className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded px-2 py-1">
+                        {skill?.name ?? skill}
                       </span>
                     ))}
                   </div>

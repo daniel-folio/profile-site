@@ -117,12 +117,6 @@
       "target": "api::skill.skill",
       "displayName": "Technologies(기술스택)",
       "required": false
-    },
-    "technologies": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::skill.skill",
-      "inversedBy": "projects"
     }
   }
 }

@@ -9,9 +9,6 @@ export interface Project {
   fullDescription?: string;
   thumbnailImage?: StrapiMediaResponse;
   images?: StrapiMultipleMediaResponse;
-  technologies?: {
-    data: Skill[];
-  };
   projectType: 'Web' | 'Mobile' | 'Desktop' | 'API' | 'Library' | 'Other';
   projectStatus: 'Completed' | 'In Progress' | 'Planned' | 'On Hold';
   startDate?: string;

@@ -126,11 +126,11 @@ export default function CareerDetailClient({ companies, projects, careerDetails,
                                 }</div>
                               )}
                               {/* 환경 뱃지 - cd 상세 내부에서만 출력 */}
-                              {Array.isArray(proj.technologies) && proj.technologies.length > 0 && (
+                              {Array.isArray(proj.skills) && proj.skills.length > 0 && (
                                 <div className="mb-1 flex items-center flex-wrap gap-1">
                                   <strong>환경 : </strong>
                                   <div className="ml-2 flex flex-wrap gap-1">
-                                    {proj.technologies.map((t: any, i: number) => (
+                                    {proj.skills.map((t: any, i: number) => (
                                       <span key={t.id || t.name || i} className="bg-sky-100 text-sky-700 px-2 py-0.5 rounded text-[12px] font-semibold border border-sky-200">{t.name}</span>
                                     ))}
                                   </div>
@@ -207,10 +207,10 @@ export default function CareerDetailClient({ companies, projects, careerDetails,
                           </div>
                         )}
                         {/* 환경 뱃지 - cd 상세 내부에서만 출력 */}
-                        {Array.isArray(proj.technologies) && proj.technologies.length > 0 && (
+                        {Array.isArray(proj.skills) && proj.skills.length > 0 && (
                           <div style={{ marginBottom: 4 }}><strong>환경 : </strong>
                             <span style={{ marginLeft: 16, fontSize: 14, fontWeight: 400, display: 'inline-block', textIndent: 0, whiteSpace: 'pre-line' }}>
-                              {proj.technologies.map((t: any) => t.name).join(', ')}
+                              {proj.skills.map((t: any) => t.name).join(', ')}
                             </span>
                           </div>
                         )}

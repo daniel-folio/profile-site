@@ -56,21 +56,6 @@
       "default": false,
       "displayName": "Is Current(재직중)"
     },
-    "skills": {
-      "name": "skills",
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::skill.skill",
-      "through": {
-        "name": "company_skills_links",
-        "fields": [
-          {
-            "name": "order",
-            "type": "integer"
-          }
-        ]
-      }
-    },
     "order": {
       "type": "integer",
       "displayName": "Order(정렬순서)"
