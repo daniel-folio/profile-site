@@ -100,68 +100,70 @@ export default function CareerDetailClient({ companies, projects, careerDetails,
                 if (companyProjects.length === 0) return null;
                 return (
                   <section key={company.id} className="mb-8">
-                    <h2 className="text-xl font-bold mb-2">{company.company}</h2>
                     {companyProjects.map((proj) => {
                       const projectCareerDetails = getSortedCareerDetails(proj.id);
                       if (projectCareerDetails.length === 0) return null;
                       return (
-                        <div key={proj.id} className="ml-6 mb-6">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-lg">{proj.title}</span>
-                            <span className="ml-2 text-xs text-gray-600">{proj.startDate} ~ {proj.endDate || '현재'}</span>
-                          </div>
-                          {projectCareerDetails.map((cd) => (
-                            <div key={cd.id} id={`cd-${cd.id}`} className="ml-6 mt-2 border-l-2 border-gray-200 pl-4 pb-4">
-                              {((cd.myRole && (Array.isArray(cd.responsibilities) ? cd.responsibilities.length > 0 : cd.responsibilities)) || (Array.isArray(cd.responsibilities) ? cd.responsibilities.length > 0 : cd.responsibilities)) && (
-                                <div className="mb-1"><strong>주요 업무 : </strong> {
-                                  Array.isArray(cd.responsibilities) ? (
-                                    <ul className="ml-4 !text-[14px] list-disc">
-                                      {cd.responsibilities.map((r, i) => <li key={i}>{r}</li>)}
-                                    </ul>
-                                  ) : (
-                                    (cd.responsibilities ?? '').split('\n').map((line: string, idx: number) => (
-                                      <div key={idx} className="ml-4 !text-[14px]">{line}</div>
-                                    ))
-                                  )
-                                }</div>
-                              )}
-                              {/* 환경 뱃지 - cd 상세 내부에서만 출력 */}
-                              {Array.isArray(proj.skills) && proj.skills.length > 0 && (
-                                <div className="mb-1 flex items-center flex-wrap gap-1">
-                                  <strong>환경 : </strong>
-                                  <div className="ml-2 flex flex-wrap gap-1">
-                                    {proj.skills.map((t: any, i: number) => (
-                                      <span key={t.id || t.name || i} className="bg-sky-100 text-sky-700 px-2 py-0.5 rounded text-[12px] font-semibold border border-sky-200">{t.name}</span>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              {cd.challenges && (
-                                <div className="mb-1">
-                                  <strong>과제 : </strong>
-                                  <RichTextRenderer text={cd.challenges} className="ml-4 !text-[14px]" />
-                                </div>
-                              )}
-                              {cd.solutions && (
-                                <div className="mb-1">
-                                  <strong>해결 : </strong>
-                                  <RichTextRenderer text={cd.solutions} className="ml-4 !text-[14px]" />
-                                </div>
-                              )}
-                              {cd.results && (
-                                <div className="mb-1">
-                                  <strong>성과 : </strong>
-                                  <RichTextRenderer text={cd.results} className="ml-4 !text-[14px]" />
-                                </div>
-                              )}
-                              {cd.lessonsLearned && (
-                                <div className="mb-1">
-                                  <strong>배운점 : </strong>
-                                  <RichTextRenderer text={cd.lessonsLearned} className="ml-4 !text-[14px]" />
-                                </div>
-                              )}
+                        <div>
+                          <h2 className="text-xl font-bold mb-2">{company.company}</h2>
+                          <div key={proj.id} className="ml-6 mb-6">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-semibold text-lg">{proj.title}</span>
+                              <span className="ml-2 text-xs text-gray-600">{proj.startDate} ~ {proj.endDate || '현재'}</span>
                             </div>
-                          ))}
+                            {projectCareerDetails.map((cd) => (
+                              <div key={cd.id} id={`cd-${cd.id}`} className="ml-6 mt-2 border-l-2 border-gray-200 pl-4 pb-4">
+                                {((cd.myRole && (Array.isArray(cd.responsibilities) ? cd.responsibilities.length > 0 : cd.responsibilities)) || (Array.isArray(cd.responsibilities) ? cd.responsibilities.length > 0 : cd.responsibilities)) && (
+                                  <div className="mb-1"><strong>주요 업무 : </strong> {
+                                    Array.isArray(cd.responsibilities) ? (
+                                      <ul className="ml-4 !text-[14px] list-disc">
+                                        {cd.responsibilities.map((r, i) => <li key={i}>{r}</li>)}
+                                      </ul>
+                                    ) : (
+                                      (cd.responsibilities ?? '').split('\n').map((line: string, idx: number) => (
+                                        <div key={idx} className="ml-4 !text-[14px]">{line}</div>
+                                      ))
+                                    )
+                                  }</div>
+                                )}
+                                {/* 환경 뱃지 - cd 상세 내부에서만 출력 */}
+                                {Array.isArray(proj.skills) && proj.skills.length > 0 && (
+                                  <div className="mb-1 flex items-center flex-wrap gap-1">
+                                    <strong>환경 : </strong>
+                                    <div className="ml-2 flex flex-wrap gap-1">
+                                      {proj.skills.map((t: any, i: number) => (
+                                        <span key={t.id || t.name || i} className="bg-sky-100 text-sky-700 px-2 py-0.5 rounded text-[12px] font-semibold border border-sky-200">{t.name}</span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                {cd.challenges && (
+                                  <div className="mb-1">
+                                    <strong>과제 : </strong>
+                                    <RichTextRenderer text={cd.challenges} className="ml-4 !text-[14px]" />
+                                  </div>
+                                )}
+                                {cd.solutions && (
+                                  <div className="mb-1">
+                                    <strong>해결 : </strong>
+                                    <RichTextRenderer text={cd.solutions} className="ml-4 !text-[14px]" />
+                                  </div>
+                                )}
+                                {cd.results && (
+                                  <div className="mb-1">
+                                    <strong>성과 : </strong>
+                                    <RichTextRenderer text={cd.results} className="ml-4 !text-[14px]" />
+                                  </div>
+                                )}
+                                {cd.lessonsLearned && (
+                                  <div className="mb-1">
+                                    <strong>배운점 : </strong>
+                                    <RichTextRenderer text={cd.lessonsLearned} className="ml-4 !text-[14px]" />
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       );
                     })}

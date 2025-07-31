@@ -26,10 +26,16 @@ export default async function ResumePage() {
     }
   }
   const companies: Company[] = Array.isArray(companiesRes?.data)
-    ? companiesRes.data.map((item: any) => item.attributes ?? item)
+    ? companiesRes.data.map((item: any) => {
+        const attrs = item.attributes ?? item;
+        return { ...attrs, id: item.id };
+      })
     : [];
   const educations: Education[] = Array.isArray(educationsRes?.data)
-    ? educationsRes.data.map((item: any) => item.attributes ?? item)
+    ? educationsRes.data.map((item: any) => {
+        const attrs = item.attributes ?? item;
+        return { ...attrs, id: item.id };
+      })
     : [];
   const skills: Skill[] = (skillsRes.data || []);
   const projects: Project[] = Array.isArray(projectsRes?.data)
@@ -50,7 +56,7 @@ export default async function ResumePage() {
       return {
         ...attrs,
         id: item.id,
-        project: attrs.project?.id ?? null,
+        project: attrs.project?.data?.id ?? attrs.project?.id ?? null,
       };
     });
   }
