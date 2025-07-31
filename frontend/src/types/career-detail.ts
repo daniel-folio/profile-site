@@ -2,10 +2,7 @@ export interface CareerDetail {
   id: number;
   title: string;
   company?: number;
-  project?: {
-    id: number;
-    title: string;
-  };
+  project: number | null;
   period?: string;
   teamSize?: string;
   myRole?: string;
