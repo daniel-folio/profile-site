@@ -10,9 +10,7 @@ interface SkillsProps {
 }
 
 export function Skills({ skills }: SkillsProps) {
-  console.log('Skills component received:', skills);
   const visibleSkills = (skills || []).filter(skill => skill.isPublic !== false && skill.visible !== false) ;
-  console.log('Visible skills after filtering:', visibleSkills);
   if (visibleSkills.length === 0) {
     return (
       <motion.section id="skills" className="py-16 md:py-24 text-center" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }} viewport={{ once: false, amount: 0.2 }}>

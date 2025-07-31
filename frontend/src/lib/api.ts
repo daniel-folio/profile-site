@@ -109,7 +109,6 @@ export async function getSkills(params?: any, options?: RequestInit): Promise<Sk
     { ...defaultParams, ...params },
     options
   );
-  console.log('Skills API Response:', JSON.stringify(response, null, 2));
   return response;
 }
 

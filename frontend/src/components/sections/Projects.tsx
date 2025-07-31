@@ -7,7 +7,7 @@ import { getImageUrl, getStatusColor, getProjectTypeIcon, formatDateRange } from
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { motion } from 'framer-motion';
-import { marked } from 'marked';
+import { RichTextRenderer } from '@/components/ui/RichTextRenderer';
 
 interface ProjectsProps {
   projects: Project[] | null;
@@ -90,9 +90,11 @@ export function Projects({ projects, featured = false }: ProjectsProps) {
                     </span>
                   </div>
                   <CardTitle className="text-xl text-gray-900 dark:text-gray-100">{project.title}</CardTitle>
-                  <CardDescription className="text-gray-700 dark:text-gray-300">
-                    {project.shortDescription}
-                  </CardDescription>
+                  {/* CardDescription을 div와 RichTextRenderer로 교체하여 마크다운을 렌더링합니다. */}
+                  <div className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                    {project.shortDescription && 
+                      <RichTextRenderer text={project.shortDescription} className="prose prose-sm dark:prose-invert max-w-none" />}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2 mb-2">
