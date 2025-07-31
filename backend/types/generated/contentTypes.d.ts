@@ -680,6 +680,7 @@ export interface ApiProjectProject extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     endDate: Schema.Attribute.String;
     featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    featuredOrder: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     fullDescription: Schema.Attribute.RichText;
     githubUrl: Schema.Attribute.String;
     images: Schema.Attribute.Media<'images', true>;
@@ -694,11 +695,13 @@ export interface ApiProjectProject extends Struct.CollectionTypeSchema {
     projectStatus: Schema.Attribute.Enumeration<
       ['Completed', 'In Progress', 'Planned', 'On Hold']
     > &
-      Schema.Attribute.Required;
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'Completed'>;
     projectType: Schema.Attribute.Enumeration<
       ['Web', 'Mobile', 'Desktop', 'API', 'Library', 'Other']
     > &
-      Schema.Attribute.Required;
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'Web'>;
     publishedAt: Schema.Attribute.DateTime;
     shortDescription: Schema.Attribute.RichText;
     skills: Schema.Attribute.Relation<'manyToMany', 'api::skill.skill'>;
@@ -734,6 +737,9 @@ export interface ApiSkillSkill extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     description: Schema.Attribute.Text;
     icon: Schema.Attribute.Media<'images'>;
+    isPublic: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<true>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::skill.skill'> &
       Schema.Attribute.Private;

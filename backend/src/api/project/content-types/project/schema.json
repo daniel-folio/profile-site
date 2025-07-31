@@ -90,6 +90,11 @@
       "default": false,
       "displayName": "Featured(대표)"
     },
+    "featuredOrder": {
+      "type": "integer",
+      "default": 0,
+      "displayName": "Featured Order(대표 프로젝트 정렬순서)"
+    },
     "liveUrl": {
       "type": "string",
       "displayName": "Live URL(배포주소)"

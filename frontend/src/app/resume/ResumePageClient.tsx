@@ -64,7 +64,7 @@ export default function ResumePageClient({
     return projects.some(proj => proj.company === company.id);
   });
   const sortedCompanies = [...filteredCompanies].sort((a, b) => {
-    if (a.order != null && b.order != null && a.order !== b.order) return b.order - a.order;
+    if (a.order != null && b.order != null && a.order !== b.order) return a.order - b.order;
     if (a.order != null && b.order == null) return -1;
     if (a.order == null && b.order != null) return 1;
     const aDate = a.endDate || a.startDate || '';
@@ -74,7 +74,7 @@ export default function ResumePageClient({
   });
   const getSortedProjects = (companyId: number) => {
     return projects.filter((proj) => proj.company === companyId && proj.visible !== false).sort((a, b) => {
-      if (a.order != null && b.order != null && a.order !== b.order) return b.order - a.order;
+      if (a.order != null && b.order != null && a.order !== b.order) return a.order - b.order;
       if (a.order != null && b.order == null) return -1;
       if (a.order == null && b.order != null) return 1;
       const aDate = a.endDate || a.startDate || '';
@@ -90,7 +90,7 @@ export default function ResumePageClient({
       }
       return cd.project === projectId;
     }).sort((a, b) => {
-      if (a.order != null && b.order != null && a.order !== b.order) return b.order - a.order;
+      if (a.order != null && b.order != null && a.order !== b.order) return a.order - b.order;
       if (a.order != null && b.order == null) return -1;
       if (a.order == null && b.order != null) return 1;
       const aDate = a.endDate || a.startDate || '';

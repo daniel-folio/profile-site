@@ -23,7 +23,7 @@ export default function CareerDetailClient({ companies, projects, careerDetails,
     careerDetailsByProject,
   } = useMemo(() => {
     const sortOrderAndDate = (a: any, b: any) => {
-      if (a.order != null && b.order != null && a.order !== b.order) return b.order - a.order;
+      if (a.order != null && b.order != null && a.order !== b.order) return a.order - b.order;
       if (a.order != null && b.order == null) return -1;
       if (a.order == null && b.order != null) return 1;
       const aDate = a.endDate || a.startDate || '';

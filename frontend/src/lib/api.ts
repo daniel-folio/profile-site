@@ -113,8 +113,16 @@ export async function getSkills(params?: any, options?: RequestInit): Promise<Sk
 }
 
 export async function getProjects(featured?: boolean, params?: any, options?: RequestInit): Promise<ProjectsResponse> {
-  const defaultParams: any = { populate: '*', sort: 'order:asc', 'pagination[pageSize]': 1000 };
-  if (featured) defaultParams['filters[featured][$eq]'] = true;
+  const defaultParams: any = { populate: '*', 'pagination[pageSize]': 1000 };
+  
+  if (featured) {
+    // 대표 프로젝트는 featuredOrder 기준으로 오름차순 정렬
+    defaultParams['filters[featured][$eq]'] = true;
+    defaultParams['sort'] = 'featuredOrder:asc';
+  } else {
+    // 그 외 모든 프로젝트는 기존 order 기준으로 오름차순 정렬
+    defaultParams['sort'] = 'order:asc';
+  }
   return fetchAPI<ProjectsResponse>(
     '/projects',
     { ...defaultParams, ...params },

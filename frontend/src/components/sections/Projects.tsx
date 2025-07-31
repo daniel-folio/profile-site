@@ -42,7 +42,7 @@ export function Projects({ projects, featured = false }: ProjectsProps) {
             {featured ? '대표 프로젝트' : '모든 프로젝트'}
           </h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {projects.map((project) => {
             let imageUrl: string | undefined;
             let imageAlt: string | null | undefined = project.title;
