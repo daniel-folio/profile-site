@@ -100,7 +100,9 @@ export default function ResumePageClient({
     });
   };
   const CATEGORY_ORDER = ["Backend", "Frontend", "Database", "Tools", "Server", "Other"];
-  const skillsByCategory = skills.reduce((acc, skill) => {
+  // isPublic이 false가 아닌 스킬만 필터링하여 이력서에 노출합니다.
+  const publicSkills = skills.filter(skill => skill.isPublic !== false);
+  const skillsByCategory = publicSkills.reduce((acc, skill) => {
     if (!acc[skill.category]) acc[skill.category] = [];
     acc[skill.category].push(skill);
     return acc;
@@ -322,7 +324,7 @@ export default function ResumePageClient({
             </>
           )}
           {/* Skills (기술스택) 섹션 위에만 조건부 <hr> */}
-          {skills.length > 0 && (
+          {publicSkills.length > 0 && (
             <>
               <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
               <section className="mb-0">
@@ -612,7 +614,7 @@ export default function ResumePageClient({
           </>
         )}
         {/* 기술스택 (Skills) */}
-        {skills.length > 0 && (
+        {publicSkills.length > 0 && (
           <>
             <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
             <section style={{ marginBottom: 32 }}>

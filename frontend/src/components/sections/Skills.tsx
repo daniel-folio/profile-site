@@ -11,7 +11,7 @@ interface SkillsProps {
 
 export function Skills({ skills }: SkillsProps) {
   console.log('Skills component received:', skills);
-  const visibleSkills = (skills || []).filter(skill => skill.visible !== false);
+  const visibleSkills = (skills || []).filter(skill => skill.isPublic !== false && skill.visible !== false) ;
   console.log('Visible skills after filtering:', visibleSkills);
   if (visibleSkills.length === 0) {
     return (

@@ -34,6 +34,10 @@
       "min": 1,
       "max": 5
     },
+    "order": {
+      "type": "integer",
+      "default": 0
+    },
     "icon": {
       "type": "media",
       "multiple": false,
@@ -45,13 +49,14 @@
     "description": {
       "type": "text"
     },
-    "order": {
-      "type": "integer",
-      "default": 0
-    },
     "visible": {
       "type": "boolean",
       "default": true
+    },
+    "isPublic": {
+      "type": "boolean",
+      "default": true,
+      "required": true
     }
   }
 }

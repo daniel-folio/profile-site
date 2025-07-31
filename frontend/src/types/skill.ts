@@ -8,6 +8,7 @@ export interface Skill {
   description?: string;
   order: number;
   visible?: boolean;
+  isPublic?: boolean;
   icon?: StrapiMediaResponse;
 }
 

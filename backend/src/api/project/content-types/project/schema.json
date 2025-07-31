@@ -33,6 +33,7 @@
         "Library",
         "Other"
       ],
+      "default": "Web",
       "required": true,
       "displayName": "Project Type(유형)"
     },
@@ -44,6 +45,7 @@
         "Planned",
         "On Hold"
       ],
+      "default": "Completed",
       "required": true,
       "displayName": "Project Status(상태)"
     },
