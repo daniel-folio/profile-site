@@ -132,59 +132,72 @@ npm run dev
 
 ## 🌐 배포 아키텍처
 
-본 프로젝트는 안정성과 고가용성을 위해 메인(A)과 백업(B)으로 구성된 이중화 구조를 가집니다.
-무료버전의 서버의 750시간/월 제약과 15분 슬림모드에 취약점을 보안하기 위한 조치입니다.
+본 프로젝트는 안정성과 고가용성을 위해 메인(A)과 개발/백업(B)으로 구성된 이중화 구조를 가집니다.
+이 구조는 무료 호스팅 플랜(Render 등)의 제약 조건(월 750시간, 15분 비활성 시 슬립 모드)을 극복하기 위해 설계되었습니다.
 
 - **A 사이트 (메인):** 실제 사용자가 접속하는 메인 사이트입니다. (GitHub A 계정, Vercel A 계정, Render A 계정)
-- **B 사이트 (백업):** A 사이트 장애 시를 대비한 백업 사이트입니다. (GitHub B 계정, Vercel B 계정, Render B 계정)
+  - 운영 환경(`Production`)만 단독으로 운영하여 월 사용 시간을 720시간(24시간 x 30일) 내로 유지합니다.
+  - UptimeRobot과 같은 모니터링 툴로 14분마다 서버를 호출하여 15분 슬립 모드를 방지하고 24/7 가용성을 확보합니다.
+
+- **B 사이트 (개발 및 백업):** 개발 및 메인 사이트(A) 장애 시를 대비한 백업 사이트입니다. (GitHub B 계정, Vercel B 계정, Render B 계정)
+  - 개발 환경(`Preview/dev`)과 운영 환경(`Production`)을 함께 운영합니다.
+  - 메인(A) 사이트의 백업 역할을 수행하며, 개발 및 테스트 용도로 주로 사용됩니다.
 
 ### Frontend (Vercel)
-- **A-프론트엔드 (메인):** `Production`과 `Preview(dev)` 환경을 운영합니다.
-- **B-프론트엔드 (백업):** `Production` 환경만 운영합니다.
+- **A-프론트엔드 (메인):** `Production` 환경만 운영합니다.
+- **B-프론트엔드 (개발/백업):** `Production`과 `Preview(dev)` 환경을 운영합니다.
 
 ### Backend (Render)
-- **A-백엔드 (메인):** `Production`과 `Preview(dev)` 환경을 운영합니다.
-- **B-백엔드 (백업):** `Production` 환경만 운영합니다.
+- **A-백엔드 (메인):** `Production` 환경만 운영합니다.
+- **B-백엔드 (개발/백업):** `Production`과 `Preview(dev)` 환경을 운영합니다.
 
 ## 🔄 고가용성 및 배포 자동화
 
-### 1. Git 저장소 자동 동기화 (A → B)
+### 1. Git 저장소 자동 동기화 (B → A)
 
-개발 효율성과 배포 안정성을 위해 개발용 메인 저장소(A)와 배포 전용 저장소(B)를 분리하여 운영합니다.
+개발 효율성과 배포 안정성을 위해 개발용 메인 저장소(B)와 배포 전용 저장소(A)를 분리하여 운영합니다.
 
-- **작동 방식:** A 저장소의 `main` 브랜치에 코드가 푸시되면, GitHub Actions가 SSH 배포 키(Deploy Key)를 사용하여 B 저장소로 모든 내용을 자동으로 미러링합니다.
-- **장점:** 개발자는 A 저장소에만 집중할 수 있으며, 배포는 B 저장소를 통해 이루어지므로 메인 저장소의 권한 노출 위험이 없습니다.
+- **작동 방식:** B 저장소의 `main` 브랜치에 코드가 푸시되면, GitHub Actions가 SSH 배포 키(Deploy Key)를 사용하여 A 저장소로 모든 내용을 자동으로 미러링합니다.
+- **장점:** 개발자는 B 저장소에만 집중할 수 있으며, 배포는 A 저장소를 통해 이루어지므로 메인 저장소의 권한 노출 위험이 없습니다.
 
 ### 2. 서버사이드 Failover (장애 조치)
 
-메인 백엔드 서버(A-운영)가 무료 플랜의 사용량 초과 등으로 중단될 경우를 대비하여, 서비스 연속성을 보장하는 서버사이드 Failover 기능이 구현되어 있습니다.
+메인 백엔드 서버(A-운영)가 예기치 않은 문제로 중단될 경우를 대비하여, 서비스 연속성을 보장하는 서버사이드 Failover 기능이 구현되어 있습니다.
 
 - **작동 방식:**
   1. 메인 프론트엔드(A-운영)는 데이터를 요청할 때 먼저 메인 백엔드(A-운영)에 접속을 시도합니다.
   2. 만약 이 요청이 실패하면, `lib/api.ts`에 구현된 로직이 자동으로 백업 백엔드(B-운영)에 동일한 요청을 다시 보냅니다.
-- **적용 범위:** 이 기능은 Vercel 환경 변수(`FAILOVER_MODE_ENABLED`)에 의해 제어되며, 오직 **A-운영 환경에서만 활성화**됩니다. 개발, 로컬, 백업(B) 환경에는 영향을 주지 않습니다.
+- **적용 범위:** 이 기능은 Vercel 환경 변수(`FAILOVER_MODE_ENABLED`)에 의해 제어되며, 오직 **A-운영 환경(메인)에서만 활성화**됩니다. 개발, 로컬, 백업(B) 환경에는 영향을 주지 않습니다.
 
 ## 🔧 환경 변수 가이드
 
-### Vercel (A-프론트엔드)
+### Vercel (A-프론트엔드 - 메인)
 
 - `NEXT_PUBLIC_STRAPI_API_URL_PRIMARY`: 메인으로 사용할 백엔드 주소
   - Production 값: A-운영 백엔드 URL
-  - Preview(dev) 값: A-개발 백엔드 URL
 - `NEXT_PUBLIC_STRAPI_API_URL_SECONDARY`: 장애 시 사용할 백업 백엔드 주소
   - Production 값: B-운영 백엔드 URL
-  - Preview(dev) 값: (설정 안함)
 - `FAILOVER_MODE_ENABLED`: Failover 기능 활성화 스위치
   - Production 값: `true`
-  - Preview(dev) 값: (설정 안함 또는 `false`)
 - `STRAPI_API_TOKEN`: 각 환경에 맞는 API 토큰
   - Production 값: A-운영 백엔드 토큰
-  - Preview(dev) 값: A-개발 백엔드 토큰
 
-### Render (A-백엔드)
+### Vercel (B-프론트엔드 - 개발/백업)
+
+- `NEXT_PUBLIC_STRAPI_API_URL_PRIMARY`: 메인으로 사용할 백엔드 주소
+  - Production 값: B-운영 백엔드 URL (백업 역할)
+  - Preview(dev) 값: B-개발 백엔드 URL
+- `NEXT_PUBLIC_STRAPI_API_URL_SECONDARY`: (설정 안함)
+- `FAILOVER_MODE_ENABLED`: (설정 안함 또는 `false`)
+- `STRAPI_API_TOKEN`:
+  - Production 값: B-운영 백엔드 토큰
+  - Preview(dev) 값: B-개발 백엔드 토큰
+
+### Render (A-백엔드 - 메인)
+- `DATABASE_URL`, `JWT_SECRET`, `ADMIN_JWT_SECRET`, `CLOUDINARY_URL` 등 운영 환경에 맞게 설정합니다.
+
+### Render (B-백엔드 - 개발/백업)
 - `DATABASE_URL`, `JWT_SECRET`, `ADMIN_JWT_SECRET`, `CLOUDINARY_URL` 등을 각 환경(운영/개발)에 맞게 설정합니다.
-
-(B 사이트의 환경 변수는 각 B 백엔드/프론트엔드 주소만 사용하도록 단순하게 설정합니다.)
 
 ## 📊 데이터 모델
 
