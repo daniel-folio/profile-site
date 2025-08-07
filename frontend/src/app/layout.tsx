@@ -6,6 +6,9 @@ import ThreeShapesBackground from "@/components/layout/ThreeShapesBackground";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import type { Metadata } from "next";
 
+// 이 설정을 추가하면 앱 전체가 동적으로 렌더링됩니다.
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "DaeSung Han",
   description: "DaeSung Han's developer portfolio and project showcase.",

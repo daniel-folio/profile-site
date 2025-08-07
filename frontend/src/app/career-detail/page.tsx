@@ -9,6 +9,9 @@ import CareerDetailPdfDownloadButton from '@/components/CareerDetailPdfDownloadB
 import { useEffect } from 'react';
 import CareerDetailClient from './CareerDetailClient';
 
+// 이 페이지를 항상 동적으로 렌더링하여 캐시를 사용하지 않도록 설정합니다.
+export const dynamic = 'force-dynamic';
+
 export default async function CareerDetailPage() {
   const [companiesRes, projectsRes, careerDetailsRes, profileRes]: any[] = await Promise.all([
     getCompanies(undefined, { next: { revalidate: 3600 } }),
