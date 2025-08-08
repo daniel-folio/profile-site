@@ -25,8 +25,16 @@ export function getStrapiMedia(url: string | null | undefined): string | null {
  * API 호출을 위한 중앙 집중식 헬퍼 함수 (Failover 로직 통합)
  */
 async function fetchAPI<T>(path: string, params?: any, options: RequestInit = {}): Promise<T> {
+  
+  // Vercel 환경 변수를 사용해 현재 환경이 운영(Production)인지 파악합니다.
+  const isProduction = process.env.VERCEL_ENV === 'production';
+
+  // 환경에 따라 사용할 기본 API URL을 결정합니다.
   // Vercel 환경에서는 _PRIMARY를, 로컬에서는 기본 URL을 사용합니다.
-  const primaryApiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL_PRIMARY || 'http://127.0.0.1:1337';
+  const primaryApiUrl = isProduction
+  ? process.env.NEXT_PUBLIC_STRAPI_API_URL_PRIMARY || 'http://127.0.0.1:1337' // 운영 환경일 경우
+  : process.env.NEXT_PUBLIC_STRAPI_URL || 'http://127.0.0.1:1337';            // Preview, dev 환경일 경우
+
   const secondaryApiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL_SECONDARY;
   // FAILOVER_MODE_ENABLED 변수가 'true'일 때만 failover 기능을 활성화합니다.
   const failoverEnabled = process.env.FAILOVER_MODE_ENABLED === 'true';
