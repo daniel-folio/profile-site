@@ -1,11 +1,14 @@
 "use client";
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import React from 'react';
 import { Company } from '@/types/company';
 import { Project } from '@/types/project';
 import { CareerDetail } from '@/types/career-detail';
 import { Profile } from '@/types/profile';
 import { RichTextRenderer } from '@/components/ui/RichTextRenderer';
+import { Button } from '@/components/ui/Button';
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 import CareerDetailPdfDownloadButton from '@/components/CareerDetailPdfDownloadButton';
 
 export default function CareerDetailClient({ companies, projects, careerDetails, profile }: {
@@ -16,6 +19,12 @@ export default function CareerDetailClient({ companies, projects, careerDetails,
 }) {
   const userName = profile?.name;
   const showDownload = !!profile?.careerDetailDownloadEnabled;
+
+  const [expandedDetails, setExpandedDetails] = useState<Record<number, boolean>>({});
+
+  const toggleExpand = (id: number) => {
+    setExpandedDetails(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const {
     companiesWithDetails,
@@ -120,58 +129,65 @@ export default function CareerDetailClient({ companies, projects, careerDetails,
                             <span className="font-semibold text-lg">{proj.title}</span>
                             <span className="ml-2 text-xs text-gray-600">{proj.startDate} ~ {proj.endDate || '현재'}</span>
                           </div>
-                          {projectCareerDetails.map((cd) => (
-                            <div key={cd.id} id={`cd-${cd.id}`} className="ml-6 mt-2 border-l-2 border-gray-200 pl-4 pb-4">
-                              {((cd.myRole && (Array.isArray(cd.responsibilities) ? cd.responsibilities.length > 0 : cd.responsibilities)) || (Array.isArray(cd.responsibilities) ? cd.responsibilities.length > 0 : cd.responsibilities)) && (
-                                <div className="mb-1"><strong>주요 업무 : </strong> {
-                                  Array.isArray(cd.responsibilities) ? (
-                                    <ul className="ml-4 !text-[14px] list-disc">
-                                      {cd.responsibilities.map((r, i) => <li key={i}>{r}</li>)}
-                                    </ul>
-                                  ) : (
-                                    (cd.responsibilities ?? '').split('\n').map((line: string, idx: number) => (
-                                      <div key={idx} className="ml-4 !text-[14px]">{line}</div>
-                                    ))
-                                  )
-                                }</div>
-                              )}
-                              {/* 환경 뱃지 - cd 상세 내부에서만 출력 */}
-                              {Array.isArray(proj.skills) && proj.skills.length > 0 && (
-                                <div className="mb-1 flex items-center flex-wrap gap-1">
-                                  <strong>환경 : </strong>
-                                  <div className="ml-2 flex flex-wrap gap-1">
-                                    {proj.skills.map((t: any, i: number) => (
-                                      <span key={t.id || t.name || i} className="bg-sky-100 text-sky-700 px-2 py-0.5 rounded text-[12px] font-semibold border border-sky-200">{t.name}</span>
-                                    ))}
+                          {projectCareerDetails.map((cd) => {
+                            const isExpanded = !!expandedDetails[cd.id];
+                            return (
+                              <div key={cd.id} id={`cd-${cd.id}`} className="ml-6 mt-2 border-l-2 border-gray-200 dark:border-gray-700 pl-4 pb-2">
+                                {/* 항상 보이는 부분 */}
+                                <div className="space-y-1">
+                                  {cd.responsibilities && (
+                                    <div>
+                                      <strong>주요 업무 : </strong>
+                                      <RichTextRenderer text={cd.responsibilities} className="ml-4 !text-[14px]" />
+                                    </div>
+                                  )}
+                                  {Array.isArray(proj.skills) && proj.skills.length > 0 && (
+                                    <div className="flex items-center flex-wrap gap-1">
+                                      <strong>환경 : </strong>
+                                      <div className="ml-2 flex flex-wrap gap-1">
+                                        {proj.skills.map((t: any, i: number) => (
+                                          <span key={t.id || t.name || i} className="bg-sky-100 text-sky-700 px-2 py-0.5 rounded text-[12px] font-semibold border border-sky-200">{t.name}</span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  {cd.results && (
+                                    <div>
+                                      <strong>성과 : </strong>
+                                      <RichTextRenderer text={cd.results} className="ml-4 !text-[14px]" />
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* 펼쳤을 때 보이는 부분 (애니메이션 적용) */}
+                                <AnimatePresence>
+                                  {isExpanded && (
+                                    <motion.div
+                                      initial={{ opacity: 0, height: 0 }}
+                                      animate={{ opacity: 1, height: 'auto' }}
+                                      exit={{ opacity: 0, height: 0 }}
+                                      transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                      className="overflow-hidden"
+                                    >
+                                      <div className="space-y-1 pt-2">
+                                        {cd.challenges && (<div><strong>과제 : </strong><RichTextRenderer text={cd.challenges} className="ml-4 !text-[14px]" /></div>)}
+                                        {cd.solutions && (<div><strong>해결 : </strong><RichTextRenderer text={cd.solutions} className="ml-4 !text-[14px]" /></div>)}
+                                        {cd.lessonsLearned && (<div><strong>배운점 : </strong><RichTextRenderer text={cd.lessonsLearned} className="ml-4 !text-[14px]" /></div>)}
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+
+                                {/* 접기/펼치기 버튼 */}
+                                <div className="mt-2 flex justify-end">
+                                  <Button variant="ghost" size="sm" onClick={() => toggleExpand(cd.id)} className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 flex items-center" aria-expanded={isExpanded}>
+                                    {isExpanded ? '간략히 보기' : '자세히 보기'}
+                                    {isExpanded ? <FaChevronUp className="ml-2 h-3 w-3" /> : <FaChevronDown className="ml-2 h-3 w-3" />}
+                                  </Button>
                                   </div>
                                 </div>
-                              )}
-                              {cd.challenges && (
-                                <div className="mb-1">
-                                  <strong>과제 : </strong>
-                                  <RichTextRenderer text={cd.challenges} className="ml-4 !text-[14px]" />
-                                </div>
-                              )}
-                              {cd.solutions && (
-                                <div className="mb-1">
-                                  <strong>해결 : </strong>
-                                  <RichTextRenderer text={cd.solutions} className="ml-4 !text-[14px]" />
-                                </div>
-                              )}
-                              {cd.results && (
-                                <div className="mb-1">
-                                  <strong>성과 : </strong>
-                                  <RichTextRenderer text={cd.results} className="ml-4 !text-[14px]" />
-                                </div>
-                              )}
-                              {cd.lessonsLearned && (
-                                <div className="mb-1">
-                                  <strong>배운점 : </strong>
-                                  <RichTextRenderer text={cd.lessonsLearned} className="ml-4 !text-[14px]" />
-                                </div>
-                              )}
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       );
                     })}
@@ -199,19 +215,10 @@ export default function CareerDetailClient({ companies, projects, careerDetails,
                     <div style={{ fontWeight: 600, fontSize: 16 }}>{proj.title} <span style={{ fontSize: 13, color: '#444', marginLeft: 8 }}>{proj.startDate} ~ {proj.endDate || '현재'}</span></div>
                     {projectCareerDetails.map((cd) => (
                       <div key={cd.id} id={`cd-${cd.id}-print`} style={{ marginLeft: 24, marginTop: 8, borderLeft: '2px solid #eee', paddingLeft: 12, paddingBottom: 8 }}>
-                        {((cd.myRole && (Array.isArray(cd.responsibilities) ? cd.responsibilities.length > 0 : cd.responsibilities)) || (Array.isArray(cd.responsibilities) ? cd.responsibilities.length > 0 : cd.responsibilities)) && (
-                          <div style={{ marginBottom: 4 }}><strong>주요 업무 : </strong>
-                            {
-                              Array.isArray(cd.responsibilities) ? (
-                                <ul style={{ marginLeft: 16, fontSize: 14, fontWeight: 400, listStyleType: 'disc', paddingLeft: 20 }}>
-                                  {cd.responsibilities.map((r, i) => <li key={i}>{r}</li>)}
-                                </ul>
-                              ) : (
-                                (cd.responsibilities ?? '').split('\n').map((line: string, idx: number) => (
-                                  <div key={idx} style={{ marginLeft: 16, fontSize: 14, fontWeight: 400 }}>{line}</div>
-                                ))
-                              )
-                            }
+                        {cd.responsibilities && (
+                          <div style={{ marginBottom: 4 }}>
+                            <strong>주요 업무 : </strong>
+                            <RichTextRenderer text={cd.responsibilities} className="print-richtext" />
                           </div>
                         )}
                         {Array.isArray(proj.skills) && proj.skills.length > 0 && (

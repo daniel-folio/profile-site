@@ -3,10 +3,6 @@ import { Company } from '@/types/company';
 import { Project } from '@/types/project';
 import { Profile } from '@/types/profile';
 import { CareerDetail } from '@/types/career-detail';
-import { marked } from 'marked';
-import { RichTextRenderer } from '@/components/ui/RichTextRenderer';
-import CareerDetailPdfDownloadButton from '@/components/CareerDetailPdfDownloadButton';
-import { useEffect } from 'react';
 import CareerDetailClient from './CareerDetailClient';
 
 // 이 페이지를 항상 동적으로 렌더링하여 캐시를 사용하지 않도록 설정합니다.
@@ -14,10 +10,10 @@ export const dynamic = 'force-dynamic';
 
 export default async function CareerDetailPage() {
   const [companiesRes, projectsRes, careerDetailsRes, profileRes]: any[] = await Promise.all([
-    getCompanies(undefined, { next: { revalidate: 3600 } }),
-    getProjects(false, undefined, { next: { revalidate: 3600 } }),
-    getCareerDetails(undefined, { next: { revalidate: 3600 } }),
-    getProfile(undefined, { next: { revalidate: 3600 } }),
+    getCompanies(),
+    getProjects(false),
+    getCareerDetails(),
+    getProfile(),
   ]);
   const companies: Company[] = Array.isArray(companiesRes?.data)
     ? companiesRes.data.map((item: any) => {
