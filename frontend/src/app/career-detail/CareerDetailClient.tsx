@@ -135,6 +135,12 @@ export default function CareerDetailClient({ companies, projects, careerDetails,
                               <div key={cd.id} id={`cd-${cd.id}`} className="ml-6 mt-2 border-l-2 border-gray-200 dark:border-gray-700 pl-4 pb-2">
                                 {/* 항상 보이는 부분 */}
                                 <div className="space-y-1">
+                                  {cd.results && (
+                                    <div>
+                                      <strong>성과 : </strong>
+                                      <RichTextRenderer text={cd.results} className="ml-4 !text-[14px]" />
+                                    </div>
+                                  )}
                                   {cd.responsibilities && (
                                     <div>
                                       <strong>주요 업무 : </strong>
@@ -149,12 +155,6 @@ export default function CareerDetailClient({ companies, projects, careerDetails,
                                           <span key={t.id || t.name || i} className="bg-sky-100 text-sky-700 px-2 py-0.5 rounded text-[12px] font-semibold border border-sky-200">{t.name}</span>
                                         ))}
                                       </div>
-                                    </div>
-                                  )}
-                                  {cd.results && (
-                                    <div>
-                                      <strong>성과 : </strong>
-                                      <RichTextRenderer text={cd.results} className="ml-4 !text-[14px]" />
                                     </div>
                                   )}
                                 </div>
@@ -215,6 +215,11 @@ export default function CareerDetailClient({ companies, projects, careerDetails,
                     <div style={{ fontWeight: 600, fontSize: 16 }}>{proj.title} <span style={{ fontSize: 13, color: '#444', marginLeft: 8 }}>{proj.startDate} ~ {proj.endDate || '현재'}</span></div>
                     {projectCareerDetails.map((cd) => (
                       <div key={cd.id} id={`cd-${cd.id}-print`} style={{ marginLeft: 24, marginTop: 8, borderLeft: '2px solid #eee', paddingLeft: 12, paddingBottom: 8 }}>
+                        {cd.results && (
+                          <div style={{ marginBottom: 4 }}><strong>성과 : </strong>
+                            <RichTextRenderer text={cd.results} className="print-richtext" />
+                          </div>
+                        )}
                         {cd.responsibilities && (
                           <div style={{ marginBottom: 4 }}>
                             <strong>주요 업무 : </strong>
@@ -236,11 +241,6 @@ export default function CareerDetailClient({ companies, projects, careerDetails,
                         {cd.solutions && (
                           <div style={{ marginBottom: 4 }}><strong>해결 : </strong>
                             <RichTextRenderer text={cd.solutions} className="print-richtext" />
-                          </div>
-                        )}
-                        {cd.results && (
-                          <div style={{ marginBottom: 4 }}><strong>성과 : </strong>
-                            <RichTextRenderer text={cd.results} className="print-richtext" />
                           </div>
                         )}
                         {cd.lessonsLearned && (
