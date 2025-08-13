@@ -68,8 +68,8 @@ export function Projects({ projects, featured = false }: ProjectsProps) {
             }
 
             return (
-              <Card key={project.id} className="group overflow-hidden bg-white dark:bg-gray-800 shadow-lg dark:shadow-xl dark:hover:shadow-primary-gradient-start/20">
-                <div className="relative h-48 overflow-hidden">
+              <div key={project.id} className="group overflow-hidden bg-white dark:bg-gray-800 shadow-lg dark:shadow-xl dark:hover:shadow-primary-gradient-start/20 rounded-lg border border-gray-200 transition-all duration-150 hover:shadow-none flex flex-col h-full">
+                <div className="relative h-48 overflow-hidden rounded-t-lg">
                   {imageUrl && (
                     <Image
                       src={getImageUrl(imageUrl)!}
@@ -80,7 +80,7 @@ export function Projects({ projects, featured = false }: ProjectsProps) {
                     />
                   )}
                 </div>
-                <CardHeader>
+                <div className="flex flex-col space-y-1.5 p-6">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-2xl text-gray-700 dark:text-gray-300">
                       {getProjectTypeIcon(project.projectType)}
@@ -89,14 +89,14 @@ export function Projects({ projects, featured = false }: ProjectsProps) {
                       {project.projectStatus}
                     </span>
                   </div>
-                  <CardTitle className="text-xl text-gray-900 dark:text-gray-100">{project.title}</CardTitle>
+                  <h3 className="text-xl font-semibold leading-none tracking-tight text-gray-900 dark:text-gray-100">{project.title}</h3>
                   {/* CardDescription을 div와 RichTextRenderer로 교체하여 마크다운을 렌더링합니다. */}
                   <div className="text-sm text-gray-700 dark:text-gray-300 mt-2">
                     {project.shortDescription && 
                       <RichTextRenderer text={project.shortDescription} className="prose prose-sm dark:prose-invert max-w-none" />}
                   </div>
-                </CardHeader>
-                <CardContent>
+                </div>
+                <div className="p-6 pt-0 flex-grow">
                   <div className="flex flex-wrap gap-2 mb-2">
                     {Array.isArray(project.skills?.data) && project.skills.data.map((skill: any, idx) => (
                       <span key={skill?.id ?? idx} className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded px-2 py-1">
@@ -107,13 +107,13 @@ export function Projects({ projects, featured = false }: ProjectsProps) {
                   <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                     {formatDateRange(project.startDate, project.endDate)}
                   </div>
-                </CardContent>
-                <CardFooter className="flex justify-end">
+                </div>
+                <div className="flex items-center p-6 pt-0 justify-end mt-auto">
                   <Link href={`/portfolio/${project.slug}`}>
                     <Button size="sm" variant="gradient">자세히 보기</Button>
                   </Link>
-                </CardFooter>
-              </Card>
+                </div>
+              </div>
             );
           })}
         </div>
