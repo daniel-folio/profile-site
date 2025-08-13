@@ -81,21 +81,42 @@ export default async function ProjectPage(props: any) {
   return (
     <div className="bg-white dark:bg-gray-900">
       <div className="container mx-auto px-4 py-16">
+        {/* ----- 상단: 제목과 기본 정보 ----- */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-gray-100">{title}</h1>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <InfoItem label="프로젝트 형태" value={projectType} />
+            <InfoItem label="상태" value={projectStatus} />
+            <InfoItem label="기간" value={formatDateRange(startDate, endDate)} />
+          </div>
+        </div>
+
+        {/* ----- 메인 이미지 (있는 경우에만 표시) ----- */}
+        {mainImage && (
+          <div className="relative aspect-video mb-8 overflow-hidden rounded-lg">
+            <Image
+              src={getImageUrl(mainImage.url)}
+              alt={mainImage.alternativeText || title}
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        )}
+
+        {/* ----- 하단: 설명과 부가 정보를 나란히 배치 ----- */}
         <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
-          {/* ----- 왼쪽 메인 콘텐츠 ----- */}
-          <main className="lg:col-span-2">
-            <div className="relative aspect-video mb-8 overflow-hidden rounded-lg">
-              <Image
-                src={mainImage ? getImageUrl(mainImage.url) : '/placeholder.svg'}
-                alt={mainImage ? mainImage.alternativeText || title : `${title} placeholder image`}
-                fill
-                className="object-cover"
-                priority
-              />
+          {/* 왼쪽: 프로젝트 설명 */}
+          <div className="lg:col-span-2">
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">프로젝트 소개</h2>
+              <RichTextRenderer text={fullDescription} className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300" />
             </div>
+
+            {/* 추가 스크린샷들 */}
             {otherImages.length > 0 && (
-              <div className="mt-16">
-                <h3 className="text-2xl font-bold mb-6">스크린샷</h3>
+              <div className="mt-12">
+                <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">스크린샷</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {otherImages.map((image) => (
                     <div key={image.url} className="relative aspect-video overflow-hidden rounded-lg">
@@ -110,22 +131,11 @@ export default async function ProjectPage(props: any) {
                 </div>
               </div>
             )}
-          </main>
+          </div>
           
-          {/* ----- 오른쪽 사이드바 정보 ----- */}
+          {/* 오른쪽: 기술 스택과 링크 */}
           <aside className="h-fit">
             <div className="space-y-8">
-              <div>
-                <h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">{title}</h1>
-                <RichTextRenderer text={fullDescription} className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <InfoItem label="프로젝트 형태" value={projectType} />
-                <InfoItem label="상태" value={projectStatus} />
-                <InfoItem label="기간" value={formatDateRange(startDate, endDate)} />
-              </div>
-
               {technologies?.data && technologies.data.length > 0 && (
                 <InfoSection title="사용 기술">
                   <div className="flex flex-wrap gap-2">
@@ -143,13 +153,13 @@ export default async function ProjectPage(props: any) {
 
               {(githubUrl || liveUrl) && (
                 <InfoSection title="관련 링크">
-                  <div className="flex flex-wrap gap-4">
+                  <div className="flex flex-col gap-3">
                     {githubUrl && (
                       <a
                         href={githubUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block px-4 py-2 rounded bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-white font-semibold shadow hover:opacity-90 transition"
+                        className="inline-block px-4 py-2 rounded bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-white font-semibold shadow hover:opacity-90 transition text-center"
                       >
                         GitHub 저장소
                       </a>
@@ -159,7 +169,7 @@ export default async function ProjectPage(props: any) {
                         href={liveUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-semibold shadow hover:opacity-90 transition"
+                        className="inline-block px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-semibold shadow hover:opacity-90 transition text-center"
                       >
                         라이브 데모
                       </a>
