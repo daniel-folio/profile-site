@@ -10,6 +10,7 @@ export default {
       path: '/visitors/stats',
       handler: 'visitor.getStats',
       config: {
+        auth: false,
         policies: [],
         middlewares: [],
       },
@@ -20,6 +21,7 @@ export default {
       path: '/visitors',
       handler: 'visitor.create',
       config: {
+        auth: false,
         policies: [],
         middlewares: [],
       },

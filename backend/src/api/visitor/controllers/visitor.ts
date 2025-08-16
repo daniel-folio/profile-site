@@ -258,12 +258,13 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
       console.log('📊 총 방문자 수:', totalVisitors);
 
       // Strapi EntityService를 사용한 고유 방문자 수 계산
-      const allVisitors = await strapi.entityService.findMany('api::visitor.visitor', {
+      const allVisitorsRaw = await strapi.entityService.findMany('api::visitor.visitor', {
         filters: dateFilter,
         fields: ['ipAddress', 'page', 'visitedAt', 'userAgent', 'sessionId', 'os', 'osVersion', 'browser', 'browserVersion', 'deviceType'],
       });
 
-      console.log('📊 조회된 방문자 데이터:', allVisitors?.length || 0, '건');
+      const allVisitors = (allVisitorsRaw as unknown as any[]) || [];
+      console.log('📊 조회된 방문자 데이터:', allVisitors.length, '건');
 
       // 고유 IP 주소 계산 및 추가 분석 데이터
       const uniqueIPs = new Set();
@@ -273,7 +274,7 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
       const browserStatsMap = new Map();
       const osStatsMap = new Map();
 
-      allVisitors?.forEach(visitor => {
+      allVisitors.forEach((visitor: any) => {
         if (visitor.ipAddress) {
           uniqueIPs.add(visitor.ipAddress);
         }

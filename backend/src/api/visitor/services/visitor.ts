@@ -4,7 +4,8 @@
 
 import { factories } from '@strapi/strapi';
 
-export default factories.createCoreService('api::visitor.visitor', ({ strapi }) => ({
+// NOTE: 타입 충돌을 피하기 위해 any 캐스팅을 사용합니다. (Strapi 타입 정의 버전차 보정)
+export default factories.createCoreService('api::visitor.visitor' as any, ({ strapi }: any) => ({
   // IP 주소로부터 지역 정보 추출 (간단한 구현)
   async getLocationFromIP(ipAddress: string) {
     try {
