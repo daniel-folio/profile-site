@@ -15,7 +15,13 @@ export default function AdminVisitorsPage() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const urlPassword = urlParams.get('password');
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123';
+    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
+    
+    // 환경변수가 설정되지 않은 경우 에러 표시
+    if (!adminPassword) {
+      setError('관리자 패스워드가 설정되지 않았습니다. 환경변수를 확인해주세요.');
+      return;
+    }
     
     if (urlPassword === adminPassword) {
       setIsAuthorized(true);
@@ -27,7 +33,13 @@ export default function AdminVisitorsPage() {
   // 패스워드 인증 처리
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123';
+    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
+    
+    // 환경변수가 설정되지 않은 경우 에러 표시
+    if (!adminPassword) {
+      setError('관리자 패스워드가 설정되지 않았습니다. 환경변수를 확인해주세요.');
+      return;
+    }
     
     if (password === adminPassword) {
       setIsAuthorized(true);

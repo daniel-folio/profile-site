@@ -209,9 +209,39 @@ npm install
 `.env.local` 파일을 생성하고 다음 내용을 추가하세요:
 
 ```env
-NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
+# Backend API Connection
+NEXT_PUBLIC_STRAPI_API_URL=http://localhost:1337
+
+# Admin Dashboard Access (REQUIRED for visitor analytics)
+NEXT_PUBLIC_ADMIN_PASSWORD=your_secure_local_password
+
+# Visitor Tracking
+NEXT_PUBLIC_ENABLE_VISITOR_TRACKING=true
 ```
+
+### 🔐 **Production Environment Variables (Vercel)**
+
+**⚠️ IMPORTANT**: For production deployment, you must set environment variables in Vercel Dashboard:
+
+#### **Required Variables**
+```env
+# Admin Access - SET DIFFERENT PASSWORDS FOR PROD/TEST
+NEXT_PUBLIC_ADMIN_PASSWORD=your_secure_production_password
+
+# Backend API
+NEXT_PUBLIC_STRAPI_API_URL=https://your-backend-url.render.com
+
+# Optional
+NEXT_PUBLIC_ENABLE_VISITOR_TRACKING=true
+```
+
+#### **Security Setup**
+1. **Vercel Dashboard** → **Project** → **Settings** → **Environment Variables**
+2. **Production**: Set strong password for production environment
+3. **Preview/Test**: Set different password for preview deployments
+4. **Never use hardcoded passwords** - the app will show an error if not set
+
+📖 **[Detailed Deployment Guide](./DEPLOYMENT.md)** - Complete setup instructions for Vercel, Render, and environment variables
 
 ```bash
 npm run dev
