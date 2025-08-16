@@ -34,11 +34,10 @@ export default factories.createCoreController('api::site-setting.site-setting', 
         fields: ['enableVisitorTracking', 'siteName', 'siteDescription', 'siteUsed', 'maxVisitorsPerDay']
       });
 
-      // 데이터가 없으면 기본값으로 생성
+      // 데이터가 없으면 기본값으로 생성 (패스워드는 제외)
       if (!settings) {
         settings = await strapi.entityService.create('api::site-setting.site-setting', {
           data: {
-            adminPassword: 'admin123',
             enableVisitorTracking: true,
             siteName: 'Developer Portfolio',
             siteDescription: 'Personal portfolio website',
@@ -123,7 +122,6 @@ export default factories.createCoreController('api::site-setting.site-setting', 
 
       const defaultSettings = await strapi.entityService.create('api::site-setting.site-setting', {
         data: {
-          adminPassword: 'admin123', // 기본 패스워드 (변경 필요)
           enableVisitorTracking: true,
           siteName: 'Developer Portfolio',
           siteDescription: 'Personal portfolio website',

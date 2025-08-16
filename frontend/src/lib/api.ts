@@ -10,11 +10,27 @@ import qs from 'qs';
 const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN || null;
 
 /**
+ * 환경에 따른 API URL 선택 로직 (중앙 집중식)
+ * 다른 파일에서 일관된 API URL 사용을 위한 공통 함수
+ */
+export function getApiUrl(): string {
+  // Vercel 환경 변수를 사용해 현재 환경이 운영(Production)인지 파악합니다.
+  const isProduction = process.env.VERCEL_ENV === 'production';
+
+  // 환경에 따라 사용할 기본 API URL을 결정합니다.
+  // Vercel 환경에서는 _PRIMARY를, 로컬에서는 기본 URL을 사용합니다.
+  const primaryApiUrl = isProduction
+    ? process.env.NEXT_PUBLIC_STRAPI_API_URL_PRIMARY || 'http://127.0.0.1:1337' // 운영 환경일 경우
+    : process.env.NEXT_PUBLIC_STRAPI_URL || 'http://127.0.0.1:1337';            // Preview, dev 환경일 경우
+
+  return primaryApiUrl;
+}
+
+/**
  * Strapi 미디어 파일의 전체 URL을 반환하는 함수
  */
 export function getStrapiMedia(url: string | null | undefined): string | null {
-  // 환경 변수가 없으면 로컬 개발 환경으로 간주하고 기본 URL을 사용합니다.
-  const baseUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL_PRIMARY || 'http://127.0.0.1:1337';
+  const baseUrl = getApiUrl();
 
   if (!url) return null;
   if (url.startsWith('http')) return url;
@@ -26,14 +42,9 @@ export function getStrapiMedia(url: string | null | undefined): string | null {
  */
 async function fetchAPI<T>(path: string, params?: any, options: RequestInit = {}): Promise<T> {
   
-  // Vercel 환경 변수를 사용해 현재 환경이 운영(Production)인지 파악합니다.
+  // 공통 API URL 선택 함수 사용
+  const primaryApiUrl = getApiUrl();
   const isProduction = process.env.VERCEL_ENV === 'production';
-
-  // 환경에 따라 사용할 기본 API URL을 결정합니다.
-  // Vercel 환경에서는 _PRIMARY를, 로컬에서는 기본 URL을 사용합니다.
-  const primaryApiUrl = isProduction
-  ? process.env.NEXT_PUBLIC_STRAPI_API_URL_PRIMARY || 'http://127.0.0.1:1337' // 운영 환경일 경우
-  : process.env.NEXT_PUBLIC_STRAPI_URL || 'http://127.0.0.1:1337';            // Preview, dev 환경일 경우
 
   const secondaryApiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL_SECONDARY;
   // FAILOVER_MODE_ENABLED 변수가 'true'일 때만 failover 기능을 활성화합니다.

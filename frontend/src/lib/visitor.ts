@@ -1,7 +1,9 @@
 // 방문자 추적 관련 API 함수들
 import { getCachedSiteSettings } from './siteSettings';
+import { getApiUrl } from './api';
 
-const API_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
+// 공통 API URL 선택 함수 사용 (api.ts의 환경별 로직 적용)
+const API_URL = getApiUrl();
 
 // Strapi 설정에서 방문자 추적 활성화 여부 확인
 async function isTrackingEnabled(): Promise<boolean> {

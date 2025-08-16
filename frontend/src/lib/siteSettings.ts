@@ -1,6 +1,8 @@
 // Strapi에서 사이트 설정을 조회하는 함수들
+import { getApiUrl } from './api';
 
-const API_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
+// 공통 API URL 선택 함수 사용 (api.ts의 환경별 로직 적용)
+const API_URL = getApiUrl();
 
 export interface SiteSettings {
   enableVisitorTracking: boolean;
@@ -37,6 +39,10 @@ export async function getSiteSettings(): Promise<SiteSettings> {
 // 관리자 패스워드 검증
 export async function validateAdminPassword(password: string): Promise<boolean> {
   try {
+    console.log('🔍 Password validation started');
+    console.log('🔍 API_URL:', API_URL);
+    console.log('🔍 Input password:', password);
+    
     const response = await fetch(`${API_URL}/api/site-settings/validate-password`, {
       method: 'POST',
       headers: {
@@ -45,14 +51,20 @@ export async function validateAdminPassword(password: string): Promise<boolean> 
       body: JSON.stringify({ password }),
     });
 
+    console.log('🔍 Response status:', response.status);
+    console.log('🔍 Response ok:', response.ok);
+
     if (response.ok) {
       const data = await response.json();
+      console.log('🔍 Response data:', data);
       return data.success === true;
     }
 
+    const errorText = await response.text();
+    console.log('🔍 Error response:', errorText);
     return false;
   } catch (error) {
-    console.error('Error validating admin password:', error);
+    console.error('🔍 Error validating admin password:', error);
     return false;
   }
 }

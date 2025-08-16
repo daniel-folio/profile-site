@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useVisitorStats } from '@/hooks/useVisitorTracking';
+import { VisitorStats } from './VisitorStats';
+import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
+import { getApiUrl } from '@/lib/api';
 
 interface VisitorDetail {
   id: number;
@@ -51,7 +55,8 @@ export function VisitorAnalyticsDashboard() {
   const fetchVisitorDetails = async () => {
     setLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
+      // 공통 API URL 선택 함수 사용 (api.ts의 환경별 로직 적용)
+      const apiUrl = getApiUrl();
       // 방문자 상세 데이터 요청
 
       const response = await fetch(`${apiUrl}/api/visitors?pagination[limit]=1000&sort=visitedAt:desc`);
