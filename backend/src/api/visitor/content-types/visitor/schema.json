@@ -1,0 +1,44 @@
+{
+  "kind": "collectionType",
+  "collectionName": "visitors",
+  "info": {
+    "singularName": "visitor",
+    "pluralName": "visitors",
+    "displayName": "Visitor",
+    "description": "방문자 추적 정보"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "ipAddress": {
+      "type": "string",
+      "required": true,
+      "maxLength": 45
+    },
+    "userAgent": {
+      "type": "text"
+    },
+    "referrer": {
+      "type": "string"
+    },
+    "page": {
+      "type": "string",
+      "required": true
+    },
+    "country": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "visitedAt": {
+      "type": "datetime",
+      "required": true
+    },
+    "sessionId": {
+      "type": "string"
+    }
+  }
+}

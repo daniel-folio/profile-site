@@ -1,4 +1,92 @@
-# 개발자 포트폴리오 웹사이트
+# Developer Portfolio Website | 개발자 포트폴리오 웹사이트
+
+**🌍 English** | [한국어](#korean)
+
+## English Overview
+
+A **full-stack developer portfolio website** showcasing modern web development practices with **Next.js 15**, **Strapi CMS**, and a custom-built **visitor analytics system**. This project demonstrates enterprise-level architecture, performance optimization, and user experience design.
+
+### 🎯 Core Features
+
+#### 📊 **Advanced Visitor Analytics System**
+- **Real-time Dashboard** with multi-tab interface (Overview, Page Analysis, Session Tracking, Live Visitors)
+- **Smart Date Selection** with quick period buttons (1d/7d/30d) and custom date range picker
+- **Session Analysis** tracking user journey paths and behavior patterns
+- **Browser/OS Statistics** with detailed visitor environment analytics
+- **IP-based Grouping** with accordion UI for organized data presentation
+- **Empty State Handling** with user-friendly fallback interfaces
+- **Privacy-First Design** with GDPR compliance considerations
+- [**📖 Detailed Documentation**](./VISITOR_TRACKING.md)
+
+#### 📄 **Dynamic Content Management**
+- **PDF Generation** for resumes and career details using html2pdf.js
+- **Rich Text Rendering** with markdown and HTML support
+- **Image Optimization** via Cloudinary integration
+- **SEO Optimization** with meta tags and Open Graph configuration
+- **Content Versioning** through Strapi's headless CMS architecture
+
+#### 🎨 **Modern UI/UX Design**
+- **Dark/Light Mode** with system preference detection
+- **Responsive Design** optimized for mobile, tablet, and desktop
+- **Smooth Animations** powered by Framer Motion
+- **Interactive Backgrounds** using Three.js and Vanta effects
+- **Typing Animations** for dynamic text presentation
+- **Accessibility** following WCAG guidelines
+
+#### ⚡ **Performance & Security**
+- **Next.js App Router** with server-side rendering and static generation
+- **Image Optimization** with Next.js Image component and lazy loading
+- **Caching Strategies** for optimal loading performance
+- **XSS Protection** using DOMPurify sanitization
+- **Secure API Endpoints** with proper authentication and validation
+- **Code Splitting** for minimal bundle sizes
+
+### 🛠️ Technical Architecture
+
+#### **Frontend Stack**
+- **Framework**: Next.js 15 with App Router architecture
+- **Language**: TypeScript for type safety and developer experience
+- **Styling**: Tailwind CSS with custom design system
+- **Animation**: Framer Motion for smooth transitions
+- **3D Graphics**: Three.js with Vanta.js for interactive backgrounds
+- **State Management**: React hooks with custom context providers
+- **Code Quality**: ESLint, Prettier, and Husky for consistent code standards
+
+#### **Backend Stack**
+- **CMS**: Strapi 5.16 headless CMS with custom controllers
+- **Database**: PostgreSQL (production) / SQLite (development)
+- **Image Storage**: Cloudinary with automatic optimization
+- **API**: RESTful endpoints with custom visitor analytics API
+- **Authentication**: JWT-based admin authentication
+- **Deployment**: Render with automated CI/CD pipeline
+
+#### **Analytics & Monitoring**
+- **Custom Analytics**: Built-in visitor tracking system
+- **Real-time Data**: Live visitor monitoring and session analysis
+- **Performance Metrics**: Core Web Vitals tracking
+- **Error Monitoring**: Comprehensive error logging and reporting
+
+### 🌟 **Project Highlights**
+
+This portfolio demonstrates:
+- **Full-stack Development** expertise with modern JavaScript ecosystem
+- **System Architecture** skills with scalable, maintainable code structure
+- **UI/UX Design** capabilities with attention to user experience
+- **Performance Optimization** knowledge with real-world implementation
+- **Security Best Practices** with proper data handling and protection
+- **Documentation Skills** with comprehensive technical documentation
+
+### 🚀 **Live Demo & Deployment**
+- **Frontend**: Deployed on Vercel with automatic deployments
+- **Backend**: Hosted on Render with PostgreSQL database
+- **CDN**: Cloudinary for optimized image delivery
+- **Domain**: Custom domain with SSL certificate
+
+---
+
+## Korean
+
+<a name="korean"></a>
 
 개인의 이력서, 포트폴리오, 경력기술서를 체계적으로 관리하고 전시할 수 있는 개인 웹사이트입니다.
 
@@ -83,6 +171,7 @@ portfolio/
 - ✅ **코드 하이라이팅**: highlight.js를 사용한 코드 블록 스타일링
 - ✅ **보안**: DOMPurify를 사용한 XSS 방지
 - ✅ **성능 최적화**: Next.js Image 컴포넌트, 캐싱 전략
+- ✅ **방문자 분석**: 실시간 방문자 추적 및 통계 대시보드 ([상세 문서](./VISITOR_TRACKING.md))
 
 ### 🔄 향후 확장 계획
 - 🔄 블로그 시스템 (데이터 모델 준비됨)

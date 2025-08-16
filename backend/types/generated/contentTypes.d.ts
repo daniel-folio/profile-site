@@ -762,6 +762,46 @@ export interface ApiSkillSkill extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiVisitorVisitor extends Struct.CollectionTypeSchema {
+  collectionName: 'visitors';
+  info: {
+    description: '\uBC29\uBB38\uC790 \uCD94\uC801 \uC815\uBCF4';
+    displayName: 'Visitor';
+    pluralName: 'visitors';
+    singularName: 'visitor';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    city: Schema.Attribute.String;
+    country: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    ipAddress: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 45;
+      }>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::visitor.visitor'
+    > &
+      Schema.Attribute.Private;
+    page: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    referrer: Schema.Attribute.String;
+    sessionId: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    userAgent: Schema.Attribute.Text;
+    visitedAt: Schema.Attribute.DateTime & Schema.Attribute.Required;
+  };
+}
+
 export interface PluginContentReleasesRelease
   extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_releases';
@@ -1280,6 +1320,7 @@ declare module '@strapi/strapi' {
       'api::profile.profile': ApiProfileProfile;
       'api::project.project': ApiProjectProject;
       'api::skill.skill': ApiSkillSkill;
+      'api::visitor.visitor': ApiVisitorVisitor;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
