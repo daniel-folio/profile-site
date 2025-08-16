@@ -26,19 +26,6 @@ export function getStrapiMedia(url: string | null | undefined): string | null {
  */
 async function fetchAPI<T>(path: string, params?: any, options: RequestInit = {}): Promise<T> {
   
-  // ==================== 디버깅 코드 추가 ====================
-  console.log("--- Vercel Build-Time Debug ---");
-  console.log("VERCEL_ENV:", process.env.VERCEL_ENV);
-  console.log("FAILOVER_MODE_ENABLED:", process.env.FAILOVER_MODE_ENABLED);
-  console.log("NEXT_PUBLIC_STRAPI_URL:", process.env.NEXT_PUBLIC_STRAPI_URL);
-  console.log("NEXT_PUBLIC_STRAPI_API_URL_PRIMARY:", process.env.NEXT_PUBLIC_STRAPI_API_URL_PRIMARY);
-  
-  // 토큰은 보안상 전체를 출력하지 않고, 존재 여부와 일부만 확인합니다.
-  console.log("STRAPI_API_TOKEN (Exists):", !!process.env.STRAPI_API_TOKEN);
-  console.log("STRAPI_API_TOKEN (First 8 Chars):", process.env.STRAPI_API_TOKEN?.substring(0, 8));
-  console.log("---------------------------------");
-  // =========================================================
-
   // Vercel 환경 변수를 사용해 현재 환경이 운영(Production)인지 파악합니다.
   const isProduction = process.env.VERCEL_ENV === 'production';
 
@@ -81,7 +68,7 @@ async function fetchAPI<T>(path: string, params?: any, options: RequestInit = {}
 
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error('API Error Response:', errorBody);
+      // API 에러 응답
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
     return response.json();
@@ -98,12 +85,12 @@ async function fetchAPI<T>(path: string, params?: any, options: RequestInit = {}
   try {
     return await tryFetch(primaryApiUrl);
   } catch (error) {
-    console.error("PRIMARY backend fetch failed:", error instanceof Error ? error.message : String(error));
+    // PRIMARY backend fetch 실패
     
     try {
         return await tryFetch(secondaryApiUrl);
     } catch (secondaryError) {
-        console.error("SECONDARY backend fetch also failed:", secondaryError instanceof Error ? secondaryError.message : String(secondaryError));
+        // SECONDARY backend fetch도 실패
         throw new Error("Both primary and secondary backends failed.");
     }
   }

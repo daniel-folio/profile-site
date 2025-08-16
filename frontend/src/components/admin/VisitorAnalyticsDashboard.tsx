@@ -52,34 +52,29 @@ export function VisitorAnalyticsDashboard() {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
-      console.log('🔍 방문자 상세 데이터 요청:', `${apiUrl}/api/visitors?pagination[limit]=1000&sort=visitedAt:desc`);
-      
+      // 방문자 상세 데이터 요청
+
       const response = await fetch(`${apiUrl}/api/visitors?pagination[limit]=1000&sort=visitedAt:desc`);
-      
-      console.log('📡 방문자 상세 데이터 응답 상태:', response.status, response.statusText);
       
       if (response.ok) {
         const result = await response.json();
-        console.log('📊 방문자 상세 데이터 결과:', result);
+        // 방문자 상세 데이터 결과 처리
         
         // API 응답 구조 검증
         if (!result || !Array.isArray(result.data)) {
-          console.warn('⚠️ 예상하지 못한 API 응답 구조:', result);
+          console.warn('예상하지 못한 API 응답 구조:', result);
           setVisitorDetails([]);
           setVisitorSessions([]);
           return;
         }
         
         // API 응답 구조 디버깅
-        console.log('🔍 result.data 타입:', typeof result.data);
-        console.log('🔍 result.data 배열 여부:', Array.isArray(result.data));
-        console.log('🔍 result.data[0] 구조:', result.data[0]);
-        console.log('🔍 result.data[0]?.attributes 존재 여부:', !!result.data[0]?.attributes);
+        // 데이터 구조 확인
         
         const details: VisitorDetail[] = result.data
           .filter((item: any) => item && item.id) // id가 있으면 유효한 데이터
           .map((item: any) => {
-            console.log('🔍 매핑 중인 아이템:', item);
+            // 매핑 중인 아이템 처리
             return {
               id: item.id,
               ipAddress: item.ipAddress || '알 수 없음', // attributes 제거
@@ -93,23 +88,19 @@ export function VisitorAnalyticsDashboard() {
             };
           });
           
-        console.log('🔍 필터링 전 데이터:', result.data.length);
-        console.log('🔍 필터링 후 데이터:', details.length);
-        console.log('🔍 첫 번째 데이터 샘플:', details[0]);
-        console.log('🔍 원본 API 응답 첫 번째 항목:', result.data[0]);
+        // 데이터 필터링 완료
         
         setVisitorDetails(details);
-        console.log('📋 처리된 방문자 상세 데이터:', details);
-        console.log('📋 setVisitorDetails 호출 완료, details 길이:', details.length);
+        // 방문자 상세 데이터 처리 완료
         
         // 세션별로 그룹화
         const sessionMap = new Map<string, VisitorSession>();
-        console.log('🔄 세션별 그룹화 시작, 총 방문 기록:', details.length);
+        // 세션별 그룹화 시작
         
         details.forEach(visit => {
           // 필수 필드 검증
           if (!visit.sessionId || !visit.ipAddress || !visit.visitedAt) {
-            console.warn('⚠️ 유효하지 않은 방문 데이터 건너뜀:', visit);
+            console.warn('유효하지 않은 방문 데이터 건너뜀:', visit);
             return;
           }
 
@@ -129,7 +120,7 @@ export function VisitorAnalyticsDashboard() {
           
           const session = sessionMap.get(visit.sessionId);
           if (!session) {
-            console.warn('⚠️ 세션을 찾을 수 없음:', visit.sessionId);
+            console.warn('세션을 찾을 수 없음:', visit.sessionId);
             return;
           }
 
@@ -145,7 +136,7 @@ export function VisitorAnalyticsDashboard() {
               session.lastVisit = visit.visitedAt;
             }
           } catch (dateError) {
-            console.warn('⚠️ 날짜 파싱 오류:', visit.visitedAt, dateError);
+            console.warn('날짜 파싱 오류:', visit.visitedAt, dateError);
           }
         });
         
@@ -153,11 +144,7 @@ export function VisitorAnalyticsDashboard() {
           new Date(b.lastVisit).getTime() - new Date(a.lastVisit).getTime()
         );
         
-        console.log('📊 세션별 그룹화 완료:', {
-          totalSessions: sessions.length,
-          totalVisits: details.length,
-          sessions: sessions.slice(0, 3) // 처음 3개 세션만 로그
-        });
+        // 세션별 그룹화 완료
         
         setVisitorSessions(sessions);
       }
@@ -175,7 +162,7 @@ export function VisitorAnalyticsDashboard() {
   // 실시간 탭이 활성화될 때마다 데이터 새로고침
   useEffect(() => {
     if (activeTab === 'realtime') {
-      console.log('🔄 실시간 탭 활성화 - 데이터 새로고침');
+      // 실시간 탭 활성화 - 데이터 새로고침
       fetchVisitorDetails();
     }
   }, [activeTab]);

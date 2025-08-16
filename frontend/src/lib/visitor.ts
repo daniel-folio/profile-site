@@ -1,7 +1,18 @@
 // 방문자 추적 관련 API 함수들
+import { getCachedSiteSettings } from './siteSettings';
 
 const API_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
-const TRACKING_ENABLED = process.env.NEXT_PUBLIC_ENABLE_VISITOR_TRACKING !== 'false';
+
+// Strapi 설정에서 방문자 추적 활성화 여부 확인
+async function isTrackingEnabled(): Promise<boolean> {
+  try {
+    const settings = await getCachedSiteSettings();
+    return settings.enableVisitorTracking;
+  } catch (error) {
+    console.warn('Failed to get tracking settings, defaulting to enabled');
+    return true; // 기본값: 활성화
+  }
+}
 
 export interface VisitorData {
   page: string;
@@ -55,8 +66,9 @@ export interface VisitorStats {
 // 방문자 정보 기록
 export async function recordVisitor(data: VisitorData): Promise<any> {
   // 방문자 추적이 비활성화된 경우 실행하지 않음
-  if (!TRACKING_ENABLED) {
-    console.log('방문자 추적이 비활성화되어 있습니다.');
+  const trackingEnabled = await isTrackingEnabled();
+  if (!trackingEnabled) {
+    // 방문자 추적이 비활성화되어 있습니다.
     return null;
   }
 
@@ -68,8 +80,7 @@ export async function recordVisitor(data: VisitorData): Promise<any> {
       },
     };
 
-    console.log('🚀 방문자 추적 요청 전송:', JSON.stringify(requestData, null, 2));
-    console.log('🚀 API URL:', `${API_URL}/api/visitors`);
+    // 방문자 추적 요청 전송
 
     const response = await fetch(`${API_URL}/api/visitors`, {
       method: 'POST',
@@ -79,7 +90,7 @@ export async function recordVisitor(data: VisitorData): Promise<any> {
       body: JSON.stringify(requestData),
     });
 
-    console.log('📡 응답 상태:', response.status, response.statusText);
+    // 응답 상태 확인
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -88,7 +99,7 @@ export async function recordVisitor(data: VisitorData): Promise<any> {
     }
 
     const result = await response.json();
-    console.log('✅ 방문자 기록 성공:', result);
+    // 방문자 기록 성공
     return result;
   } catch (error) {
     console.error('❌ 방문자 기록 실패:', error);

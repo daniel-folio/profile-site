@@ -31,7 +31,7 @@ export function useVisitorTracking() {
         // 추적 완료 표시
         hasTracked.current.add(normalizedPage);
         
-        console.log(`방문자 추적 완료: ${normalizedPage}`);
+        // 방문자 추적 완료
       } catch (error) {
         console.error('방문자 추적 오류:', error);
       }

@@ -1,0 +1,49 @@
+{
+  "kind": "singleType",
+  "collectionName": "site_settings",
+  "info": {
+    "singularName": "site-setting",
+    "pluralName": "site-settings",
+    "displayName": "Site Settings",
+    "description": "Global site configuration settings"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "adminPassword": {
+      "type": "string",
+      "private": false,
+      "minLength": 6,
+      "maxLength": 50,
+      "configurable": false
+    },
+    "enableVisitorTracking": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "siteName": {
+      "type": "string",
+      "required": false,
+      "maxLength": 100
+    },
+    "siteDescription": {
+      "type": "text",
+      "required": false,
+      "maxLength": 500
+    },
+    "siteUsed": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "maxVisitorsPerDay": {
+      "type": "integer",
+      "default": 10000,
+      "min": 100,
+      "max": 1000000
+    }
+  }
+}

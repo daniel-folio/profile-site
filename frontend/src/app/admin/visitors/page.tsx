@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useVisitorStats } from '@/hooks/useVisitorTracking';
 import { VisitorAnalyticsDashboard } from '@/components/admin/VisitorAnalyticsDashboard';
+import { validateAdminPassword } from '@/lib/siteSettings';
 
 // 관리자 방문자 분석 페이지
 export default function AdminVisitorsPage() {
@@ -10,44 +10,61 @@ export default function AdminVisitorsPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // URL에서 패스워드 확인 (보안상 권장하지 않지만 기존 호환성을 위해 유지)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const urlPassword = urlParams.get('password');
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
     
-    // 환경변수가 설정되지 않은 경우 에러 표시
-    if (!adminPassword) {
-      setError('관리자 패스워드가 설정되지 않았습니다. 환경변수를 확인해주세요.');
-      return;
-    }
-    
-    if (urlPassword === adminPassword) {
-      setIsAuthorized(true);
+    if (urlPassword) {
+      // URL 패스워드가 있으면 Strapi에서 검증
+      validateUrlPassword(urlPassword);
       // URL에서 패스워드 제거
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
+  // URL 패스워드 검증
+  const validateUrlPassword = async (urlPassword: string) => {
+    try {
+      const isValid = await validateAdminPassword(urlPassword);
+      if (isValid) {
+        setIsAuthorized(true);
+      }
+    } catch (error) {
+      console.error('URL password validation failed:', error);
+    }
+  };
+
   // 패스워드 인증 처리
-  const handleAuth = (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
     
-    // 환경변수가 설정되지 않은 경우 에러 표시
-    if (!adminPassword) {
-      setError('관리자 패스워드가 설정되지 않았습니다. 환경변수를 확인해주세요.');
+    if (!password.trim()) {
+      setError('패스워드를 입력해주세요.');
       return;
     }
-    
-    if (password === adminPassword) {
-      setIsAuthorized(true);
-      setError('');
-      // 로그인 성공 시 세션 스토리지에 인증 상태 저장
-      sessionStorage.setItem('admin_authenticated', 'true');
-    } else {
-      setError('올바르지 않은 패스워드입니다.');
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const isValid = await validateAdminPassword(password);
+      
+      if (isValid) {
+        setIsAuthorized(true);
+        setError('');
+        // 로그인 성공 시 세션 스토리지에 인증 상태 저장
+        sessionStorage.setItem('admin_authenticated', 'true');
+      } else {
+        setError('올바르지 않은 패스워드입니다.');
+      }
+    } catch (error) {
+      console.error('Password validation error:', error);
+      setError('패스워드 검증 중 오류가 발생했습니다. Strapi 서버 연결을 확인해주세요.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -111,9 +128,20 @@ export default function AdminVisitorsPage() {
             <div>
               <button
                 type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition"
+                disabled={loading}
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                로그인
+                {loading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    검증 중...
+                  </>
+                ) : (
+                  '로그인'
+                )}
               </button>
             </div>
           </form>
