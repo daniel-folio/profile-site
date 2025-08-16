@@ -9,21 +9,47 @@ import qs from 'qs';
 // Vercel 환경에서는 환경 변수를, 로컬에서는 null이 됩니다.
 const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN || null;
 
+// URL 유효성 검사 유틸리티
+function isValidHttpUrl(url: string | undefined | null): boolean {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 /**
  * 환경에 따른 API URL 선택 로직 (중앙 집중식)
  * 다른 파일에서 일관된 API URL 사용을 위한 공통 함수
  */
 export function getApiUrl(): string {
-  // Vercel 환경 변수를 사용해 현재 환경이 운영(Production)인지 파악합니다.
-  const isProduction = process.env.VERCEL_ENV === 'production';
+  // Vercel 런타임 여부 및 환경 종류 감지
+  const vercelEnv = process.env.VERCEL_ENV; // 'production' | 'preview' | 'development' | undefined
+  const isVercel = process.env.VERCEL === '1';
 
-  // 환경에 따라 사용할 기본 API URL을 결정합니다.
-  // Vercel 환경에서는 _PRIMARY를, 로컬에서는 기본 URL을 사용합니다.
-  const primaryApiUrl = isProduction
-    ? process.env.NEXT_PUBLIC_STRAPI_API_URL_PRIMARY || 'http://127.0.0.1:1337' // 운영 환경일 경우
-    : process.env.NEXT_PUBLIC_STRAPI_URL || 'http://127.0.0.1:1337';            // Preview, dev 환경일 경우
+  const PRIMARY = process.env.NEXT_PUBLIC_STRAPI_API_URL_PRIMARY; // 운영/공용 기본 백엔드 URL
+  const PREVIEW = process.env.NEXT_PUBLIC_STRAPI_URL;             // Vercel preview/dev 전용 URL
+  const SECONDARY = process.env.NEXT_PUBLIC_STRAPI_API_URL_SECONDARY; // 보조 백엔드 URL
 
-  return primaryApiUrl;
+  // 1) Production (Vercel)
+  if (vercelEnv === 'production') {
+    if (PRIMARY) return PRIMARY;
+    // Fail-fast: 프로덕션에서 PRIMARY 미설정은 치명적 구성 오류
+    throw new Error('Production requires NEXT_PUBLIC_STRAPI_API_URL_PRIMARY.');
+  }
+
+  // 2) Preview/Development on Vercel
+  if (isVercel) {
+    if (PREVIEW) return PREVIEW;
+    if (PRIMARY) return PRIMARY;
+    if (SECONDARY) return SECONDARY;
+    return 'http://127.0.0.1:1337';
+  }
+
+  // 3) Local development
+  return PREVIEW || PRIMARY || 'http://127.0.0.1:1337';
 }
 
 /**
@@ -65,24 +91,36 @@ async function fetchAPI<T>(path: string, params?: any, options: RequestInit = {}
     ...options,
   };
 
-  // 실제 요청을 수행하는 내부 함수
-  const tryFetch = async (apiUrl: string | undefined) => {
-    if (!apiUrl) {
-      throw new Error("API URL is not defined. This should not happen with the default value set.");
+  // 실제 요청을 수행하는 내부 함수 (타임아웃 및 URL 유효성 포함)
+  const tryFetch = async (apiUrl: string | undefined, timeoutMs = 8000) => {
+    if (!isValidHttpUrl(apiUrl || '')) {
+      throw new Error('Invalid API URL.');
     }
-    
-    // 쿼리 파라미터 생성
-    const queryString = params ? `?${qs.stringify(params)}` : '';
-    const requestUrl = `${apiUrl}/api${path}${queryString}`;
-    
-    const response = await fetch(requestUrl, defaultOptions);
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      // API 에러 응답
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      // 쿼리 파라미터 생성
+      const queryString = params ? `?${qs.stringify(params)}` : '';
+      const requestUrl = `${apiUrl}/api${path}${queryString}`;
+
+      const response = await fetch(requestUrl, { ...defaultOptions, signal: controller.signal });
+
+      if (!response.ok) {
+        // 본문은 디버깅 시 별도로 확인 가능. 로그는 간결하게 유지.
+        throw new Error(`API ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    } catch (err: any) {
+      // AbortError 또는 네트워크 에러를 간결히 래핑
+      if (err?.name === 'AbortError') {
+        throw new Error('API request timeout');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timer);
     }
-    return response.json();
   };
 
   // --- 로직 실행 ---
@@ -96,13 +134,16 @@ async function fetchAPI<T>(path: string, params?: any, options: RequestInit = {}
   try {
     return await tryFetch(primaryApiUrl);
   } catch (error) {
-    // PRIMARY backend fetch 실패
-    
+    // PRIMARY backend fetch 실패 → 조건부로 SECONDARY 시도
+    if (!isValidHttpUrl(secondaryApiUrl || '')) {
+      // SECONDARY 미설정/무효: 즉시 에러 전파
+      throw error;
+    }
     try {
         return await tryFetch(secondaryApiUrl);
     } catch (secondaryError) {
         // SECONDARY backend fetch도 실패
-        throw new Error("Both primary and secondary backends failed.");
+        throw new Error('Both primary and secondary backends failed.');
     }
   }
 }

@@ -274,39 +274,33 @@ npm install
 `.env.local` 파일을 생성하고 다음 내용을 추가하세요:
 
 ```env
-# Backend API Connection
-NEXT_PUBLIC_STRAPI_API_URL=http://localhost:1337
-
-# Admin Dashboard Access (REQUIRED for visitor analytics)
-NEXT_PUBLIC_ADMIN_PASSWORD=your_secure_local_password
-
-# Visitor Tracking (Optional - enabled by default)
-# 방문자 추적은 Strapi Admin의 enableVisitorTracking 설정으로 제어됩니다
+# 백엔드 API 연결 (중앙 선택 로직)
+NEXT_PUBLIC_STRAPI_API_URL_PRIMARY=http://localhost:1337
 ```
 
-### 🔐 **Production Environment Variables (Vercel)**
+### 🔐 **프로덕션 환경 변수 (Vercel)**
 
-**⚠️ IMPORTANT**: For production deployment, you must set environment variables in Vercel Dashboard:
+**⚠️ 중요**: 프로덕션 배포 시 Vercel 대시보드에 환경 변수를 반드시 설정해야 합니다.
 
-#### **Required Variables**
+#### **필수 변수 (프론트엔드)**
 ```env
-# Admin Access - SET DIFFERENT PASSWORDS FOR PROD/TEST
-NEXT_PUBLIC_ADMIN_PASSWORD=your_secure_production_password
+# Primary backend URL (required in production)
+NEXT_PUBLIC_STRAPI_API_URL_PRIMARY=https://your-backend-url.render.com
 
-# Backend API
-NEXT_PUBLIC_STRAPI_API_URL=https://your-backend-url.render.com
+# Optional: Vercel Preview/Dev specific URL
+NEXT_PUBLIC_STRAPI_URL=https://your-preview-backend.example.com
 
-# NEXT_PUBLIC_ENABLE_VISITOR_TRACKING는 더 이상 사용되지 않습니다
-# 방문자 추적은 Strapi Admin의 enableVisitorTracking 설정으로 제어됩니다
+# Optional: API token when calling Strapi from Vercel
+# STRAPI_API_TOKEN=vercel_strapi_api_token
 ```
 
-#### **Security Setup**
-1. **Vercel Dashboard** → **Project** → **Settings** → **Environment Variables**
-2. **Production**: Set strong password for production environment
-3. **Preview/Test**: Set different password for preview deployments
-4. **Never use hardcoded passwords** - the app will show an error if not set
+#### **보안 설정**
+1. **Vercel 대시보드** → **프로젝트** → **Settings** → **Environment Variables**
+2. **관리자 비밀번호**: Strapi Admin의 `Site Settings`에서 설정/관리
+3. **미리보기/테스트**: 환경에 맞는 백엔드 URL 사용
+4. **비밀값 하드코딩 금지**
 
-📖 **[Detailed Deployment Guide](./DEPLOYMENT.md)** - Complete setup instructions for Vercel, Render, and environment variables
+📖 **[배포 가이드 자세히 보기](./DEPLOYMENT.md)** - Vercel/Render 설정 및 환경 변수 안내
 
 ```bash
 npm run dev
@@ -359,10 +353,11 @@ npm run dev
 
 - `NEXT_PUBLIC_STRAPI_API_URL_PRIMARY`: 메인으로 사용할 백엔드 주소
   - Production 값: A-운영 백엔드 URL
-- `NEXT_PUBLIC_STRAPI_API_URL_SECONDARY`: 장애 시 사용할 백업 백엔드 주소
-  - Production 값: B-운영 백엔드 URL
 - `FAILOVER_MODE_ENABLED`: Failover 기능 활성화 스위치
   - Production 값: `true`
+- `(선택) NEXT_PUBLIC_STRAPI_API_URL_SECONDARY`: 장애 시 사용할 백업 백엔드 주소
+  - 사용 조건: `FAILOVER_MODE_ENABLED='true'` 이고, PRIMARY 요청이 실패할 때만 자동 대체 요청에 사용됨
+  - 권장 값(Production): B-운영 백엔드 URL
 - `STRAPI_API_TOKEN`: 각 환경에 맞는 API 토큰
   - Production 값: A-운영 백엔드 토큰
 
@@ -948,10 +943,12 @@ The site settings system provides centralized configuration management through S
    
    **Frontend (.env.local):**
    ```env
-   NEXT_PUBLIC_STRAPI_API_URL=http://localhost:1337
-   NEXT_PUBLIC_ADMIN_PASSWORD=your_secure_local_password
-   
-   # Visitor tracking is now controlled via Strapi Admin enableVisitorTracking setting
+   # Primary backend URL (local)
+   NEXT_PUBLIC_STRAPI_API_URL_PRIMARY=http://localhost:1337
+   # Optional: Vercel Preview/Dev specific URL
+   # NEXT_PUBLIC_STRAPI_URL=https://your-preview-backend.example.com
+   # Optional: Secondary backend for failover
+   # NEXT_PUBLIC_STRAPI_API_URL_SECONDARY=https://your-backup-backend.example.com
    ```
 
    **Backend (.env):**
@@ -967,14 +964,14 @@ The site settings system provides centralized configuration management through S
 **⚠️ IMPORTANT**: For production deployment, you must set environment variables in Vercel Dashboard:
 
 ```env
-# Admin Access - SET DIFFERENT PASSWORDS FOR PROD/TEST
-NEXT_PUBLIC_ADMIN_PASSWORD=your_secure_production_password
+# Primary backend URL (required in production)
+NEXT_PUBLIC_STRAPI_API_URL_PRIMARY=https://your-backend-url.render.com
 
-# Backend API
-NEXT_PUBLIC_STRAPI_API_URL=https://your-backend-url.render.com
+# Optional: Vercel Preview/Dev specific URL
+NEXT_PUBLIC_STRAPI_URL=https://your-preview-backend.example.com
 
-# NEXT_PUBLIC_ENABLE_VISITOR_TRACKING is no longer used
-# Visitor tracking is controlled via Strapi Admin enableVisitorTracking setting
+# Optional: API token when calling Strapi from Vercel
+# STRAPI_API_TOKEN=vercel_strapi_api_token
 ```
 
 #### **Security Setup**

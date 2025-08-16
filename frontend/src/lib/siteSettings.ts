@@ -43,6 +43,12 @@ export async function validateAdminPassword(password: string): Promise<boolean> 
     console.log('🔍 API_URL:', API_URL);
     console.log('🔍 Input password:', password);
     
+    // Production 환경에서 API URL이 없으면 실패 처리
+    if (!API_URL) {
+      console.error('❌ API URL이 설정되지 않았습니다. 백엔드를 배포하고 NEXT_PUBLIC_STRAPI_API_URL_PRIMARY를 설정해주세요.');
+      return false;
+    }
+    
     const response = await fetch(`${API_URL}/api/site-settings/validate-password`, {
       method: 'POST',
       headers: {

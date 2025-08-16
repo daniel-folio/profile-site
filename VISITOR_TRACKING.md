@@ -119,11 +119,8 @@ function CustomStats() {
 
 환경 변수 설정 (`.env.local` 파일):
 ```bash
-# Strapi Backend API URL
-NEXT_PUBLIC_STRAPI_API_URL=http://localhost:1337
-
-# 방문자 추적 활성화/비활성화 (기본값: true)
-NEXT_PUBLIC_ENABLE_VISITOR_TRACKING=true
+# Strapi Backend API URL (중앙 선택 로직 사용)
+NEXT_PUBLIC_STRAPI_API_URL_PRIMARY=http://localhost:1337
 ```
 
 #### 3. 관리자 대시보드 접근
@@ -133,10 +130,7 @@ NEXT_PUBLIC_ENABLE_VISITOR_TRACKING=true
 http://localhost:3000/admin/visitors
 ```
 
-관리자 패스워드는 환경 변수로 설정:
-```bash
-NEXT_PUBLIC_ADMIN_PASSWORD=your_secure_password
-```
+관리자 패스워드는 이제 Strapi Admin의 `Site Settings`에서 관리됩니다. 프론트엔드 환경변수는 사용하지 않습니다.
 
 ### 🛠️ API 사용법
 
@@ -214,10 +208,7 @@ await strapi.service('api::visitor.visitor').cleanupOldVisitors(90);
 ```
 
 #### 추적 비활성화
-방문자 추적을 완전히 비활성화하려면:
-```bash
-NEXT_PUBLIC_ENABLE_VISITOR_TRACKING=false
-```
+방문자 추적을 완전히 비활성화하려면 Strapi Admin의 `Site Settings`에서 `enableVisitorTracking`을 `false`로 설정하세요. 프론트엔드 환경변수는 더 이상 사용하지 않습니다.
 
 ### 📊 데이터베이스 스키마
 
@@ -468,11 +459,8 @@ module.exports = {
 
 환경 변수 설정 (`.env.local` 파일):
 ```bash
-# Strapi Backend API URL
-NEXT_PUBLIC_STRAPI_API_URL=http://localhost:1337
-
-# 방문자 추적 활성화/비활성화 (기본값: true)
-NEXT_PUBLIC_ENABLE_VISITOR_TRACKING=true
+# Strapi Backend API URL (중앙 선택 로직 사용)
+NEXT_PUBLIC_STRAPI_API_URL_PRIMARY=http://localhost:1337
 ```
 
 ### 3. 자동 추적 활성화
@@ -642,10 +630,7 @@ await strapi.service('api::visitor.visitor').cleanupOldVisitors(90);
 ```
 
 ##### 추적 비활성화
-방문자 추적을 완전히 비활성화하려면:
-```bash
-NEXT_PUBLIC_ENABLE_VISITOR_TRACKING=false
-```
+방문자 추적을 완전히 비활성화하려면 Strapi Admin의 `Site Settings`에서 `enableVisitorTracking`을 `false`로 설정하세요. 프론트엔드 환경변수는 더 이상 사용하지 않습니다.
 
 #### 📊 데이터베이스 스키마
 

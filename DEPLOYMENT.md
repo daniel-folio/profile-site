@@ -9,7 +9,7 @@
 
 ### 🔐 관리자 패스워드 설정
 
-보안을 위해 관리자 패스워드는 반드시 Vercel 환경변수로 설정해야 합니다. **운영 환경에서는 절대 하드코딩된 패스워드를 사용하지 마세요.**
+방문자 대시보드 관리자 패스워드는 이제 Strapi Admin의 `Site Settings`에서 관리됩니다. 프론트엔드 환경변수 `NEXT_PUBLIC_ADMIN_PASSWORD`는 더 이상 사용되지 않습니다. **운영 환경에서는 절대 하드코딩된 패스워드를 사용하지 마세요.**
 
 ### 📋 Vercel 설정 단계
 
@@ -18,17 +18,10 @@
    - **Settings** 탭 클릭
    - **Environment Variables** 선택
 
-2. **운영 환경 패스워드 추가**
-   - **Key**: `NEXT_PUBLIC_ADMIN_PASSWORD`
-   - **Value**: 안전한 운영 패스워드
-   - **Environments**: **Production** 선택
-   - **Save** 클릭
-
-3. **테스트 환경 패스워드 추가**
-   - **Key**: `NEXT_PUBLIC_ADMIN_PASSWORD`
-   - **Value**: 테스트용 패스워드 (운영과 다르게 설정)
-   - **Environments**: **Preview**, **Development** 선택
-   - **Save** 클릭
+2. **Strapi Admin에서 설정**
+   - Strapi Admin 접속 → `Content-Type: Site Setting`
+   - `adminPassword` 값을 설정/변경 후 저장합니다.
+   - 프론트엔드는 이 값을 사용하여 인증합니다.
 
 ### 🔒 보안 권장사항
 
@@ -62,14 +55,14 @@ CLIENT_URL=https://your-frontend-domain.vercel.app
 
 #### **프론트엔드 환경변수**
 ```bash
-# API 연결
-NEXT_PUBLIC_STRAPI_API_URL=https://your-backend-url.render.com
-
-# 관리자 접근
-NEXT_PUBLIC_ADMIN_PASSWORD=your_secure_password
-
-# 방문자 분석 (선택사항 - 기본값: 활성화)
-# 방문자 추적은 Strapi Admin의 enableVisitorTracking 설정으로 제어됩니다
+# API 연결 (중앙 선택 로직 사용)
+NEXT_PUBLIC_STRAPI_API_URL_PRIMARY=https://your-backend-url.render.com
+# 선택: 장애 시 보조 백엔드
+NEXT_PUBLIC_STRAPI_API_URL_SECONDARY=https://your-backup-backend.example.com
+# 선택: Vercel Preview/Dev 전용 URL
+NEXT_PUBLIC_STRAPI_URL=https://your-preview-backend.example.com
+# 선택: Vercel에서 Strapi API Token 사용 시
+# STRAPI_API_TOKEN=vercel_strapi_api_token
 ```
 
 ### 🌍 환경별 구성
@@ -91,24 +84,22 @@ NEXT_PUBLIC_ADMIN_PASSWORD=your_secure_password
 프론트엔드 디렉토리에 `.env.local` 파일 생성:
 ```bash
 # Frontend/.env.local
-NEXT_PUBLIC_STRAPI_API_URL=http://localhost:1337
-NEXT_PUBLIC_ADMIN_PASSWORD=local_dev_password_123
-NEXT_PUBLIC_ENABLE_VISITOR_TRACKING=true
+NEXT_PUBLIC_STRAPI_API_URL_PRIMARY=http://localhost:1337
 ```
 
 ### 🚨 문제 해결
 
-#### **"관리자 패스워드가 설정되지 않았습니다" 오류**
-1. Vercel 환경변수가 올바르게 설정되었는지 확인
-2. 변수명이 정확히 `NEXT_PUBLIC_ADMIN_PASSWORD`인지 확인
-3. 변수 설정 후 애플리케이션 재배포
-4. 브라우저 콘솔에서 추가 오류 확인
+#### **인증 실패/접속 오류**
+1. 백엔드가 정상 동작 중인지 확인 (Render/Railway 상태, CORS)
+2. `NEXT_PUBLIC_STRAPI_API_URL_PRIMARY`가 올바른지 확인 (프로덕션 필수)
+3. Vercel Preview/Dev에서는 `NEXT_PUBLIC_STRAPI_URL`(선택) → PRIMARY 순으로 사용됩니다
+4. Strapi Admin의 `Site Settings > adminPassword`가 의도한 값인지 확인
 
 #### **패스워드가 작동하지 않는 경우**
-1. 패스워드가 정확히 일치하는지 확인 (공백 없음)
-2. 올바른 환경(운영 vs 미리보기)을 사용하는지 확인
-3. 브라우저 캐시 및 쿠키 삭제 시도
-4. Vercel 배포 로그에서 오류 확인
+1. 올바른 백엔드로 요청되는지 확인 (`frontend/src/lib/api.ts`의 `getApiUrl()` 로직 참고)
+2. 환경변수 캐시로 인해 값이 반영되지 않을 수 있으니 재배포/새로고침
+3. Strapi DB의 `site-setting` 값이 실제로 갱신되었는지 확인
+4. 네트워크 탭에서 `/api/site-settings/validatePassword` 응답 확인 (`success: true` 기대)
 
 ### 📊 모니터링 및 분석
 
@@ -149,42 +140,26 @@ NEXT_PUBLIC_ENABLE_VISITOR_TRACKING=true
 
 ## 🇺🇸 English Version
 
-### Vercel Environment Variables Setup
+### Environment Variables Setup (Frontend)
 
-#### 🔐 Admin Password Configuration
+#### 🔐 Admin Password
 
-For security, the admin password must be set via environment variables in Vercel. **Never use hardcoded passwords in production.**
+The admin password is now managed in Strapi Admin `Site Settings`. The frontend env `NEXT_PUBLIC_ADMIN_PASSWORD` is deprecated and removed. **Never hardcode passwords.**
 
-##### 1. **Production Environment**
+#### 🌐 API URL Variables
 ```bash
-# Vercel Dashboard > Project > Settings > Environment Variables
-NEXT_PUBLIC_ADMIN_PASSWORD=your_secure_production_password_here
+# Primary backend URL (required in production)
+NEXT_PUBLIC_STRAPI_API_URL_PRIMARY=https://your-backend-url.render.com
+
+# Optional: Secondary backend for failover
+NEXT_PUBLIC_STRAPI_API_URL_SECONDARY=https://your-backup-backend.example.com
+
+# Optional: Vercel Preview/Dev specific URL
+NEXT_PUBLIC_STRAPI_URL=https://your-preview-backend.example.com
+
+# Optional: API token when calling Strapi from Vercel
+# STRAPI_API_TOKEN=vercel_strapi_api_token
 ```
-
-##### 2. **Preview/Test Environment**
-```bash
-# Vercel Dashboard > Project > Settings > Environment Variables
-NEXT_PUBLIC_ADMIN_PASSWORD=your_test_password_here
-```
-
-#### 📋 **Step-by-Step Setup in Vercel**
-
-1. **Access Vercel Dashboard**
-   - Navigate to your project
-   - Click on **Settings** tab
-   - Select **Environment Variables**
-
-2. **Configure Production Password**
-   - **Key**: `NEXT_PUBLIC_ADMIN_PASSWORD`
-   - **Value**: Your secure production password
-   - **Environments**: Select **Production**
-   - Click **Save**
-
-3. **Configure Preview/Test Password**
-   - **Key**: `NEXT_PUBLIC_ADMIN_PASSWORD`
-   - **Value**: Your test password (can be different from production)
-   - **Environments**: Select **Preview** and **Development**
-   - Click **Save**
 
 #### 🚀 **Backend Environment Variables**
 
@@ -211,14 +186,14 @@ CLIENT_URL=https://your-frontend-domain.vercel.app
 
 ##### **Frontend Environment Variables**
 ```bash
-# API Connection
-NEXT_PUBLIC_STRAPI_API_URL=https://your-backend-url.render.com
-
-# Admin Access
-NEXT_PUBLIC_ADMIN_PASSWORD=your_secure_password
-
-# Visitor Analytics (Optional - defaults to enabled)
-# Visitor tracking is now controlled via Strapi Admin enableVisitorTracking setting
+# API Connection (centralized selection logic)
+NEXT_PUBLIC_STRAPI_API_URL_PRIMARY=https://your-backend-url.render.com
+# Optional: Secondary backend for failover
+NEXT_PUBLIC_STRAPI_API_URL_SECONDARY=https://your-backup-backend.example.com
+# Optional: Vercel Preview/Dev specific URL
+NEXT_PUBLIC_STRAPI_URL=https://your-preview-backend.example.com
+# Optional: API token when calling Strapi from Vercel
+# STRAPI_API_TOKEN=vercel_strapi_api_token
 ```
 
 #### 🔒 **Security Best Practices**
@@ -229,46 +204,34 @@ NEXT_PUBLIC_ADMIN_PASSWORD=your_secure_password
 - **Different passwords for production vs test environments**
 - **Rotate passwords regularly**
 
-##### **Example Strong Passwords**
-```bash
-# Production (example - generate your own!)
-NEXT_PUBLIC_ADMIN_PASSWORD=Pr0d#2025$V1s1t0r@Dash
-
-# Test/Preview (example - generate your own!)
-NEXT_PUBLIC_ADMIN_PASSWORD=T3st#2025$V1s1t0r@Dev
-```
-
 #### 🌍 **Environment-Specific Configuration**
 
 ##### **Production**
 - **Domain**: `your-portfolio.vercel.app`
 - **Backend**: `your-backend.render.com`
 - **Database**: Production PostgreSQL
-- **Password**: Strong, unique production password
+- **Admin Password**: Configure in Strapi Admin `Site Settings`
 
 ##### **Preview/Test**
 - **Domain**: `your-portfolio-git-branch.vercel.app`
 - **Backend**: Same backend or test backend
 - **Database**: Same or test database
-- **Password**: Different test password for security
 
 #### 🔧 **Local Development**
 
 Create `.env.local` file in frontend directory:
 ```bash
 # Frontend/.env.local
-NEXT_PUBLIC_STRAPI_API_URL=http://localhost:1337
-NEXT_PUBLIC_ADMIN_PASSWORD=local_dev_password_123
-NEXT_PUBLIC_ENABLE_VISITOR_TRACKING=true
+NEXT_PUBLIC_STRAPI_API_URL_PRIMARY=http://localhost:1337
 ```
 
 #### 🚨 **Troubleshooting**
 
-##### **"Admin Password Not Set" Error**
-1. Check Vercel environment variables are set correctly
-2. Ensure variable name is exactly `NEXT_PUBLIC_ADMIN_PASSWORD`
-3. Redeploy the application after setting variables
-4. Check browser console for any additional errors
+##### **Authentication/Connectivity Issues**
+1. Ensure the backend is healthy and CORS allows your frontend
+2. Verify `NEXT_PUBLIC_STRAPI_API_URL_PRIMARY` in production
+3. Preview/Dev on Vercel uses `NEXT_PUBLIC_STRAPI_URL` (optional) → PRIMARY
+4. Check Strapi `Site Settings > adminPassword` and the API response from `/api/site-settings/validatePassword`
 
 ##### **Password Authentication Issues**
 1. Verify the password matches exactly (no extra spaces)
@@ -280,7 +243,7 @@ NEXT_PUBLIC_ENABLE_VISITOR_TRACKING=true
 
 ##### **Visitor Analytics Access**
 - **URL**: `https://your-domain.vercel.app/admin/visitors`
-- **Authentication**: Environment-specific password
+- **Authentication**: Password from Strapi `Site Settings`
 - **Features**: Real-time dashboard, custom date ranges, session analysis
 
 ##### **Security Monitoring**
