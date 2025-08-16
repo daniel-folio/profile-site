@@ -4,21 +4,148 @@
 
 import { factories } from '@strapi/strapi';
 
+// --- IP 유틸리티 ---
+function normalizeIp(raw?: string | null): string | undefined {
+  if (!raw) return undefined;
+  let ip = raw.trim();
+  // XFF에 포트 포함 가능: "203.0.113.1:12345"
+  if (ip.includes(':') && ip.split(':').length > 2) {
+    // IPv6 (브라우저는 대개 포트를 XFF에 붙이지 않지만 방어적으로 둔다)
+    // 대괄호 제거
+    ip = ip.replace(/^\[/, '').replace(/\]$/, '');
+  } else {
+    // IPv4 with port
+    ip = ip.split(':')[0];
+  }
+  // IPv4-mapped IPv6 ::ffff:192.0.2.1 → 192.0.2.1
+  if (ip.startsWith('::ffff:')) ip = ip.substring(7);
+  // IPv6 loopback ::1 → 127.0.0.1로 정규화
+  if (ip === '::1') ip = '127.0.0.1';
+  return ip;
+}
+
+function isPrivateOrReservedIp(ip?: string): boolean {
+  if (!ip) return true;
+  const ipv4 = /^\d+\.\d+\.\d+\.\d+$/.test(ip);
+  if (ipv4) {
+    const [a, b] = ip.split('.').map(Number);
+    // loopback 127.0.0.0/8
+    if (a === 127) return true;
+    // private 10.0.0.0/8
+    if (a === 10) return true;
+    // private 172.16.0.0/12
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    // private 192.168.0.0/16
+    if (a === 192 && b === 168) return true;
+    // link-local 169.254.0.0/16
+    if (a === 169 && b === 254) return true;
+    // CGNAT 100.64.0.0/10
+    if (a === 100 && b >= 64 && b <= 127) return true;
+    // 0.0.0.0
+    if (ip === '0.0.0.0') return true;
+    return false;
+  }
+  // 간단한 IPv6 예약/사설 판별
+  const lower = ip.toLowerCase();
+  if (lower === '::1') return true; // loopback
+  if (lower.startsWith('fc') || lower.startsWith('fd')) return true; // unique local fc00::/7
+  if (lower.startsWith('fe80')) return true; // link-local fe80::/10
+  return false;
+}
+
+function parseXff(header: string | string[] | undefined): string[] {
+  if (!header) return [];
+  const raw = Array.isArray(header) ? header.join(',') : header;
+  return raw
+    .split(',')
+    .map((h) => normalizeIp(h))
+    .filter((v): v is string => !!v);
+}
+
+// --- User-Agent 파서 (경량) ---
+function parseUserAgent(uaRaw?: string) {
+  const ua = (uaRaw || '').toLowerCase();
+  let os = 'Unknown';
+  let osVersion = '';
+  let browser = 'Unknown';
+  let browserVersion = '';
+  let deviceType: 'mobile' | 'tablet' | 'desktop' | 'bot' | 'unknown' = 'unknown';
+
+  // Device type
+  if (/(googlebot|bingbot|bot|crawler|spider)/.test(ua)) deviceType = 'bot';
+  else if (/(ipad|tablet)/.test(ua)) deviceType = 'tablet';
+  else if (/(iphone|android|mobile)/.test(ua)) deviceType = 'mobile';
+  else deviceType = 'desktop';
+
+  // OS detection
+  if (ua.includes('windows')) {
+    os = 'Windows';
+    const m = ua.match(/windows nt ([0-9\.]+)/);
+    if (m) osVersion = m[1];
+  } else if (ua.includes('mac os x') || ua.includes('macintosh')) {
+    os = 'macOS';
+    const m = ua.match(/mac os x ([0-9_\.]+)/);
+    if (m) osVersion = m[1].replace(/_/g, '.');
+  } else if (ua.includes('android')) {
+    os = 'Android';
+    const m = ua.match(/android ([0-9\.]+)/);
+    if (m) osVersion = m[1];
+  } else if (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ios')) {
+    os = 'iOS';
+    const m = ua.match(/os ([0-9_]+) like mac os x/);
+    if (m) osVersion = m[1].replace(/_/g, '.');
+  } else if (ua.includes('linux')) {
+    os = 'Linux';
+  }
+
+  // Browser detection (순서 중요)
+  if (ua.includes('edg/')) {
+    browser = 'Edge';
+    const m = ua.match(/edg\/(\d+\.\d+\.\d+\.\d+|\d+\.\d+)/);
+    if (m) browserVersion = m[1];
+  } else if (ua.includes('opr/') || ua.includes('opera')) {
+    browser = 'Opera';
+    const m = ua.match(/(?:opr|opera)\/(\d+\.\d+)/);
+    if (m) browserVersion = m[1];
+  } else if (ua.includes('chrome/') && !ua.includes('edg')) {
+    browser = 'Chrome';
+    const m = ua.match(/chrome\/(\d+\.\d+\.\d+\.\d+|\d+\.\d+)/);
+    if (m) browserVersion = m[1];
+  } else if (ua.includes('safari/') && !ua.includes('chrome')) {
+    browser = 'Safari';
+    const m = ua.match(/version\/(\d+\.\d+|\d+)/);
+    if (m) browserVersion = m[1];
+  } else if (ua.includes('firefox/')) {
+    browser = 'Firefox';
+    const m = ua.match(/firefox\/(\d+\.\d+)/);
+    if (m) browserVersion = m[1];
+  }
+
+  return { os, osVersion, browser, browserVersion, deviceType };
+}
+
 export default factories.createCoreController('api::visitor.visitor', ({ strapi }) => ({
   // 방문자 정보 기록
   async create(ctx) {
     try {
       const { data } = ctx.request.body;
       
-      // IP 주소 추출 (프록시 환경 고려)
-      const ipAddress = ctx.request.ip || 
-                       ctx.request.headers['x-forwarded-for'] || 
-                       ctx.request.headers['x-real-ip'] || 
-                       ctx.ip || 
-                       '127.0.0.1';
+      // IP 주소 추출 (프록시/CDN 환경 고려)
+      // 우선순위 헤더: CF-Connecting-IP > True-Client-IP > X-Real-IP > X-Forwarded-For 체인 > koa ip
+      const cf = normalizeIp(ctx.request.headers['cf-connecting-ip'] as string | undefined);
+      const tci = normalizeIp(ctx.request.headers['true-client-ip'] as string | undefined);
+      const xri = normalizeIp(ctx.request.headers['x-real-ip'] as string | undefined);
+      const xffList = parseXff(ctx.request.headers['x-forwarded-for'] as string | string[] | undefined);
+      const koaIp = normalizeIp(ctx.request.ip || ctx.ip);
 
-      // User-Agent 정보
+      const candidates = [cf, tci, xri, ...xffList, koaIp].filter((v): v is string => !!v);
+      // 공인 IP(사설/예약 아님) 우선 선택
+      const publicCandidate = candidates.find((ip) => !isPrivateOrReservedIp(ip));
+      const ipAddress = publicCandidate || candidates[0] || '127.0.0.1';
+
+      // User-Agent 정보 및 파싱
       const userAgent = ctx.request.headers['user-agent'];
+      const uaParsed = parseUserAgent(userAgent || '');
       
       // Referrer 정보
       const referrer = ctx.request.headers['referer'] || ctx.request.headers['referrer'];
@@ -26,8 +153,13 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
       // 방문자 데이터 생성
       const visitorData = {
         ...data,
-        ipAddress: Array.isArray(ipAddress) ? ipAddress[0] : ipAddress,
+        ipAddress,
         userAgent,
+        os: uaParsed.os,
+        osVersion: uaParsed.osVersion,
+        browser: uaParsed.browser,
+        browserVersion: uaParsed.browserVersion,
+        deviceType: uaParsed.deviceType,
         referrer,
         visitedAt: new Date(),
       };
@@ -128,7 +260,7 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
       // Strapi EntityService를 사용한 고유 방문자 수 계산
       const allVisitors = await strapi.entityService.findMany('api::visitor.visitor', {
         filters: dateFilter,
-        fields: ['ipAddress', 'page', 'visitedAt', 'userAgent', 'sessionId'],
+        fields: ['ipAddress', 'page', 'visitedAt', 'userAgent', 'sessionId', 'os', 'osVersion', 'browser', 'browserVersion', 'deviceType'],
       });
 
       console.log('📊 조회된 방문자 데이터:', allVisitors?.length || 0, '건');
@@ -191,16 +323,18 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
           sessionStats.lastVisit = visitor.visitedAt;
         }
 
-        // 브라우저 통계 (User-Agent에서 추출)
-        if (visitor.userAgent) {
-          let browser = 'Unknown';
-          const ua = visitor.userAgent.toLowerCase();
-          if (ua.includes('chrome') && !ua.includes('edg')) browser = 'Chrome';
-          else if (ua.includes('firefox')) browser = 'Firefox';
-          else if (ua.includes('safari') && !ua.includes('chrome')) browser = 'Safari';
-          else if (ua.includes('edg')) browser = 'Edge';
-          else if (ua.includes('opera')) browser = 'Opera';
-
+        // 브라우저 통계 (저장 필드 우선, 없으면 UA 파싱)
+        {
+          let browser = (visitor as any).browser as string | undefined;
+          if (!browser) {
+            const ua = (visitor.userAgent || '').toLowerCase();
+            if (ua.includes('edg')) browser = 'Edge';
+            else if (ua.includes('opr') || ua.includes('opera')) browser = 'Opera';
+            else if (ua.includes('chrome') && !ua.includes('edg')) browser = 'Chrome';
+            else if (ua.includes('safari') && !ua.includes('chrome')) browser = 'Safari';
+            else if (ua.includes('firefox')) browser = 'Firefox';
+            else browser = 'Unknown';
+          }
           if (!browserStatsMap.has(browser)) {
             browserStatsMap.set(browser, { browser, visits: 0, uniqueIPs: new Set() });
           }
@@ -211,16 +345,18 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
           }
         }
 
-        // 운영체제 통계 (User-Agent에서 추출)
-        if (visitor.userAgent) {
-          let os = 'Unknown';
-          const ua = visitor.userAgent.toLowerCase();
-          if (ua.includes('windows')) os = 'Windows';
-          else if (ua.includes('mac os x') || ua.includes('macintosh')) os = 'macOS';
-          else if (ua.includes('linux')) os = 'Linux';
-          else if (ua.includes('android')) os = 'Android';
-          else if (ua.includes('iphone') || ua.includes('ipad')) os = 'iOS';
-
+        // 운영체제 통계 (저장 필드 우선, 없으면 UA 파싱)
+        {
+          let os = (visitor as any).os as string | undefined;
+          if (!os) {
+            const ua = (visitor.userAgent || '').toLowerCase();
+            if (ua.includes('windows')) os = 'Windows';
+            else if (ua.includes('mac os x') || ua.includes('macintosh')) os = 'macOS';
+            else if (ua.includes('android')) os = 'Android';
+            else if (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ios')) os = 'iOS';
+            else if (ua.includes('linux')) os = 'Linux';
+            else os = 'Unknown';
+          }
           if (!osStatsMap.has(os)) {
             osStatsMap.set(os, { os, visits: 0, uniqueIPs: new Set() });
           }

@@ -39,6 +39,21 @@
     },
     "sessionId": {
       "type": "string"
+    },
+    "os": {
+      "type": "string"
+    },
+    "osVersion": {
+      "type": "string"
+    },
+    "browser": {
+      "type": "string"
+    },
+    "browserVersion": {
+      "type": "string"
+    },
+    "deviceType": {
+      "type": "string"
     }
   }
 }
