@@ -50,6 +50,7 @@ export interface VisitorStats {
     lastVisit: string;
     userAgent: string;
     pages: string[];
+    ownerNote?: string | null;
   }>;
   browserStats: Array<{
     browser: string;
@@ -113,7 +114,8 @@ export async function recordVisitor(data: VisitorData): Promise<any> {
 // 방문자 통계 조회
 export async function getVisitorStats(
   period: '1d' | '7d' | '30d' | 'custom' = '7d', 
-  customDateRange?: { startDate: string; endDate: string }
+  customDateRange?: { startDate: string; endDate: string },
+  segment: 'general' | 'owner' | 'all' = 'all'
 ): Promise<VisitorStats | null> {
   try {
     let url = `${API_URL}/api/visitors/stats`;
@@ -123,6 +125,8 @@ export async function getVisitorStats(
     } else {
       url += `?period=${period}`;
     }
+    // 세그먼트 쿼리 추가
+    url += `&segment=${segment}`;
     
     const response = await fetch(url, {
       method: 'GET',

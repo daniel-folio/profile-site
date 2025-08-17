@@ -16,15 +16,22 @@
 
 ### 🎯 핵심 기능
 
-#### 📊 **고급 방문자 분석 시스템**
-- **실시간 대시보드** - 개요, 페이지 분석, 세션 추적, 실시간 방문자 멀티탭 인터페이스
-- **스마트 날짜 선택** - 빠른 기간 버튼(1일/7일/30일)과 사용자 정의 날짜 범위 선택기
-- **세션 분석** - 사용자 여정 경로 및 행동 패턴 추적
-- **브라우저/OS 통계** - 상세한 방문자 환경 분석
-- **IP 기반 그룹화** - 체계적인 데이터 표시를 위한 아코디언 UI
-- **빈 상태 처리** - 사용자 친화적인 대체 인터페이스
-- **개인정보 우선 설계** - GDPR 준수 고려사항
-- [**📖 상세 문서**](./VISITOR_TRACKING.md)
+#### 📊 **고급 방문자 분석 시스템 (Admin전용 Visitors 페이지)**
+- **탭 구성**: 개요, 세션 분석, 페이지 분석, 실시간, 지도 탭 제공. 모든 탭 상단에 세그먼트 탭(전체/일반/오너) 공통 노출.
+- **기간 선택**: 1일/7일/30일 빠른 선택 및 사용자 정의 범위. 선택한 기간을 상단 배너에 `YYYY-MM-DD ~ YYYY-MM-DD (N일)` 형식으로 표시.
+- **세그먼트 분리**: 오너 방문과 일반 방문 완전 분리 처리(`isOwnerVisit` 기준). 세그먼트 필터는 백엔드/프론트 모두 `$eq/$ne`로 일관 처리.
+- **오너 IP 허용목록**: Strapi Site Settings에서 오너 IP(또는 CIDR)들을 등록. 최대 5개까지 ‘오너’ 태깅 우선, 초과 항목도 관리 가능.
+- **실시간/세션/페이지 분석**: 방문자 타임라인, 페이지뷰 집계, 브라우저/OS/디바이스 통계 제공. 빈 데이터 시 가독성 있는 대체 UI 제공.
+- **지도 시각화**: OpenStreetMap 기반 `pigeon-maps` 사용(React 19 호환). 위치 정보가 있는 방문만 지도 탭에서 표시.
+- **IP/프록시 처리**: `X-Forwarded-For` 등 헤더 기반으로 실제 클라이언트 IP 추출. 프록시 환경에서도 127.0.0.1 문제 완화.
+- **엔드포인트 접근**: 방문자 수집/통계 API는 공개(`auth: false`)로 설정하여 로컬/프로덕션 모두 403 방지.
+- **안정성/장애조치**: 프론트 `frontend/src/lib/api.ts`에서 URL 유효성 검사, 타임아웃, 선택적 재시도, 프로덕션 fail-fast를 적용.
+- **운영 팁**:
+  - 트래킹 중지: Site Settings의 `enableVisitorTracking=false`로 즉시 중단.
+  - 점검 모드: `siteUsed=false`로 전체 접근 차단(관리자 포함) — 사용 시 주의.
+  - 관리자 인증: `/admin/visitors` 진입 시 Site Settings의 `adminPassword` 사용(평문 저장 UI 한계로 강력한 비밀번호 권장).
+  - 데이터 품질: 모바일 누락/프록시 환경 이슈는 IP/헤더 설정을 우선 점검.
+  - 지도 성능: 무료 타일/네트워크 상황에 따라 초기 로딩이 지연될 수 있음.
 
 #### 📄 **동적 콘텐츠 관리**
 - **PDF 생성** - html2pdf.js를 사용한 이력서 및 경력 상세 정보
@@ -675,16 +682,23 @@ A **comprehensive full-stack developer portfolio website** showcasing advanced w
 
 ### 🎯 **Core Features & Capabilities**
 
-#### 📊 **Enterprise-Grade Visitor Analytics System**
-- **Multi-Tab Real-time Dashboard** (Overview, Page Analysis, Session Tracking, Live Visitors)
-- **Advanced Date Selection** with quick period buttons (1d/7d/30d) and custom date range picker
-- **Comprehensive Session Analysis** tracking complete user journey paths and behavior patterns
-- **Detailed Browser/OS Statistics** with visitor environment analytics and device fingerprinting
-- **Intelligent IP-based Grouping** with accordion UI for organized data presentation
-- **Robust Empty State Handling** with user-friendly fallback interfaces and loading states
-- **Privacy-First Architecture** with GDPR compliance and data anonymization
-- **Real-time Updates** with WebSocket-like functionality for live data streaming
-- [**📖 Complete Documentation**](./VISITOR_TRACKING.md)
+#### 📊 **Enterprise-Grade Visitor Analytics (Only Admin Visitors Page)**
+- **Tabs**: Overview, Sessions, Pages, Realtime, Map. Segment tabs (All/General/Owner) are shown on top of every main tab consistently.
+- **Period Selection**: Quick buttons (1d/7d/30d) and custom range. Selected period banner shows `YYYY-MM-DD ~ YYYY-MM-DD (N days)`.
+- **Segment Separation**: Owner vs General visits strictly separated via `isOwnerVisit`. Filters are applied consistently ($eq/$ne) across backend and frontend.
+- **Owner IP Allowlist**: Manage owner IPs (and CIDR) in Strapi Site Settings. Up to 5 are prioritized for owner tagging; additional entries are still accepted for management.
+- **Realtime/Sessions/Pages Analytics**: Visitor timelines, pageview aggregation, and browser/OS/device stats. Clear empty states when no data.
+- **Map Visualization**: OpenStreetMap with `pigeon-maps` (React 19 compatible). Only visits with geo info are rendered in the Map tab.
+- **IP/Proxy Handling**: Real client IP extracted from headers (e.g., X-Forwarded-For) to mitigate 127.0.0.1 in proxy setups.
+- **Endpoint Access**: Visitor collection and stats endpoints are public (auth: false) to prevent 403 in local/production.
+- **Resilience/Failover**: Frontend `frontend/src/lib/api.ts` validates URLs, applies timeout and optional retries, and fail-fast behavior in production.
+- **Ops Tips**:
+  - Stop tracking: set `enableVisitorTracking=false` in Site Settings.
+  - Maintenance mode: set `siteUsed=false` to block access for all (including admin) — use with caution.
+  - Admin auth: `/admin/visitors` uses `adminPassword` from Site Settings (stored as plain text by Strapi UI limitation; use strong passwords).
+  - Data quality: For missing mobile records or proxy environments, verify IP/forwarded header configuration first.
+  - Map performance: Initial load may be slow depending on free tile/CDN/network conditions.
+  - Docs: see [VISITOR_TRACKING.md](./VISITOR_TRACKING.md).
 
 #### 📄 **Advanced Content Management System**
 - **Dynamic PDF Generation** for resumes and career details using html2pdf.js with custom styling

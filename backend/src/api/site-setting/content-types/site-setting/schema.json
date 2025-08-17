@@ -45,5 +45,16 @@
       "min": 100,
       "max": 1000000
     }
+    ,
+    "ownerIpAllowlist": {
+      "type": "json",
+      "default": [],
+      "description": "오너 방문자 구분을 위한 허용목록. IPv4, IPv6, CIDR(예: 203.0.113.0/24) 지원. 문자열 또는 { ip, note } 객체 배열을 입력하세요.",
+      "customField": {
+        "options": {
+          "hint": "예시: [\n  \"1.2.3.4\",\n  { \"ip\": \"203.0.113.0/24\", \"note\": \"사무실 대역\" },\n  { \"ip\": \"2001:db8::/32\", \"note\": \"V6 테스트\" }\n]\n- IP는 normalize되어 비교됩니다.\n- CIDR 대역과 정확 일치를 모두 지원합니다.\n- 메모(note)는 대시보드에 함께 표기됩니다."
+        }
+      }
+    }
   }
 }

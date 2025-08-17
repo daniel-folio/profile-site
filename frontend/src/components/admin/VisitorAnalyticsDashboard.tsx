@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import dynamic from 'next/dynamic';
+import { osm } from 'pigeon-maps/providers';
 import { useVisitorStats } from '@/hooks/useVisitorTracking';
 import { VisitorStats } from './VisitorStats';
 import { format } from 'date-fns';
@@ -17,6 +19,14 @@ interface VisitorDetail {
   sessionId: string;
   country?: string;
   city?: string;
+  region?: string;
+  countryCode?: string;
+  latitude?: number;
+  longitude?: number;
+  timezone?: string;
+  isp?: string;
+  isOwnerVisit?: boolean;
+  ownerNote?: string | null;
 }
 
 interface VisitorSession {
@@ -34,11 +44,30 @@ interface VisitorSession {
 // 개선된 방문자 분석 대시보드
 export function VisitorAnalyticsDashboard() {
   const [period, setPeriod] = useState<'1d' | '7d' | '30d' | 'custom'>('1d');
-  const [activeTab, setActiveTab] = useState<'overview' | 'sessions' | 'pages' | 'realtime'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'sessions' | 'pages' | 'realtime' | 'map'>('overview');
+  const [segment, setSegment] = useState<'general' | 'owner' | 'all'>('general');
+  // deprecated: local stats state removed; use useVisitorStats().stats
   const [visitorDetails, setVisitorDetails] = useState<VisitorDetail[]>([]);
   const [visitorSessions, setVisitorSessions] = useState<VisitorSession[]>([]);
   const [loading, setLoading] = useState(false);
   const [expandedIPs, setExpandedIPs] = useState<Set<string>>(new Set());
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoPoints, setGeoPoints] = useState<{
+    lat: number;
+    lng: number;
+    count: number;
+    country?: string;
+    city?: string;
+    region?: string;
+    countryCode?: string;
+    timezone?: string;
+    isp?: string;
+  }[]>([]);
+
+  // react 19 호환 지도 컴포넌트 (SSR 비활성화)
+  // 주의: 전역 Map 객체와 이름 충돌을 피하기 위해 별칭 사용
+  const PigeonMap = dynamic(() => import('pigeon-maps').then(m => m.Map), { ssr: false } as any);
+  const PigeonMarker = dynamic(() => import('pigeon-maps').then(m => m.Marker), { ssr: false } as any);
   
   // 사용자 정의 날짜 범위 상태 (초기값: 오늘)
   const [customDateRange, setCustomDateRange] = useState({
@@ -46,20 +75,193 @@ export function VisitorAnalyticsDashboard() {
     endDate: new Date().toISOString().split('T')[0], // 오늘
   });
 
-  const { stats, loading: statsLoading, error, refetch } = useVisitorStats(
-    period, 
-    period === 'custom' ? customDateRange : undefined
+  const { stats, loading: statsLoading, error, refetch: refetchStats } = useVisitorStats(
+    period,
+    period === 'custom' ? customDateRange : undefined,
+    segment,
+    activeTab !== 'realtime'
   );
 
+  // 실시간 폴링 타이머
+  const realtimeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // 기간 빠른 변경 헬퍼
+  const handlePeriodChange = (p: '1d' | '7d' | '30d') => {
+    // 기간 변경 시 시작일/종료일도 함께 변경
+    const now = new Date();
+    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // 오늘 00:00 기준
+    const days = p === '1d' ? 1 : p === '7d' ? 7 : 30;
+    const start = new Date(end);
+    start.setDate(end.getDate() - (days - 1));
+    const toStr = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    setCustomDateRange({ startDate: toStr(start), endDate: toStr(end) });
+    setPeriod(p);
+  };
+
+  // 실시간 탭: 진입 시 즉시 로드 + 10초 폴링, 이탈/언마운트 시 정리
+  useEffect(() => {
+    if (activeTab === 'realtime') {
+      // 최초 즉시 로드
+      fetchVisitorDetails({ mode: 'realtime' });
+      // 10초마다 갱신
+      realtimeTimerRef.current = setInterval(() => {
+        fetchVisitorDetails({ mode: 'realtime' });
+      }, 10000);
+    } else {
+      // 다른 탭으로 이동 시 타이머 정리
+      if (realtimeTimerRef.current) {
+        clearInterval(realtimeTimerRef.current);
+        realtimeTimerRef.current = null;
+      }
+      // 실시간 외 탭은 기존 기간 기반 데이터 로드(필요 시)
+      // 세션/페이지 탭에서 상세가 필요하면 일반 모드로 로드
+      if (activeTab === 'sessions' || activeTab === 'pages') {
+        fetchVisitorDetails({ mode: 'default' });
+      }
+    }
+    return () => {
+      if (realtimeTimerRef.current) {
+        clearInterval(realtimeTimerRef.current);
+        realtimeTimerRef.current = null;
+      }
+    };
+  }, [activeTab, segment, period, customDateRange.startDate, customDateRange.endDate]);
+  const applyCustomRange = () => {
+    setPeriod('custom');
+  };
+
+  // 브라우저/OS 파서(간단 버전)
+  const parseBrowser = (ua?: string) => {
+    if (!ua) return 'Unknown';
+    if (/Chrome\//i.test(ua) && !/Edg\//i.test(ua)) return 'Chrome';
+    if (/Edg\//i.test(ua)) return 'Edge';
+    if (/Firefox\//i.test(ua)) return 'Firefox';
+    if (/Safari\//i.test(ua) && !/Chrome\//i.test(ua)) return 'Safari';
+    return 'Unknown';
+  };
+
+  const parseOS = (ua?: string) => {
+    if (!ua) return 'Unknown';
+    if (/Windows/i.test(ua)) return 'Windows';
+    if (/Mac OS X/i.test(ua)) return 'macOS';
+    if (/Android/i.test(ua)) return 'Android';
+    if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
+    if (/Linux/i.test(ua)) return 'Linux';
+    return 'Unknown';
+  };
+
+  // 실시간 탭: IP별 그룹핑
+  const groupVisitorsByIP = (
+    details: VisitorDetail[]
+  ): { ip: string; visits: VisitorDetail[]; latestVisit: VisitorDetail }[] => {
+    const map = new Map<string, VisitorDetail[]>();
+    for (const v of details) {
+      const key = v.ipAddress || 'Unknown';
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(v);
+    }
+    const result: { ip: string; visits: VisitorDetail[]; latestVisit: VisitorDetail }[] = [];
+    for (const [ip, visits] of map.entries()) {
+      visits.sort((a, b) => new Date(b.visitedAt).getTime() - new Date(a.visitedAt).getTime());
+      result.push({ ip, visits, latestVisit: visits[0] });
+    }
+    return result;
+  };
+
+  // 아코디언 토글
+  const toggleIPExpansion = (ip: string) => {
+    setExpandedIPs(prev => {
+      const next = new Set(prev);
+      if (next.has(ip)) next.delete(ip); else next.add(ip);
+      return next;
+    });
+  };
+
+  // 지도용 지오 포인트 조회
+  const fetchGeo = useCallback(async () => {
+    if (geoFetchingRef.current) return;
+    geoFetchingRef.current = true;
+    const controller = new AbortController();
+    try {
+      const apiUrl = getApiUrl();
+      const params = new URLSearchParams();
+      params.set('segment', segment);
+      params.set('period', period);
+      if (period === 'custom' && customDateRange.startDate && customDateRange.endDate) {
+        params.set('startDate', customDateRange.startDate);
+        params.set('endDate', customDateRange.endDate);
+      }
+      const res = await fetch(`${apiUrl}/api/visitors/geo?${params.toString()}`, { signal: controller.signal });
+      if (res.ok) {
+        // TODO: 실제 응답 스키마에 맞춰 setGeoPoints 반영
+        // const data = await res.json();
+        // setGeoPoints(mapToPoints(data));
+      }
+    } catch (e) {
+      // noop
+    } finally {
+      geoFetchingRef.current = false;
+    }
+  }, [segment, period, customDateRange.startDate, customDateRange.endDate]);
+
   // 방문자 상세 데이터 가져오기
-  const fetchVisitorDetails = async () => {
+  const fetchVisitorDetails = async (opts?: { mode?: 'default' | 'realtime' }) => {
+    if (detailsFetchingRef.current) return;
+    detailsFetchingRef.current = true;
+    const controller = new AbortController();
     setLoading(true);
     try {
       // 공통 API URL 선택 함수 사용 (api.ts의 환경별 로직 적용)
       const apiUrl = getApiUrl();
       // 방문자 상세 데이터 요청
 
-      const response = await fetch(`${apiUrl}/api/visitors?pagination[limit]=1000&sort=visitedAt:desc`);
+      // 세그먼트 필터: boolean 기반으로 엄격 적용
+      const segParams: string[] = [];
+      if (segment === 'general') {
+        // 오너가 아닌 것만 (null/undefined 포함 위해 $ne=true 사용)
+        segParams.push('filters[isOwnerVisit][$ne]=true');
+      } else if (segment === 'owner') {
+        // 오너만
+        segParams.push('filters[isOwnerVisit][$eq]=true');
+      }
+      const segFilter = segParams.length ? `&${segParams.join('&')}` : '';
+      
+      // 기간 필터: 실시간 모드와 일반 모드 분리
+      const buildDateFilter = (days: number): string => {
+        const now = new Date();
+        const start = new Date(now);
+        start.setTime(now.getTime() - days * 24 * 60 * 60 * 1000);
+        return `&filters[visitedAt][$gte]=${encodeURIComponent(start.toISOString())}&filters[visitedAt][$lte]=${encodeURIComponent(now.toISOString())}`;
+      };
+
+      let dateFilter = '';
+      if (opts?.mode === 'realtime') {
+        // 최근 24시간 고정
+        dateFilter = buildDateFilter(1);
+      } else {
+        // 일반 모드: 기존 period 로직 유지
+        const params: string[] = [];
+        if (period === 'custom' && customDateRange.startDate && customDateRange.endDate) {
+          const startISO = new Date(customDateRange.startDate).toISOString();
+          const endISO = new Date(customDateRange.endDate).toISOString();
+          params.push(`filters[visitedAt][$gte]=${encodeURIComponent(startISO)}`);
+          params.push(`filters[visitedAt][$lte]=${encodeURIComponent(endISO)}`);
+        } else if (period === '1d' || period === '7d' || period === '30d') {
+          const now = new Date();
+          const start = new Date(now);
+          const days = period === '1d' ? 1 : period === '7d' ? 7 : 30;
+          start.setTime(now.getTime() - days * 24 * 60 * 60 * 1000);
+          params.push(`filters[visitedAt][$gte]=${encodeURIComponent(start.toISOString())}`);
+          params.push(`filters[visitedAt][$lte]=${encodeURIComponent(now.toISOString())}`);
+        }
+        dateFilter = params.length ? `&${params.join('&')}` : '';
+      }
+
+      const url = `${apiUrl}/api/visitors?pagination[limit]=1000&sort=visitedAt:desc${segFilter}${dateFilter}`;
+      if (opts?.mode === 'realtime') {
+        console.debug('[realtime] visitors GET', { url, segment });
+      }
+      const response = await fetch(url , { signal: controller.signal });
       
       if (response.ok) {
         const result = await response.json();
@@ -73,34 +275,59 @@ export function VisitorAnalyticsDashboard() {
           return;
         }
         
-        // API 응답 구조 디버깅
-        // 데이터 구조 확인
-        
-        const details: VisitorDetail[] = result.data
-          .filter((item: any) => item && item.id) // id가 있으면 유효한 데이터
+        // 실시간 모드에서 0건이면 7일로 한 번 더 재조회 (fallback)
+        if (opts?.mode === 'realtime' && (!result || !Array.isArray(result.data) || result.data.length === 0)) {
+          try {
+            const fbUrl = `${apiUrl}/api/visitors?pagination[limit]=1000&sort=visitedAt:desc${segFilter}${buildDateFilter(7)}`;
+            console.debug('[realtime] visitors fallback GET', { url: fbUrl, segment });
+            const fallbackRes = await fetch(fbUrl, { signal: controller.signal });
+            if (fallbackRes.ok) {
+              const fb = await fallbackRes.json();
+              if (fb && Array.isArray(fb.data)) {
+                result.data = fb.data;
+              }
+            }
+          } catch {}
+        }
+
+        let details: VisitorDetail[] = result.data
+          .filter((item: any) => item && item.id)
           .map((item: any) => {
-            // 매핑 중인 아이템 처리
+            const a = item.attributes ? item.attributes : item;
             return {
               id: item.id,
-              ipAddress: item.ipAddress || '알 수 없음', // attributes 제거
-              userAgent: item.userAgent || '알 수 없음',
-              referrer: item.referrer || '',
-              page: item.page || '/',
-              visitedAt: item.visitedAt || new Date().toISOString(),
-              sessionId: item.sessionId || `unknown-${item.id}`,
-              country: item.country || '',
-              city: item.city || '',
-            };
+              ipAddress: a.ipAddress || a.ipaddress || '알 수 없음',
+              userAgent: a.userAgent || a.useragent || '알 수 없음',
+              referrer: a.referrer || '',
+              page: a.page || '/',
+              visitedAt: a.visitedAt || new Date().toISOString(),
+              sessionId: a.sessionId || `unknown-${item.id}`,
+              country: a.country,
+              city: a.city,
+              region: a.region,
+              countryCode: a.countryCode,
+              latitude: a.latitude,
+              longitude: a.longitude,
+              timezone: (a as any).timezone,
+              isp: (a as any).isp,
+              isOwnerVisit: (a as any).isOwnerVisit,
+              ownerNote: (a as any).ownerNote ?? null,
+            } as VisitorDetail;
           });
-          
-        // 데이터 필터링 완료
-        
+
+        // 세그먼트 최종 안전필터
+        if (segment === 'general') {
+          details = details.filter((d) => d.isOwnerVisit !== true);
+        } else if (segment === 'owner') {
+          details = details.filter((d) => d.isOwnerVisit === true);
+        }
+
+        // 상태 반영
+        console.debug('[realtime] mapped details', { segment, count: details.length });
         setVisitorDetails(details);
-        // 방문자 상세 데이터 처리 완료
-        
+
         // 세션별로 그룹화
         const sessionMap = new Map<string, VisitorSession>();
-        // 세션별 그룹화 시작
         
         details.forEach(visit => {
           // 필수 필드 검증
@@ -145,7 +372,7 @@ export function VisitorAnalyticsDashboard() {
           }
         });
         
-        const sessions = Array.from(sessionMap.values()).sort((a, b) => 
+        const sessions = Array.from(sessionMap.values()).sort((a: VisitorSession, b: VisitorSession) => 
           new Date(b.lastVisit).getTime() - new Date(a.lastVisit).getTime()
         );
         
@@ -154,253 +381,188 @@ export function VisitorAnalyticsDashboard() {
         setVisitorSessions(sessions);
       }
     } catch (error) {
-      console.error('❌ 방문자 상세 데이터 조회 실패:', error);
+      console.error('방문자 상세 조회 실패:', error);
     } finally {
       setLoading(false);
+      detailsFetchingRef.current = false;
     }
   };
 
+  // 요청 중복 방지용 ref 및 디바운스 타이머
+  const requestKeyRef = useRef<string>('');
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const detailsFetchingRef = useRef<boolean>(false);
+  const geoFetchingRef = useRef<boolean>(false);
+
+  // 탭/세그먼트/기간 변경 시 단일 갱신 + 디바운스 + 딱 1회 호출
   useEffect(() => {
-    fetchVisitorDetails();
-  }, []);
+    const key = `${activeTab}|${segment}|${period}|${customDateRange.startDate}|${customDateRange.endDate}`;
+    if (requestKeyRef.current === key) return;
+    requestKeyRef.current = key;
 
-  // 실시간 탭이 활성화될 때마다 데이터 새로고침
-  useEffect(() => {
-    if (activeTab === 'realtime') {
-      // 실시간 탭 활성화 - 데이터 새로고침
-      fetchVisitorDetails();
-    }
-  }, [activeTab]);
-
-  // IP별 아코디언 토글 함수
-  const toggleIPExpansion = (ipAddress: string) => {
-    const newExpandedIPs = new Set(expandedIPs);
-    if (newExpandedIPs.has(ipAddress)) {
-      newExpandedIPs.delete(ipAddress);
-    } else {
-      newExpandedIPs.add(ipAddress);
-    }
-    setExpandedIPs(newExpandedIPs);
-  };
-
-  // IP별로 방문자 데이터 그룹화
-  const groupVisitorsByIP = (visitors: VisitorDetail[]) => {
-    const grouped = new Map<string, VisitorDetail[]>();
-    visitors.forEach(visitor => {
-      const ip = visitor.ipAddress;
-      if (!grouped.has(ip)) {
-        grouped.set(ip, []);
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = setTimeout(() => {
+      if (activeTab === 'map') {
+        fetchGeo();
+        fetchVisitorDetails(); // 지도 탭의 "장소별 분석" 카드가 visitorDetails를 사용
+      } else if (activeTab === 'realtime') {
+        fetchVisitorDetails();
       }
-      grouped.get(ip)!.push(visitor);
-    });
-    
-    // IP별로 정렬하고 각 IP 내에서는 최신순으로 정렬
-    return Array.from(grouped.entries())
-      .map(([ip, visits]) => ({
-        ip,
-        visits: visits.sort((a, b) => new Date(b.visitedAt).getTime() - new Date(a.visitedAt).getTime()),
-        latestVisit: visits.reduce((latest, visit) => 
-          new Date(visit.visitedAt) > new Date(latest.visitedAt) ? visit : latest
-        )
-      }))
-      .sort((a, b) => new Date(b.latestVisit.visitedAt).getTime() - new Date(a.latestVisit.visitedAt).getTime());
-  };
+      // 나머지 탭(overview/sessions/pages)은 useVisitorStats 훅 데이터로 충분
+    }, 150);
 
-  // 기간 버튼 클릭 시 날짜 범위 자동 설정
-  const handlePeriodChange = (newPeriod: '1d' | '7d' | '30d') => {
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    
-    let startDate: string;
-    
-    switch (newPeriod) {
-      case '1d':
-        startDate = todayStr; // 오늘
-        break;
-      case '7d':
-        startDate = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // 7일 전 (오늘 포함)
-        break;
-      case '30d':
-        startDate = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // 30일 전 (오늘 포함)
-        break;
-      default:
-        startDate = todayStr;
-    }
-    
-    setPeriod(newPeriod);
-    setCustomDateRange({
-      startDate,
-      endDate: todayStr
-    });
-  };
-
-  // 사용자 정의 날짜 범위 적용
-  const handleCustomDateApply = () => {
-    setPeriod('custom');
-    refetch();
-    fetchVisitorDetails();
-  };
-
-  // 브라우저 정보 파싱
-  const parseBrowser = (userAgent: string) => {
-    if (userAgent.includes('Chrome')) return 'Chrome';
-    if (userAgent.includes('Firefox')) return 'Firefox';
-    if (userAgent.includes('Safari')) return 'Safari';
-    if (userAgent.includes('Edge')) return 'Edge';
-    return 'Other';
-  };
-
-  // OS 정보 파싱
-  const parseOS = (userAgent: string) => {
-    if (userAgent.includes('Windows')) return 'Windows';
-    if (userAgent.includes('Mac')) return 'macOS';
-    if (userAgent.includes('Linux')) return 'Linux';
-    if (userAgent.includes('Android')) return 'Android';
-    if (userAgent.includes('iOS')) return 'iOS';
-    return 'Other';
-  };
-
-  // 브라우저별 통계
-  const browserStats = visitorDetails.reduce((acc, visitor) => {
-    const browser = parseBrowser(visitor.userAgent);
-    acc[browser] = (acc[browser] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  // OS별 통계
-  const osStats = visitorDetails.reduce((acc, visitor) => {
-    const os = parseOS(visitor.userAgent);
-    acc[os] = (acc[os] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  if (statsLoading || loading) {
-    return (
-      <div className="space-y-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            ))}
-          </div>
-          <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-        <div className="text-red-800 dark:text-red-200">
-          <p>데이터를 불러오는 중 오류가 발생했습니다: {error}</p>
-          <button 
-            onClick={() => {
-              refetch();
-              fetchVisitorDetails();
-            }}
-            className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-          >
-            다시 시도
-          </button>
-        </div>
-      </div>
-    );
-  }
-
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+    };
+  }, [activeTab, segment, period, customDateRange.startDate, customDateRange.endDate]);
   return (
-    <div className="space-y-6">
-      {/* 기간 선택 */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-center">
-          <div className="flex flex-wrap gap-2 items-center">
-            {(['1d', '7d', '30d'] as const).map((p) => (
-              <button
-                key={p}
-                onClick={() => handlePeriodChange(p)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  period === p
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-              >
-                {p === '1d' ? '1일' : p === '7d' ? '7일' : '30일'}
-              </button>
-            ))}
-            
-            {/* 사용자 정의 날짜 입력 (인라인) */}
-            <div className="flex items-center gap-2">
-              <input
-                type="date"
-                value={customDateRange.startDate}
-                onChange={(e) => {
-                  setCustomDateRange(prev => ({ ...prev, startDate: e.target.value }));
-                }}
-                className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                style={{ width: '140px' }}
-              />
-              <span className="text-gray-500 dark:text-gray-400">~</span>
-              <input
-                type="date"
-                value={customDateRange.endDate}
-                onChange={(e) => {
-                  setCustomDateRange(prev => ({ ...prev, endDate: e.target.value }));
-                }}
-                className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                style={{ width: '140px' }}
-              />
-              <button
-                onClick={handleCustomDateApply}
-                className="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 transition"
-              >
-                적용
-              </button>
+  <>
+  {/* 상단 메인 탭은 일자검색/배너 아래로 이동됨 */}
+
+  {/* 필터 바: 기간 선택만 유지 */}
+  <div className="mt-4 mb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div className="flex items-center gap-2 flex-wrap">
+      <button onClick={() => handlePeriodChange('1d')} className={`px-3 py-1.5 rounded border text-sm ${period==='1d' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600'}`}>1일</button>
+      <button onClick={() => handlePeriodChange('7d')} className={`px-3 py-1.5 rounded border text-sm ${period==='7d' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600'}`}>7일</button>
+      <button onClick={() => handlePeriodChange('30d')} className={`px-3 py-1.5 rounded border text-sm ${period==='30d' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600'}`}>30일</button>
+      <div className="flex items-center gap-1 text-sm">
+        <input type="date" value={customDateRange.startDate} onChange={(e)=>setCustomDateRange(v=>({...v,startDate:e.target.value}))} className="px-2 py-1 rounded border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600" />
+        <span className="text-gray-500">~</span>
+        <input type="date" value={customDateRange.endDate} onChange={(e)=>setCustomDateRange(v=>({...v,endDate:e.target.value}))} className="px-2 py-1 rounded border bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600" />
+        <button onClick={applyCustomRange} className="ml-2 px-3 py-1.5 rounded bg-blue-600 text-white">적용</button>
+      </div>
+    </div>
+  </div>
+
+  {/* 선택한 기간 표시 배너 */}
+  {(() => {
+    const start = customDateRange.startDate ? new Date(customDateRange.startDate) : null;
+    const end = customDateRange.endDate ? new Date(customDateRange.endDate) : null;
+    const diffDays = (s: Date, e: Date) => Math.floor((Date.UTC(e.getFullYear(), e.getMonth(), e.getDate()) - Date.UTC(s.getFullYear(), s.getMonth(), s.getDate())) / (1000*60*60*24)) + 1;
+    return (
+      <div className="mb-6">
+        <div className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-sm">
+          <span className="inline-flex items-center">
+            <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 4h18"/><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="8" width="18" height="13" rx="2" ry="2"/></svg>
+            선택한 기간 :
+          </span>
+          {start && end ? (
+            <>
+              <span className="font-medium">{`${format(start, 'yyyy-MM-dd')} ~ ${format(end, 'yyyy-MM-dd')}`}</span>
+              <span className="text-xs text-blue-500">({diffDays(start, end)}일)</span>
+            </>
+          ) : (
+            <span className="font-medium">기간을 선택하세요</span>
+          )}
+        </div>
+      </div>
+    );
+  })()}
+
+  {/* 메인 탭: 개요/세션/페이지/실시간/지도 (기간 배너 아래) */}
+  <div className="border-b border-gray-200 dark:border-gray-700">
+    <nav className="-mb-px flex space-x-8 overflow-x-auto">
+      {[
+        { key: 'overview', label: '개요' },
+        { key: 'sessions', label: '세션 분석' },
+        { key: 'pages', label: '페이지 분석' },
+        { key: 'realtime', label: '실시간' },
+        { key: 'map', label: '지도' },
+      ].map((tab) => (
+        <button
+          key={tab.key}
+          onClick={() => setActiveTab(tab.key as any)}
+          className={`py-2 px-2 border-b-2 font-medium transition text-sm sm:text-base ${
+            activeTab === tab.key
+              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+          }`}
+        >
+          <span className="whitespace-nowrap break-keep tracking-tight">{tab.label}</span>
+        </button>
+      ))}
+    </nav>
+  </div>
+
+  {/* 세그먼트 탭: 모든 메인 탭에서 공통 노출 (개요 전용에서 전역으로 변경) */}
+  <div className="mb-4 mt-4 overflow-x-auto">
+    <nav className="flex gap-6 border-b border-gray-200 dark:border-gray-700 min-w-[320px]">
+      {[
+        { key: 'all', label: '전체' },
+        { key: 'general', label: '일반' },
+        { key: 'owner', label: '오너' },
+      ].map((seg) => (
+        <button
+          key={seg.key}
+          onClick={() => setSegment(seg.key as any)}
+          className={`relative -mb-px py-2 px-1 text-sm sm:text-base whitespace-nowrap transition-colors ${
+            segment === seg.key
+              ? 'text-blue-600 dark:text-blue-400'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+          }`}
+        >
+          <span className="px-1 whitespace-nowrap break-keep tracking-tight">{seg.label}</span>
+          <span className={`absolute left-0 right-0 -bottom-px h-0.5 rounded-full transition-all ${segment === seg.key ? 'bg-blue-600 dark:bg-blue-400' : 'bg-transparent'}`}/>
+        </button>
+      ))}
+    </nav>
+  </div>
+
+  {/* 장소별 분석 - 지도 탭에서만 표시 */}
+  {activeTab === 'map' && (
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">장소별 분석</h3>
+        {(() => {
+          const countryCount: Record<string, number> = {};
+          const cityCount: Record<string, number> = {};
+          const timezoneCount: Record<string, number> = {};
+          const ispCount: Record<string, number> = {};
+          visitorDetails.forEach(v => {
+            const country = v.country || 'Unknown';
+            const city = v.city || 'Unknown';
+            const tz = (v as any).timezone || 'Unknown';
+            const isp = (v as any).isp || 'Unknown';
+            countryCount[country] = (countryCount[country] || 0) + 1;
+            cityCount[city] = (cityCount[city] || 0) + 1;
+            timezoneCount[tz] = (timezoneCount[tz] || 0) + 1;
+            ispCount[isp] = (ispCount[isp] || 0) + 1;
+          });
+          const top = (obj: Record<string, number>, n=5) => Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,n);
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-4 rounded border dark:border-gray-700">
+                <div className="font-medium mb-2">국가 Top5</div>
+                <ul className="space-y-1 text-sm">
+                  {top(countryCount).map(([k,v])=> (<li key={k} className="flex justify-between"><span>{k}</span><span className="text-gray-500">{v}</span></li>))}
+                </ul>
+              </div>
+              <div className="p-4 rounded border dark:border-gray-700">
+                <div className="font-medium mb-2">도시 Top5</div>
+                <ul className="space-y-1 text-sm">
+                  {top(cityCount).map(([k,v])=> (<li key={k} className="flex justify-between"><span>{k}</span><span className="text-gray-500">{v}</span></li>))}
+                </ul>
+              </div>
+              <div className="p-4 rounded border dark:border-gray-700">
+                <div className="font-medium mb-2">타임존 Top5</div>
+                <ul className="space-y-1 text-sm">
+                  {top(timezoneCount).map(([k,v])=> (<li key={k} className="flex justify-between"><span>{k}</span><span className="text-gray-500">{v}</span></li>))}
+                </ul>
+              </div>
+              <div className="p-4 rounded border dark:border-gray-700">
+                <div className="font-medium mb-2">ISP Top5</div>
+                <ul className="space-y-1 text-sm">
+                  {top(ispCount).map(([k,v])=> (<li key={k} className="flex justify-between"><span>{k}</span><span className="text-gray-500">{v}</span></li>))}
+                </ul>
+              </div>
             </div>
-          </div>
-          
-          <button
-            onClick={() => {
-              refetch();
-              fetchVisitorDetails();
-            }}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium"
-          >
-            새로고침
-          </button>
-        </div>
-
-        {/* 현재 선택된 기간 표시 */}
-        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-xs text-blue-800 dark:text-blue-200">
-          📊 선택된 기간: {customDateRange.startDate} ~ {customDateRange.endDate}
-          ({Math.ceil((new Date(customDateRange.endDate).getTime() - new Date(customDateRange.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1}일)
-          {period !== 'custom' && <span className="ml-2 text-blue-600 dark:text-blue-300">({period === '1d' ? '1일' : period === '7d' ? '7일' : '30일'} 기간)</span>}
-        </div>
+          );
+        })()}
+        <div className="text-xs text-gray-500">지도 시각화는 OpenStreetMap + React Leaflet로 추가 예정입니다. 설치 승인 시(leaflet/react-leaflet) 히트맵/클러스터 포함해 드립니다.</div>
       </div>
-
-      {/* 탭 네비게이션 */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="-mb-px flex space-x-8">
-          {[
-            { key: 'overview', label: '개요' },
-            { key: 'sessions', label: '세션 분석' },
-            { key: 'pages', label: '페이지 분석' },
-            { key: 'realtime', label: '실시간' },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key as any)}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition ${
-                activeTab === tab.key
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
+      )}
 
       {/* 개요 탭 */}
       {activeTab === 'overview' && (
@@ -480,6 +642,7 @@ export function VisitorAnalyticsDashboard() {
                 {(!stats.browserStats || stats.browserStats.length === 0) && (
                   <p className="text-gray-500 dark:text-gray-400 text-sm">데이터가 없습니다</p>
                 )}
+                
               </div>
             </div>
 
@@ -749,12 +912,20 @@ export function VisitorAnalyticsDashboard() {
                                   <div className="flex items-center gap-3">
                                     <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                                     <div className="text-left">
-                                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                        {ip}
+                                      <div className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        <span>{ip}</span>
+                                        {latestVisit.isOwnerVisit && (
+                                          <span className="inline-flex items-center px-2 py-0.5 rounded bg-amber-100 text-amber-700 text-[11px] border border-amber-200">
+                                            오너
+                                          </span>
+                                        )}
                                       </div>
                                       <div className="text-xs text-gray-500 dark:text-gray-400">
                                         {parseBrowser(latestVisit.userAgent)} • {parseOS(latestVisit.userAgent)}
                                       </div>
+                                      {latestVisit.ownerNote && (
+                                        <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">메모: {latestVisit.ownerNote}</div>
+                                      )}
                                     </div>
                                   </div>
                                   
@@ -814,6 +985,6 @@ export function VisitorAnalyticsDashboard() {
           </div>
         </div>
       )}
-    </div>
+  </>
   );
 }

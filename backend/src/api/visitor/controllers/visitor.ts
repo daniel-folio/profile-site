@@ -4,6 +4,30 @@
 
 import { factories } from '@strapi/strapi';
 
+// --- IPv4 CIDR 매칭 유틸리티 ---
+function ipToLong(ip: string): number | null {
+  const m = ip.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (!m) return null;
+  const [a, b, c, d] = m.slice(1).map((n) => Number(n));
+  if ([a, b, c, d].some((x) => x < 0 || x > 255)) return null;
+  return ((a << 24) >>> 0) + (b << 16) + (c << 8) + d;
+}
+
+function isIpv4(ip?: string): boolean {
+  return !!ip && /^\d+\.\d+\.\d+\.\d+$/.test(ip);
+}
+
+function matchIpv4Cidr(ip: string, cidr: string): boolean {
+  const [base, maskStr] = cidr.split('/');
+  const mask = Number(maskStr);
+  if (!isFinite(mask) || mask < 0 || mask > 32) return false;
+  const ipLong = ipToLong(ip);
+  const baseLong = ipToLong(base);
+  if (ipLong == null || baseLong == null) return false;
+  const maskBits = mask === 0 ? 0 : (~0 << (32 - mask)) >>> 0;
+  return (ipLong & maskBits) === (baseLong & maskBits);
+}
+
 // --- IP 유틸리티 ---
 function normalizeIp(raw?: string | null): string | undefined {
   if (!raw) return undefined;
@@ -150,6 +174,59 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
       // Referrer 정보
       const referrer = ctx.request.headers['referer'] || ctx.request.headers['referrer'];
 
+      // Site Settings에서 Owner IP 목록 가져오기 (무제한, 메모 지원: string | { ip, note })
+      type AllowItem = { ip: string; note?: string };
+      let ownerList: AllowItem[] = [];
+      try {
+        const settings = await strapi.entityService.findOne('api::site-setting.site-setting', 1);
+        const list = (settings as any)?.ownerIpAllowlist;
+        if (Array.isArray(list)) {
+          ownerList = list
+            .map((v) => {
+              if (typeof v === 'string') return { ip: v } as AllowItem;
+              if (v && typeof v === 'object' && typeof v.ip === 'string') return { ip: v.ip, note: (v as any).note } as AllowItem;
+              return undefined;
+            })
+            .filter((v): v is AllowItem => !!v)
+            .map((item) => ({ ip: normalizeIp(item.ip)!, note: item.note }))
+            .filter((item) => !!item.ip);
+        }
+      } catch (e) {
+        // settings 미존재해도 방문 기록은 진행
+      }
+
+      // 오너 매칭: 정확 일치 또는 IPv4 CIDR 지원 (예: 203.0.113.0/24)
+      let isOwnerVisit = false;
+      let ownerNote: string | null = null;
+      if (ipAddress && ownerList.length > 0) {
+        for (const item of ownerList) {
+          const cand = item.ip;
+          if (!cand) continue;
+          // CIDR 표기인지 확인
+          if (cand.includes('/')) {
+            if (isIpv4(ipAddress) && isIpv4(cand.split('/')[0]) && matchIpv4Cidr(ipAddress, cand)) {
+              isOwnerVisit = true;
+              ownerNote = item.note || null;
+              break;
+            }
+          } else {
+            if (ipAddress === cand) {
+              isOwnerVisit = true;
+              ownerNote = item.note || null;
+              break;
+            }
+          }
+        }
+      }
+
+      // GeoIP 조회
+      let geo: any = {};
+      try {
+        geo = await (strapi.service('api::visitor.visitor') as any).getLocationFromIP(ipAddress);
+      } catch (e) {
+        geo = {};
+      }
+
       // 방문자 데이터 생성
       const visitorData = {
         ...data,
@@ -160,6 +237,22 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
         browser: uaParsed.browser,
         browserVersion: uaParsed.browserVersion,
         deviceType: uaParsed.deviceType,
+        isOwnerVisit,
+        ownerTag: isOwnerVisit ? 'owner' : null,
+        ownerNote: ownerNote,
+        continent: geo?.continent,
+        countryCode: geo?.countryCode,
+        // 기존 schema의 country/city 필드 재사용
+        country: geo?.country || undefined,
+        city: geo?.city || undefined,
+        region: geo?.region,
+        regionCode: geo?.regionCode,
+        district: geo?.district,
+        latitude: geo?.latitude ?? null,
+        longitude: geo?.longitude ?? null,
+        timezone: geo?.timezone,
+        asn: geo?.asn,
+        isp: geo?.isp,
         referrer,
         visitedAt: new Date(),
       };
@@ -204,6 +297,88 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
     }
   },
 
+  // 위치 집계 조회 (지도용)
+  async getGeo(ctx) {
+    try {
+      const { period = '7d', startDate: customStartDate, endDate: customEndDate, segment = 'general' } = ctx.query as any;
+
+      let startDate: Date;
+      let endDate = new Date();
+      if (period === 'custom' && customStartDate && customEndDate) {
+        startDate = new Date(String(customStartDate));
+        endDate = new Date(String(customEndDate));
+        endDate.setHours(23, 59, 59, 999);
+      } else {
+        const now = new Date();
+        switch (period) {
+          case '1d':
+            startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            break;
+          case '7d':
+            startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            break;
+          case '30d':
+            startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            break;
+          default:
+            startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        }
+      }
+
+      // 쿼리 조건 구성
+      const filters: any = {
+        visitedAt: { $gte: startDate, $lte: endDate },
+      };
+      if (segment === 'general') filters.isOwnerVisit = { $notIn: [true, 'true'] };
+      else if (segment === 'owner') filters.isOwnerVisit = { $in: [true, 'true'] };
+
+      // 데이터 조회 (위경도 있는 데이터만)
+      const records = (await strapi.entityService.findMany('api::visitor.visitor', {
+        filters,
+        fields: ['latitude', 'longitude', 'country', 'city', 'region', 'countryCode', 'timezone', 'isp'],
+        pagination: { page: 1, pageSize: 10000 },
+      })) as any[];
+
+      const pointsMap = new Map<string, { lat: number; lng: number; count: number; country?: string; city?: string; region?: string; countryCode?: string; timezone?: string; isp?: string }>();
+
+      for (const r of records) {
+        const lat = typeof r.latitude === 'number' ? r.latitude : undefined;
+        const lng = typeof r.longitude === 'number' ? r.longitude : undefined;
+        if (lat == null || lng == null) continue;
+        const key = `${lat.toFixed(3)},${lng.toFixed(3)}`; // 살짝 격자화
+        if (!pointsMap.has(key)) {
+          pointsMap.set(key, {
+            lat: Number(lat.toFixed(6)),
+            lng: Number(lng.toFixed(6)),
+            count: 0,
+            country: r.country,
+            city: r.city,
+            region: r.region,
+            countryCode: r.countryCode,
+            timezone: r.timezone,
+            isp: r.isp,
+          });
+        }
+        const p = pointsMap.get(key)!;
+        p.count += 1;
+      }
+
+      const points = Array.from(pointsMap.values()).sort((a, b) => b.count - a.count);
+
+      return {
+        period,
+        segment,
+        startDate,
+        endDate,
+        totalPoints: points.length,
+        points,
+      };
+    } catch (error) {
+      console.error('지오 데이터 조회 오류:', error);
+      ctx.throw(500, '지오 데이터 조회에 실패했습니다.');
+    }
+  },
+
   // 방문자 통계 조회
   async getStats(ctx) {
     try {
@@ -242,15 +417,23 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
         customRange: period === 'custom' 
       });
 
-      // 날짜 범위 필터 설정
-      const dateFilter = {
+      // 날짜 범위 필터 + 세그먼트(owner/general/all)
+      const segment = (ctx.query?.segment as string) || 'all';
+      const dateFilter: any = {
         visitedAt: {
           $gte: startDate,
           $lte: endDate,
         },
       };
 
-      // 총 방문자 수
+      if (segment === 'general') {
+        // boolean 엄격 비교
+        dateFilter.isOwnerVisit = { $ne: true };
+      } else if (segment === 'owner') {
+        dateFilter.isOwnerVisit = { $eq: true };
+      }
+
+      // 총 방문자 수 (현재 세그먼트 기준)
       const totalVisitors = await strapi.entityService.count('api::visitor.visitor', {
         filters: dateFilter,
       });
@@ -260,7 +443,7 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
       // Strapi EntityService를 사용한 고유 방문자 수 계산
       const allVisitorsRaw = await strapi.entityService.findMany('api::visitor.visitor', {
         filters: dateFilter,
-        fields: ['ipAddress', 'page', 'visitedAt', 'userAgent', 'sessionId', 'os', 'osVersion', 'browser', 'browserVersion', 'deviceType'],
+        fields: ['ipAddress', 'page', 'visitedAt', 'userAgent', 'sessionId', 'os', 'osVersion', 'browser', 'browserVersion', 'deviceType', 'isOwnerVisit', 'ownerNote'],
       });
 
       const allVisitors = (allVisitorsRaw as unknown as any[]) || [];
@@ -307,6 +490,7 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
           sessionStatsMap.set(sessionId, { 
             sessionId, 
             ipAddress: visitor.ipAddress,
+            ownerNote: visitor.ownerNote || null,
             pages: new Set(), 
             visits: 0,
             firstVisit: visitor.visitedAt,
@@ -429,6 +613,32 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
         ? Math.round(sessionStats.reduce((sum, session) => sum + session.duration, 0) / sessionStats.length / 1000) 
         : 0;
 
+      // 세그먼트 분해 집계(동일 기간, 세그먼트 무관하게 항상 계산)
+      const baseFilterAll: any = { ...dateFilter };
+      delete baseFilterAll.isOwnerVisit; // all
+      // boolean 엄격 비교: 문자열 'true'는 더 이상 고려하지 않음 (schema는 boolean)
+      const baseFilterGeneral: any = { ...dateFilter, isOwnerVisit: { $ne: true } };
+      const baseFilterOwner: any = { ...dateFilter, isOwnerVisit: { $eq: true } };
+
+      const [allCount, generalCount, ownerCount] = await Promise.all([
+        strapi.entityService.count('api::visitor.visitor', { filters: baseFilterAll }),
+        strapi.entityService.count('api::visitor.visitor', { filters: baseFilterGeneral }),
+        strapi.entityService.count('api::visitor.visitor', { filters: baseFilterOwner }),
+      ]);
+
+      // 디버그: 세그먼트 합산 검증 로그
+      try {
+        const consistent = allCount === (generalCount + ownerCount);
+        console.log('📊 세그먼트 카운트', {
+          period,
+          segment,
+          allCount,
+          generalCount,
+          ownerCount,
+          consistent
+        });
+      } catch {}
+
       const result = {
         period,
         totalVisitors,
@@ -441,6 +651,11 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
         sessionStats,
         browserStats,
         osStats,
+        breakdown: {
+          all: { totalVisitors: allCount },
+          general: { totalVisitors: generalCount },
+          owner: { totalVisitors: ownerCount },
+        },
       };
 
       console.log('📊 최종 통계 결과:', {

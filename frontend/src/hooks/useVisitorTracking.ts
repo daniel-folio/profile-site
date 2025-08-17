@@ -47,18 +47,28 @@ export function useVisitorTracking() {
 }
 
 // 방문자 통계 조회 훅
-export function useVisitorStats(period: '1d' | '7d' | '30d' | 'custom' = '7d', customDateRange?: { startDate: string; endDate: string }) {
+export function useVisitorStats(
+  period: '1d' | '7d' | '30d' | 'custom' = '7d', 
+  customDateRange?: { startDate: string; endDate: string },
+  segment: 'general' | 'owner' | 'all' = 'all',
+  enabled: boolean = true,
+) {
   const [stats, setStats] = useState<VisitorStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
+      if (!enabled) {
+        // 비활성화 시 네트워크 요청 건너뜀
+        setLoading(false);
+        return;
+      }
       try {
         setLoading(true);
         setError(null);
         
-        const data = await getVisitorStats(period, customDateRange);
+        const data = await getVisitorStats(period, customDateRange, segment);
         setStats(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : '통계 조회 실패');
@@ -69,14 +79,15 @@ export function useVisitorStats(period: '1d' | '7d' | '30d' | 'custom' = '7d', c
     };
 
     fetchStats();
-  }, [period, customDateRange?.startDate, customDateRange?.endDate]);
+  }, [period, customDateRange?.startDate, customDateRange?.endDate, segment, enabled]);
 
   const refetch = async () => {
+    if (!enabled) return;
     try {
       setLoading(true);
       setError(null);
       
-      const data = await getVisitorStats(period, customDateRange);
+      const data = await getVisitorStats(period, customDateRange, segment);
       setStats(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : '통계 조회 실패');

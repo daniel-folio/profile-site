@@ -54,6 +54,26 @@
     },
     "deviceType": {
       "type": "string"
-    }
+    },
+    "isOwnerVisit": {
+      "type": "boolean",
+      "default": false
+    },
+    "ownerTag": {
+      "type": "string"
+    },
+    "ownerNote": {
+      "type": "string"
+    },
+    "continent": { "type": "string" },
+    "countryCode": { "type": "string", "maxLength": 2 },
+    "region": { "type": "string" },
+    "regionCode": { "type": "string" },
+    "district": { "type": "string" },
+    "latitude": { "type": "decimal" },
+    "longitude": { "type": "decimal" },
+    "timezone": { "type": "string" },
+    "asn": { "type": "string" },
+    "isp": { "type": "string" }
   }
 }

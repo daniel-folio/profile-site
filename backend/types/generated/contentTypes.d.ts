@@ -754,6 +754,7 @@ export interface ApiSiteSettingSiteSetting extends Struct.SingleTypeSchema {
         number
       > &
       Schema.Attribute.DefaultTo<10000>;
+    ownerIpAllowlist: Schema.Attribute.JSON & Schema.Attribute.DefaultTo<[]>;
     publishedAt: Schema.Attribute.DateTime;
     siteDescription: Schema.Attribute.Text &
       Schema.Attribute.SetMinMaxLength<{
@@ -830,31 +831,47 @@ export interface ApiVisitorVisitor extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
+    asn: Schema.Attribute.String;
     browser: Schema.Attribute.String;
     browserVersion: Schema.Attribute.String;
     city: Schema.Attribute.String;
+    continent: Schema.Attribute.String;
     country: Schema.Attribute.String;
+    countryCode: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 2;
+      }>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     deviceType: Schema.Attribute.String;
+    district: Schema.Attribute.String;
     ipAddress: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 45;
       }>;
+    isOwnerVisit: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    isp: Schema.Attribute.String;
+    latitude: Schema.Attribute.Decimal;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::visitor.visitor'
     > &
       Schema.Attribute.Private;
+    longitude: Schema.Attribute.Decimal;
     os: Schema.Attribute.String;
     osVersion: Schema.Attribute.String;
+    ownerNote: Schema.Attribute.String;
+    ownerTag: Schema.Attribute.String;
     page: Schema.Attribute.String & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
     referrer: Schema.Attribute.String;
+    region: Schema.Attribute.String;
+    regionCode: Schema.Attribute.String;
     sessionId: Schema.Attribute.String;
+    timezone: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

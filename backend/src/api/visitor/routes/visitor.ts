@@ -15,6 +15,17 @@ export default {
         middlewares: [],
       },
     },
+    // 지오 집계 라우트
+    {
+      method: 'GET',
+      path: '/visitors/geo',
+      handler: 'visitor.getGeo',
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
     // 기본 CRUD 라우트
     {
       method: 'POST',
@@ -31,6 +42,7 @@ export default {
       path: '/visitors',
       handler: 'visitor.find',
       config: {
+        auth: false,
         policies: [],
         middlewares: [],
       },
@@ -40,6 +52,7 @@ export default {
       path: '/visitors/:id',
       handler: 'visitor.findOne',
       config: {
+        auth: false,
         policies: [],
         middlewares: [],
       },
