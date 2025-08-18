@@ -17,10 +17,10 @@
 ### 🎯 핵심 기능
 
 #### 📊 **고급 방문자 분석 시스템 (Admin전용 Visitors 페이지)**
-- **탭 구성**: 개요, 세션 분석, 페이지 분석, 실시간, 지도 탭 제공. 모든 탭 상단에 세그먼트 탭(전체/일반/오너) 공통 노출.
+- **탭 구성**: 개요, 세션 분석, 페이지 분석, 실시간, 지도 탭 제공. 모든 탭 상단에 세그먼트 탭(전체/일반/OWNER) 공통 노출.
 - **기간 선택**: 1일/7일/30일 빠른 선택 및 사용자 정의 범위. 선택한 기간을 상단 배너에 `YYYY-MM-DD ~ YYYY-MM-DD (N일)` 형식으로 표시.
-- **세그먼트 분리**: 오너 방문과 일반 방문 완전 분리 처리(`isOwnerVisit` 기준). 세그먼트 필터는 백엔드/프론트 모두 `$eq/$ne`로 일관 처리.
-- **오너 IP 허용목록**: Strapi Site Settings에서 오너 IP(또는 CIDR)들을 등록. 최대 5개까지 ‘오너’ 태깅 우선, 초과 항목도 관리 가능.
+- **세그먼트 분리**: 오너 방문과 일반 방문을 __Owner IP 허용목록(ownerIpAllowlist)__ 기준으로 완전 분리. 백엔드/프론트 모두 동일 기준을 사용합니다.
+- **오너 IP 허용목록**: Strapi Site Settings에서 오너 IP(또는 CIDR)들을 등록. 최대 5개까지 ‘OWNER’ 태깅 우선, 초과 항목도 관리 가능.
 - **실시간/세션/페이지 분석**: 방문자 타임라인, 페이지뷰 집계, 브라우저/OS/디바이스 통계 제공. 빈 데이터 시 가독성 있는 대체 UI 제공.
 - **지도 시각화**: OpenStreetMap 기반 `pigeon-maps` 사용(React 19 호환). 위치 정보가 있는 방문만 지도 탭에서 표시.
 - **IP/프록시 처리**: `X-Forwarded-For` 등 헤더 기반으로 실제 클라이언트 IP 추출. 프록시 환경에서도 127.0.0.1 문제 완화.
@@ -32,6 +32,8 @@
   - 관리자 인증: `/admin/visitors` 진입 시 Site Settings의 `adminPassword` 사용(평문 저장 UI 한계로 강력한 비밀번호 권장).
   - 데이터 품질: 모바일 누락/프록시 환경 이슈는 IP/헤더 설정을 우선 점검.
   - 지도 성능: 무료 타일/네트워크 상황에 따라 초기 로딩이 지연될 수 있음.
+  - 오너 자동 등록: 방문 URL에 특정 조건을 붙이면 현재 IP가 `ownerIpAllowlist`에 자동 추가되고, 해당 방문은 오너 방문으로 기록됩니다. 남용 위험이 있어 공개 링크로 노출하지 마세요.
+    - 자동 메모 포맷: `countryCode/city, isp/asn, timezone, deviceType | YYYY-MM-DD HH:mm KST` (민감 파라미터는 기록하지 않음)
 
 #### 📄 **동적 콘텐츠 관리**
 - **PDF 생성** - html2pdf.js를 사용한 이력서 및 경력 상세 정보
@@ -685,7 +687,7 @@ A **comprehensive full-stack developer portfolio website** showcasing advanced w
 #### 📊 **Enterprise-Grade Visitor Analytics (Only Admin Visitors Page)**
 - **Tabs**: Overview, Sessions, Pages, Realtime, Map. Segment tabs (All/General/Owner) are shown on top of every main tab consistently.
 - **Period Selection**: Quick buttons (1d/7d/30d) and custom range. Selected period banner shows `YYYY-MM-DD ~ YYYY-MM-DD (N days)`.
-- **Segment Separation**: Owner vs General visits strictly separated via `isOwnerVisit`. Filters are applied consistently ($eq/$ne) across backend and frontend.
+- **Segment Separation**: Owner vs General visits are strictly separated by the __Owner IP allowlist (ownerIpAllowlist)__. Both backend and frontend rely on the same rule.
 - **Owner IP Allowlist**: Manage owner IPs (and CIDR) in Strapi Site Settings. Up to 5 are prioritized for owner tagging; additional entries are still accepted for management.
 - **Realtime/Sessions/Pages Analytics**: Visitor timelines, pageview aggregation, and browser/OS/device stats. Clear empty states when no data.
 - **Map Visualization**: OpenStreetMap with `pigeon-maps` (React 19 compatible). Only visits with geo info are rendered in the Map tab.
@@ -699,6 +701,7 @@ A **comprehensive full-stack developer portfolio website** showcasing advanced w
   - Data quality: For missing mobile records or proxy environments, verify IP/forwarded header configuration first.
   - Map performance: Initial load may be slow depending on free tile/CDN/network conditions.
   - Docs: see [VISITOR_TRACKING.md](./VISITOR_TRACKING.md).
+  - Owner auto-allowlist: Append some information to the visit URL to auto-add the current IP to `ownerIpAllowlist` and record this visit as owner. Do not expose this publicly to avoid abuse.
 
 #### 📄 **Advanced Content Management System**
 - **Dynamic PDF Generation** for resumes and career details using html2pdf.js with custom styling

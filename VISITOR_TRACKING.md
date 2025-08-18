@@ -30,6 +30,9 @@
 - **세션 분석**: 사용자별 방문 경로 및 행동 패턴
 - **브라우저/OS 통계**: 방문자 환경 분석
 - **빈 데이터 상태**: 데이터 없을 때 사용자 친화적 UI
+- **세그먼트 분리**: 오너 vs 일반을 __Owner IP 허용목록(ownerIpAllowlist)__ 기준으로 완전 분리 (백엔드/프론트 동일 규칙)
+- **오너 IP 허용목록**: Strapi Site Settings에서 단일 IP 및 CIDR 대역 등록 지원 (예: `203.0.113.5`, `203.0.113.0/24`)
+ - **오너 자동 등록 메모**: 자동 허용목록 등록 시 메모는 `countryCode/city, isp/asn, timezone, deviceType | YYYY-MM-DD HH:mm KST` 형식을 사용합니다. 민감한 파라미터는 기록하지 않습니다.
 
 #### 🔒 개인정보 보호
 - **중복 방문 필터링**: 같은 IP에서 1시간 이내 재방문 시 중복 기록 방지
@@ -50,6 +53,8 @@
 - **페이지 분석**: 페이지별 상세 방문 현황
 - **세션 분석**: 사용자별 방문 경로 및 행동 패턴
 - **실시간**: 최근 방문자 목록 (IP별 아코디언 그룹화)
+- **세그먼트 탭**: 모든 탭 상단에 세그먼트 탭(전체/일반/OWNER) 공통 노출, 선택값이 전체 대시보드에 적용
+  - 표기: 탭 라벨은 'OWNER'로 표시됩니다 (예: 전체/일반/OWNER)
 
 #### 3. **빈 데이터 상태 UI**
 ```tsx
@@ -78,6 +83,11 @@ function CustomStats() {
     startDate: '2025-08-01',
     endDate: '2025-08-16'
   });
+
+  // 세그먼트별 조회 (일반/오너/전체)
+  const general = useVisitorStats('7d', undefined, 'general');
+  const owner = useVisitorStats('7d', undefined, 'owner');
+  const all = useVisitorStats('7d', undefined, 'all');
   
   if (loading) return <div>로딩 중...</div>;
   if (error) return <div>오류: {error}</div>;
@@ -159,6 +169,11 @@ const customStats = await getVisitorStats('custom', {
   startDate: '2025-08-01',
   endDate: '2025-08-16'
 });
+
+// 세그먼트별 조회 (일반/오너/전체)
+const gen = await getVisitorStats('7d', undefined, 'general');
+const own = await getVisitorStats('7d', undefined, 'owner');
+const allSeg = await getVisitorStats('7d', undefined, 'all');
 
 console.log('7일 통계:', stats7d);
 console.log('사용자 정의 통계:', customStats);
@@ -267,6 +282,8 @@ This portfolio website includes a comprehensive **visitor analytics system** wit
 - **🌐 Browser/OS Statistics** - Detailed visitor environment analytics
 - **🚫 Empty State Handling** - User-friendly UI when no data is available
 - **🔒 Privacy-First** - IP anonymization, duplicate filtering, GDPR compliance ready
+ - **Segment Separation**: Owner vs General is strictly split based on the __Owner IP allowlist (ownerIpAllowlist)__. The same rule is used in both backend and frontend.
+ - **Owner Auto-Registration Note**: When an IP is auto-allowlisted, the note uses the format `countryCode/city, isp/asn, timezone, deviceType | YYYY-MM-DD HH:mm KST`. Sensitive parameters are not recorded.
 
 #### 🛠️ Technical Stack
 
@@ -288,6 +305,7 @@ This portfolio website includes a comprehensive **visitor analytics system** wit
 - **Page Analysis**: Detailed page-by-page visitor breakdown
 - **Session Analysis**: User behavior patterns and journey paths
 - **Real-time**: Live visitor feed with IP grouping
+ - **Segment Tabs**: Segment tabs (All/General/Owner) are consistently shown on top of every dashboard tab
 
 ##### Empty State UI
 ```tsx
@@ -346,6 +364,8 @@ const customStats = await getVisitorStats('custom', {
 - **Live Visitor Feed**: Real-time visitor tracking with automatic updates
 - **Session Monitoring**: Track user sessions and page navigation patterns
 - **Geographic Insights**: Country and city-level visitor analytics
+ - **Segment Separation**: Owner vs General is strictly separated by the __Owner IP allowlist (ownerIpAllowlist)__ used consistently in backend and frontend
+ - **Owner IP Allowlist**: Manage single IPs and CIDR ranges in Strapi Site Settings (e.g., `203.0.113.5`, `203.0.113.0/24`)
 - **Device Analytics**: Comprehensive browser, OS, and device statistics
 
 ##### **Privacy & Compliance**

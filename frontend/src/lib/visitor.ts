@@ -84,8 +84,20 @@ export async function recordVisitor(data: VisitorData): Promise<any> {
     };
 
     // 방문자 추적 요청 전송
+    // 페이지 URL에 ?owner=true가 있으면 API 호출에도 전달하여 백엔드가 자동 오너 등록/태깅 수행
+    let postUrl = `${API_URL}/api/visitors`;
+    try {
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('owner')?.toLowerCase() === 'true') {
+          postUrl += `?owner=true`;
+        }
+      }
+    } catch {
+      // 쿼리 파싱 실패 시 무시하고 기본 URL 사용
+    }
 
-    const response = await fetch(`${API_URL}/api/visitors`, {
+    const response = await fetch(postUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

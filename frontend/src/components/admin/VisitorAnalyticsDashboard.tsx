@@ -25,8 +25,8 @@ interface VisitorDetail {
   longitude?: number;
   timezone?: string;
   isp?: string;
-  isOwnerVisit?: boolean;
   ownerNote?: string | null;
+  ownerTag?: string | null;
 }
 
 interface VisitorSession {
@@ -45,29 +45,19 @@ interface VisitorSession {
 export function VisitorAnalyticsDashboard() {
   const [period, setPeriod] = useState<'1d' | '7d' | '30d' | 'custom'>('1d');
   const [activeTab, setActiveTab] = useState<'overview' | 'sessions' | 'pages' | 'realtime' | 'map'>('overview');
-  const [segment, setSegment] = useState<'general' | 'owner' | 'all'>('general');
+  const [segment, setSegment] = useState<'general' | 'owner' | 'all'>('all');
   // deprecated: local stats state removed; use useVisitorStats().stats
   const [visitorDetails, setVisitorDetails] = useState<VisitorDetail[]>([]);
   const [visitorSessions, setVisitorSessions] = useState<VisitorSession[]>([]);
+  const [geoPoints, setGeoPoints] = useState<Array<{ lat: number; lng: number; count: number; country?: string; city?: string; region?: string; countryCode?: string; timezone?: string; isp?: string }>>([]);
   const [loading, setLoading] = useState(false);
   const [expandedIPs, setExpandedIPs] = useState<Set<string>>(new Set());
   const [geoLoading, setGeoLoading] = useState(false);
-  const [geoPoints, setGeoPoints] = useState<{
-    lat: number;
-    lng: number;
-    count: number;
-    country?: string;
-    city?: string;
-    region?: string;
-    countryCode?: string;
-    timezone?: string;
-    isp?: string;
-  }[]>([]);
 
   // react 19 호환 지도 컴포넌트 (SSR 비활성화)
   // 주의: 전역 Map 객체와 이름 충돌을 피하기 위해 별칭 사용
-  const PigeonMap = dynamic(() => import('pigeon-maps').then(m => m.Map), { ssr: false } as any);
-  const PigeonMarker = dynamic(() => import('pigeon-maps').then(m => m.Marker), { ssr: false } as any);
+  const PigeonMap: any = dynamic(() => import('pigeon-maps').then(m => m.Map as any), { ssr: false } as any);
+  const PigeonMarker: any = dynamic(() => import('pigeon-maps').then(m => m.Marker as any), { ssr: false } as any);
   
   // 사용자 정의 날짜 범위 상태 (초기값: 오늘)
   const [customDateRange, setCustomDateRange] = useState({
@@ -193,9 +183,24 @@ export function VisitorAnalyticsDashboard() {
       }
       const res = await fetch(`${apiUrl}/api/visitors/geo?${params.toString()}`, { signal: controller.signal });
       if (res.ok) {
-        // TODO: 실제 응답 스키마에 맞춰 setGeoPoints 반영
-        // const data = await res.json();
-        // setGeoPoints(mapToPoints(data));
+        const data = await res.json();
+        if (data && Array.isArray(data.points)) {
+          setGeoPoints(
+            data.points.map((p: any) => ({
+              lat: Number(p.lat),
+              lng: Number(p.lng),
+              count: Number(p.count ?? 1),
+              country: p.country,
+              city: p.city,
+              region: p.region,
+              countryCode: p.countryCode,
+              timezone: p.timezone,
+              isp: p.isp,
+            }))
+          );
+        } else {
+          setGeoPoints([]);
+        }
       }
     } catch (e) {
       // noop
@@ -215,16 +220,8 @@ export function VisitorAnalyticsDashboard() {
       const apiUrl = getApiUrl();
       // 방문자 상세 데이터 요청
 
-      // 세그먼트 필터: boolean 기반으로 엄격 적용
-      const segParams: string[] = [];
-      if (segment === 'general') {
-        // 오너가 아닌 것만 (null/undefined 포함 위해 $ne=true 사용)
-        segParams.push('filters[isOwnerVisit][$ne]=true');
-      } else if (segment === 'owner') {
-        // 오너만
-        segParams.push('filters[isOwnerVisit][$eq]=true');
-      }
-      const segFilter = segParams.length ? `&${segParams.join('&')}` : '';
+      // 세그먼트 필터는 백엔드 통계/지도 API에서 동적으로 처리. 상세 목록은 날짜 기준만 사용
+      const segFilter = '';
       
       // 기간 필터: 실시간 모드와 일반 모드 분리
       const buildDateFilter = (days: number): string => {
@@ -257,7 +254,7 @@ export function VisitorAnalyticsDashboard() {
         dateFilter = params.length ? `&${params.join('&')}` : '';
       }
 
-      const url = `${apiUrl}/api/visitors?pagination[limit]=1000&sort=visitedAt:desc${segFilter}${dateFilter}`;
+      const url = `${apiUrl}/api/visitors?pagination[limit]=1000&sort=visitedAt:desc&segment=${encodeURIComponent(segment)}${segFilter}${dateFilter}`;
       if (opts?.mode === 'realtime') {
         console.debug('[realtime] visitors GET', { url, segment });
       }
@@ -278,7 +275,7 @@ export function VisitorAnalyticsDashboard() {
         // 실시간 모드에서 0건이면 7일로 한 번 더 재조회 (fallback)
         if (opts?.mode === 'realtime' && (!result || !Array.isArray(result.data) || result.data.length === 0)) {
           try {
-            const fbUrl = `${apiUrl}/api/visitors?pagination[limit]=1000&sort=visitedAt:desc${segFilter}${buildDateFilter(7)}`;
+            const fbUrl = `${apiUrl}/api/visitors?pagination[limit]=1000&sort=visitedAt:desc&segment=${encodeURIComponent(segment)}${segFilter}${buildDateFilter(7)}`;
             console.debug('[realtime] visitors fallback GET', { url: fbUrl, segment });
             const fallbackRes = await fetch(fbUrl, { signal: controller.signal });
             if (fallbackRes.ok) {
@@ -310,20 +307,15 @@ export function VisitorAnalyticsDashboard() {
               longitude: a.longitude,
               timezone: (a as any).timezone,
               isp: (a as any).isp,
-              isOwnerVisit: (a as any).isOwnerVisit,
               ownerNote: (a as any).ownerNote ?? null,
+              ownerTag: (a as any).ownerTag ?? null,
             } as VisitorDetail;
           });
 
-        // 세그먼트 최종 안전필터
-        if (segment === 'general') {
-          details = details.filter((d) => d.isOwnerVisit !== true);
-        } else if (segment === 'owner') {
-          details = details.filter((d) => d.isOwnerVisit === true);
-        }
+        // 세그먼트 필터링은 백엔드 결과를 신뢰 (ownerIpAllowlist 기준)
 
         // 상태 반영
-        console.debug('[realtime] mapped details', { segment, count: details.length });
+        console.debug('[realtime] mapped details', { segment, count: details.length, sample: details.slice(0,3).map(d=>d.ipAddress) });
         setVisitorDetails(details);
 
         // 세션별로 그룹화
@@ -406,7 +398,7 @@ export function VisitorAnalyticsDashboard() {
         fetchGeo();
         fetchVisitorDetails(); // 지도 탭의 "장소별 분석" 카드가 visitorDetails를 사용
       } else if (activeTab === 'realtime') {
-        fetchVisitorDetails();
+        fetchVisitorDetails({ mode: 'realtime' });
       }
       // 나머지 탭(overview/sessions/pages)은 useVisitorStats 훅 데이터로 충분
     }, 150);
@@ -493,7 +485,7 @@ export function VisitorAnalyticsDashboard() {
       {[
         { key: 'all', label: '전체' },
         { key: 'general', label: '일반' },
-        { key: 'owner', label: '오너' },
+        { key: 'owner', label: 'OWNER' },
       ].map((seg) => (
         <button
           key={seg.key}
@@ -914,9 +906,9 @@ export function VisitorAnalyticsDashboard() {
                                     <div className="text-left">
                                       <div className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100">
                                         <span>{ip}</span>
-                                        {latestVisit.isOwnerVisit && (
-                                          <span className="inline-flex items-center px-2 py-0.5 rounded bg-amber-100 text-amber-700 text-[11px] border border-amber-200">
-                                            오너
+                                        {(latestVisit.ownerTag || segment === 'owner') && (
+                                          <span className="px-2 py-0.5 rounded-md bg-yellow-100 text-yellow-800 text-[11px] font-semibold border border-yellow-200">
+                                            OWNER
                                           </span>
                                         )}
                                       </div>

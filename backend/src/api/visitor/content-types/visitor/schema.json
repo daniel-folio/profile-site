@@ -55,10 +55,6 @@
     "deviceType": {
       "type": "string"
     },
-    "isOwnerVisit": {
-      "type": "boolean",
-      "default": false
-    },
     "ownerTag": {
       "type": "string"
     },
