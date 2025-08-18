@@ -4,6 +4,30 @@
 
 import { factories } from '@strapi/strapi'
 
+// 싱글톤 안전 조회 헬퍼: 최신(updatedAt desc) 1개를 사용, 없으면 생성, 최후 id=1 조회
+async function getSiteSettingSingleton(strapi: any): Promise<any> {
+  try {
+    const rows = await strapi.db
+      .query('api::site-setting.site-setting')
+      .findMany({ select: ['id', 'updatedAt'], orderBy: { updatedAt: 'desc' }, limit: 2 });
+    if (Array.isArray(rows) && rows.length > 0) {
+      if (rows.length > 1) {
+        try { strapi.log.warn(`[site-setting/controller] duplicate records detected: ids=${rows.map((r:any)=>r.id).join(',')}`) } catch {}
+      }
+      return rows[0];
+    }
+  } catch (e) {}
+  try {
+    return await strapi.entityService.create('api::site-setting.site-setting', { data: {} });
+  } catch (e) {
+    try {
+      const fb = await strapi.entityService.findOne('api::site-setting.site-setting', 1);
+      if (fb) return fb;
+    } catch {}
+    throw e;
+  }
+}
+
 export default factories.createCoreController('api::site-setting.site-setting', ({ strapi }) => ({
   // 업데이트 요청 로깅을 위한 커스텀 update 메서드
   async update(ctx) {
@@ -21,7 +45,8 @@ export default factories.createCoreController('api::site-setting.site-setting', 
     
     console.log('🔍 Update 결과:', JSON.stringify(result, null, 2));
     
-    const actualData = await strapi.entityService.findOne('api::site-setting.site-setting', 1);
+    const actualId = (await getSiteSettingSingleton(strapi)).id;
+    const actualData = await strapi.entityService.findOne('api::site-setting.site-setting', actualId);
     console.log('🔍 업데이트 후 실제 DB 데이터:', JSON.stringify(actualData, null, 2));
     
     return result;
@@ -29,33 +54,22 @@ export default factories.createCoreController('api::site-setting.site-setting', 
   // 공개 설정 조회 (패스워드 제외)
   async find(ctx) {
     try {
-      // singleType이므로 findOne 사용
-      let settings = await strapi.entityService.findOne('api::site-setting.site-setting', 1, {
-        fields: ['enableVisitorTracking', 'siteName', 'siteDescription', 'siteUsed', 'maxVisitorsPerDay']
-      });
-
-      // 데이터가 없으면 기본값으로 생성 (패스워드는 제외)
-      if (!settings) {
-        settings = await strapi.entityService.create('api::site-setting.site-setting', {
-          data: {
-            enableVisitorTracking: true,
-            siteName: 'Developer Portfolio',
-            siteDescription: 'Personal portfolio website',
-            siteUsed: true,
-            maxVisitorsPerDay: 10000
-          }
-        });
-      }
-
-      return {
-        data: settings || {
-          enableVisitorTracking: true,
-          siteName: null,
-          siteDescription: null,
-          siteUsed: true,
-          maxVisitorsPerDay: 10000
-        }
+      const s = await getSiteSettingSingleton(strapi);
+      // 특정 필드만 노출
+      const data = s ? {
+        enableVisitorTracking: s.enableVisitorTracking ?? true,
+        siteName: s.siteName ?? null,
+        siteDescription: s.siteDescription ?? null,
+        siteUsed: s.siteUsed ?? true,
+        maxVisitorsPerDay: s.maxVisitorsPerDay ?? 10000,
+      } : {
+        enableVisitorTracking: true,
+        siteName: null,
+        siteDescription: null,
+        siteUsed: true,
+        maxVisitorsPerDay: 10000,
       };
+      return { data };
     } catch (error) {
       console.error('Error in site-setting find:', error);
       ctx.throw(500, 'Failed to fetch site settings');
@@ -74,8 +88,8 @@ export default factories.createCoreController('api::site-setting.site-setting', 
         return ctx.badRequest('Password is required');
       }
 
-      // singleType이므로 findOne 사용
-      const settings = await strapi.entityService.findOne('api::site-setting.site-setting', 1, {
+      const target = await getSiteSettingSingleton(strapi);
+      const settings = await strapi.entityService.findOne('api::site-setting.site-setting', target.id, {
         fields: ['adminPassword', 'enableVisitorTracking', 'siteName', 'siteDescription', 'siteUsed', 'maxVisitorsPerDay']
       });
 
@@ -114,9 +128,8 @@ export default factories.createCoreController('api::site-setting.site-setting', 
   // 기본 설정 생성 (초기 설정용)
   async createDefaultSettings(ctx) {
     try {
-      const existingSettings = await strapi.entityService.findMany('api::site-setting.site-setting');
-      
-      if (existingSettings) {
+      const existing = await strapi.db.query('api::site-setting.site-setting').findMany({ limit: 1 });
+      if (Array.isArray(existing) && existing.length > 0) {
         return ctx.badRequest('Settings already exist');
       }
 
@@ -138,5 +151,57 @@ export default factories.createCoreController('api::site-setting.site-setting', 
       console.error('Create default settings error:', error);
       ctx.throw(500, 'Failed to create default settings');
     }
+  }
+  ,
+  // 진단: 모든 site-setting 레코드와 요약 반환
+  async debugSummary(ctx) {
+    const rows = await strapi.db.query('api::site-setting.site-setting').findMany({
+      select: ['id', 'updatedAt', 'createdAt', 'siteName', 'enableVisitorTracking']
+    });
+    const details = await Promise.all(rows.map(async (r:any) => {
+      const full = await strapi.entityService.findOne('api::site-setting.site-setting', r.id);
+      const size = Array.isArray(full?.ownerIpAllowlist) ? full.ownerIpAllowlist.length : 0;
+      return { id: r.id, createdAt: r.createdAt, updatedAt: r.updatedAt, allowSize: size };
+    }));
+    ctx.body = { ok: true, ids: rows.map((r:any)=>r.id), details };
+  }
+  ,
+  // 중복 병합: 최신 1개를 남기고 ownerIpAllowlist 병합 후 나머지 삭제
+  async mergeDuplicates(ctx) {
+    const rows = await strapi.db
+      .query('api::site-setting.site-setting')
+      .findMany({ select: ['id','updatedAt'], orderBy: { updatedAt: 'desc' } });
+    if (!Array.isArray(rows) || rows.length <= 1) {
+      ctx.body = { ok: true, message: 'No duplicates' };
+      return;
+    }
+    const primary = rows[0];
+    const others = rows.slice(1);
+    // 병합할 allowlist 수집
+    const sets = [] as any[];
+    for (const r of rows) {
+      const full = await strapi.entityService.findOne('api::site-setting.site-setting', r.id);
+      const arr = Array.isArray(full?.ownerIpAllowlist) ? full.ownerIpAllowlist : [];
+      sets.push(...arr);
+    }
+    // 중복 ip 제거, 최근 항목 우선
+    const seen = new Set<string>();
+    const merged: any[] = [];
+    for (const item of sets.reverse()) { // 뒤에서부터 → 최신 먼저 반영되도록
+      const ip = typeof item === 'string' ? item : item?.ip;
+      if (!ip || seen.has(ip)) continue;
+      seen.add(ip);
+      merged.push(typeof item === 'string' ? { ip: item, note: '' } : { ip, note: item?.note ?? '' });
+    }
+    merged.reverse();
+    // 1) 기본 레코드 업데이트
+    await strapi.entityService.update('api::site-setting.site-setting', primary.id, {
+      data: { ownerIpAllowlist: merged }
+    });
+    // 2) 나머지 삭제
+    for (const r of others) {
+      try { await strapi.db.query('api::site-setting.site-setting').delete({ where: { id: r.id } }); } catch {}
+    }
+    ctx.body = { ok: true, primaryId: primary.id, deletedIds: others.map(o=>o.id), mergedCount: merged.length };
   }
 }));

@@ -86,6 +86,35 @@ function parseXff(header: string | string[] | undefined): string[] {
     .filter((v): v is string => !!v);
 }
 
+// --- Site Settings 싱글톤 유틸리티 ---
+async function getSiteSettingSingleton(strapi: any): Promise<any> {
+  // Admin에서 보는 것과 동일한 단일 레코드를 DB에서 직접 조회
+  try {
+    const rows = await strapi.db
+      .query('api::site-setting.site-setting')
+      .findMany({ select: ['id', 'ownerIpAllowlist', 'enableVisitorTracking'], orderBy: { id: 'desc' }, limit: 2 });
+    if (Array.isArray(rows) && rows.length > 0) {
+      if (rows.length > 1) {
+        try { strapi.log.warn(`[site-setting] duplicate records detected: ids=${rows.map(r => r.id).join(',')}`); } catch {}
+      }
+      return rows[0];
+    }
+  } catch (e) {
+    // db.query 사용 불가한 환경일 경우 아래 분기 사용
+  }
+  // entityService로 생성 또는 조회
+  try {
+    const created = await strapi.entityService.create('api::site-setting.site-setting', { data: {} });
+    return created;
+  } catch (e) {
+    try {
+      const fallback = await strapi.entityService.findOne('api::site-setting.site-setting', 1);
+      if (fallback) return fallback;
+    } catch {}
+    throw e;
+  }
+}
+
 // --- User-Agent 파서 (경량) ---
 function parseUserAgent(uaRaw?: string) {
   const ua = (uaRaw || '').toLowerCase();
@@ -158,7 +187,8 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
     type AllowItem = { ip: string; note?: string };
     let ownerList: AllowItem[] = [];
     try {
-      const settings = await strapi.entityService.findOne('api::site-setting.site-setting', 1);
+      const singleton = await getSiteSettingSingleton(strapi);
+      const settings = singleton;
       const list = (settings as any)?.ownerIpAllowlist;
       if (Array.isArray(list)) {
         ownerList = list
@@ -275,7 +305,8 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
       let settings: any = null;
       let rawAllowList: any[] = [];
       try {
-        settings = await strapi.entityService.findOne('api::site-setting.site-setting', 1);
+        const singleton = await getSiteSettingSingleton(strapi);
+        settings = singleton;
         const list = (settings as any)?.ownerIpAllowlist;
         if (Array.isArray(list)) {
           rawAllowList = list.slice();
@@ -294,6 +325,7 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
       }
 
       // 쿼리로 owner=true 전달 시: 현재 IP를 허용목록에 자동 등록(중복 방지) 시도
+      try { strapi.log.info(`[visitor.create] ownerFlag=${ownerFlag} ipAddress=${ipAddress}`); } catch {}
       if (ownerFlag && ipAddress) {
         // 중복 체크: 정확 일치 또는 CIDR 범위 포함 시 이미 존재로 간주
         const exists = ownerList.some((it) => {
@@ -305,6 +337,7 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
           }
           return false;
         });
+        try { strapi.log.info(`[visitor.create] exists=${exists} currentAllowSize=${ownerList.length}`); } catch {}
         if (!exists) {
           // 메모: 민감 정보 제외, 직관적 출처 구분용 자동 메모
           // 포맷: countryCode/city, isp/asn, timezone, deviceType | YYYY-MM-DD
@@ -337,11 +370,18 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
           try {
             const newRaw = Array.isArray(rawAllowList) ? rawAllowList.slice() : [];
             newRaw.push(toPush);
-            await strapi.entityService.update('api::site-setting.site-setting', 1, {
+            const targetId = (settings && settings.id) ? settings.id : (await getSiteSettingSingleton(strapi)).id;
+            try { strapi.log.info(`[visitor.create] updating site-setting id=${targetId} push=${JSON.stringify(toPush)}`); } catch {}
+            await strapi.entityService.update('api::site-setting.site-setting', targetId, {
               data: { ownerIpAllowlist: newRaw },
             });
             // 메모리 상 목록도 갱신
             ownerList.push({ ip: ipAddress, note: toPush.note });
+            try {
+              const after = await getSiteSettingSingleton(strapi);
+              const size = Array.isArray(after?.ownerIpAllowlist) ? after.ownerIpAllowlist.length : -1;
+              strapi.log.info(`[visitor.create] allowlist updated. new size=${size}`);
+            } catch {}
           } catch (e) {
             strapi.log.warn(`owner=true auto-allowlist failed: ${String(e)}`);
           }
@@ -483,7 +523,7 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
       type AllowItem = { ip: string; note?: string };
       let ownerList: AllowItem[] = [];
       try {
-        const settings = await strapi.entityService.findOne('api::site-setting.site-setting', 1);
+        const settings = await getSiteSettingSingleton(strapi);
         const list = (settings as any)?.ownerIpAllowlist;
         if (Array.isArray(list)) {
           ownerList = list
