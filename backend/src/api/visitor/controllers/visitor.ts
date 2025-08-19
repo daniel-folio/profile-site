@@ -568,9 +568,12 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
       const pointsMap = new Map<string, { lat: number; lng: number; count: number; country?: string; city?: string; region?: string; countryCode?: string; timezone?: string; isp?: string }>();
 
       for (const r of records) {
-        const lat = typeof r.latitude === 'number' ? r.latitude : undefined;
-        const lng = typeof r.longitude === 'number' ? r.longitude : undefined;
-        if (lat == null || lng == null) continue;
+        // 위경도가 문자열(DECIMAL)로 반환되는 경우가 있어 안전하게 파싱한다.
+        const latRaw: any = (r as any).latitude;
+        const lngRaw: any = (r as any).longitude;
+        const lat = typeof latRaw === 'number' ? latRaw : (latRaw != null ? parseFloat(String(latRaw)) : NaN);
+        const lng = typeof lngRaw === 'number' ? lngRaw : (lngRaw != null ? parseFloat(String(lngRaw)) : NaN);
+        if (!isFinite(lat) || !isFinite(lng)) continue;
         const key = `${lat.toFixed(3)},${lng.toFixed(3)}`; // 살짝 격자화
         if (!pointsMap.has(key)) {
           pointsMap.set(key, {

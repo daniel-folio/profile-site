@@ -173,6 +173,7 @@ export function VisitorAnalyticsDashboard() {
     geoFetchingRef.current = true;
     const controller = new AbortController();
     try {
+      setGeoLoading(true);
       const apiUrl = getApiUrl();
       const params = new URLSearchParams();
       params.set('segment', segment);
@@ -206,8 +207,16 @@ export function VisitorAnalyticsDashboard() {
       // noop
     } finally {
       geoFetchingRef.current = false;
+      setGeoLoading(false);
     }
   }, [segment, period, customDateRange.startDate, customDateRange.endDate]);
+
+  // 지도 탭 진입 또는 필터 변경 시 지오포인트 로드
+  useEffect(() => {
+    if (activeTab === 'map') {
+      fetchGeo();
+    }
+  }, [activeTab, fetchGeo]);
 
   // 방문자 상세 데이터 가져오기
   const fetchVisitorDetails = async (opts?: { mode?: 'default' | 'realtime' }) => {
@@ -503,7 +512,7 @@ export function VisitorAnalyticsDashboard() {
     </nav>
   </div>
 
-  {/* 장소별 분석 - 지도 탭에서만 표시 */}
+  {/* 장소별 분석 + 지도 - 지도 탭에서만 표시 */}
   {activeTab === 'map' && (
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">장소별 분석</h3>
@@ -552,7 +561,29 @@ export function VisitorAnalyticsDashboard() {
             </div>
           );
         })()}
-        <div className="text-xs text-gray-500">지도 시각화는 OpenStreetMap + React Leaflet로 추가 예정입니다. 설치 승인 시(leaflet/react-leaflet) 히트맵/클러스터 포함해 드립니다.</div>
+
+        <h3 className="text-lg font-semibold">지도</h3>
+        {/* 지도 영역 */}
+        <div className="w-full h-[420px] rounded overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+          {geoLoading ? (
+            <div className="w-full h-full flex items-center justify-center text-sm text-gray-500">지도 데이터를 불러오는 중…</div>
+          ) : geoPoints.length === 0 ? (
+            <div className="w-full h-full flex items-center justify-center text-sm text-gray-500">표시할 위치 데이터가 없습니다</div>
+          ) : (
+            <PigeonMap
+              provider={osm}
+              defaultCenter={[
+                Number.isFinite(geoPoints[0]?.lat) ? geoPoints[0].lat : 36.5,
+                Number.isFinite(geoPoints[0]?.lng) ? geoPoints[0].lng : 127.8,
+              ]}
+              defaultZoom={4}
+            >
+              {geoPoints.map((p, idx) => (
+                <PigeonMarker key={`${p.lat},${p.lng}-${idx}`} anchor={[p.lat, p.lng]} width={32} />
+              ))}
+            </PigeonMap>
+          )}
+        </div>
       </div>
       )}
 
