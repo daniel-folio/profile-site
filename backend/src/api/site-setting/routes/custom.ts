@@ -53,5 +53,18 @@ export default {
       handler: 'site-setting.mergeDuplicates',
       config: { auth: false, policies: [], middlewares: [] },
     },
+    // Health check endpoints
+    {
+      method: 'GET',
+      path: '/healthz',
+      handler: 'site-setting.healthz',
+      config: { auth: false, policies: [], middlewares: [] },
+    },
+    {
+      method: 'HEAD',
+      path: '/healthz',
+      handler: 'site-setting.healthz',
+      config: { auth: false, policies: [], middlewares: [] },
+    },
   ],
 };

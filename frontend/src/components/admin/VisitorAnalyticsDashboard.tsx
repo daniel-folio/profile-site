@@ -51,7 +51,8 @@ export function VisitorAnalyticsDashboard() {
   const [visitorSessions, setVisitorSessions] = useState<VisitorSession[]>([]);
   const [geoPoints, setGeoPoints] = useState<Array<{ lat: number; lng: number; count: number; country?: string; city?: string; region?: string; countryCode?: string; timezone?: string; isp?: string }>>([]);
   const [loading, setLoading] = useState(false);
-  const [expandedIPs, setExpandedIPs] = useState<Set<string>>(new Set());
+  const [expandedIPs
+    , setExpandedIPs] = useState<Set<string>>(new Set());
   const [geoLoading, setGeoLoading] = useState(false);
 
   // react 19 호환 지도 컴포넌트 (SSR 비활성화)

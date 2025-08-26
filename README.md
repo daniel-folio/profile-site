@@ -338,6 +338,33 @@ npm run dev
 - **A-백엔드 (메인):** `Production` 환경만 운영합니다.
 - **B-백엔드 (개발/백업):** `Production`과 `Preview(dev)` 환경을 운영합니다.
 
+### 🧩 인프라 개요 (요약)
+
+- **Frontend**: Vercel (Next.js 자동 배포)
+- **Backend**: Render (Strapi CMS)
+- **Database**: Neon (PostgreSQL, 서버리스)
+- **Image CDN/Storage**: Cloudinary
+- **Wake-up Trigger**: cron-job.org (주기적 호출로 서버 기상)
+- **Wake-up Monitoring(옵션)**: UptimeRobot (14분 주기 헬스 체크)
+
+Neon 사용 시 `DATABASE_URL`은 Render 환경 변수에 설정합니다. 예시: `postgres://<user>:<password>@<neon-host>/<db>?sslmode=require`.
+
+### 💓 헬스 체크 / 웨이크업 설정
+
+- **헬스 엔드포인트**: `GET | HEAD /healthz`
+  - 예: `https://<render-app>.onrender.com/healthz`
+  - GET: `200` + `{ ok: true }`
+  - HEAD: `200` (본문 없음)
+- **cron-job.org 설정**
+  - Method: GET
+  - Schedule: 10~14분 간격
+  - 용도: 보조 웨이크업(프리 플랜 환경에서 안정적인 기상 보장)
+- **UptimeRobot 설정(선택)**
+  - Monitor Type: HTTP(s)
+  - Method: HEAD
+  - URL: 위 헬스 엔드포인트
+  - Interval: 14분 (Render Free의 15분 슬립 방지)
+
 ## 🔄 고가용성 및 배포 자동화
 
 ### 1. Git 저장소 자동 동기화 (B → A)
@@ -776,6 +803,33 @@ This portfolio demonstrates expertise in:
 - **Domain & SSL**: Custom domain with automatic SSL certificate management and renewal
 - **Monitoring**: Real-time uptime monitoring, performance tracking, and alert systems
 - **Backup Strategy**: Automated database backups with point-in-time recovery capabilities
+
+### 🧩 Infrastructure Overview (Summary)
+
+- **Frontend**: Vercel (automatic Next.js deployments)
+- **Backend**: Render (Strapi CMS)
+- **Database**: Neon (PostgreSQL, serverless)
+- **Image CDN/Storage**: Cloudinary
+- **Wake-up Trigger**: cron-job.org (periodic GET to wake server)
+- **Wake-up Monitoring (optional)**: UptimeRobot (HEAD request every ~14 min)
+
+For Neon, set `DATABASE_URL` in Render environment variables. Example: `postgres://<user>:<password>@<neon-host>/<db>?sslmode=require`.
+
+### 💓 Health Check / Wake-up Configuration
+
+- **Health Endpoint**: `GET | HEAD /healthz`
+  - Example: `https://<render-app>.onrender.com/healthz`
+  - GET: `200` + `{ ok: true }`
+  - HEAD: `200` (no body)
+- **cron-job.org**
+  - Method: GET
+  - Schedule: every 10–14 minutes
+  - Purpose: auxiliary wake-up to ensure stable uptime on free tiers
+- **UptimeRobot (optional)**
+  - Monitor Type: HTTP(s)
+  - Method: HEAD
+  - URL: Health endpoint above
+  - Interval: 14 minutes (avoids Render Free 15-min sleep)
 
 ### 📁 **Project Structure & Organization**
 
