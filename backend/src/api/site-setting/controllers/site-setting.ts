@@ -203,15 +203,6 @@ export default factories.createCoreController('api::site-setting.site-setting', 
       try { await strapi.db.query('api::site-setting.site-setting').delete({ where: { id: r.id } }); } catch {}
     }
     ctx.body = { ok: true, primaryId: primary.id, deletedIds: others.map(o=>o.id), mergedCount: merged.length };
-  },
-  // 헬스 체크: GET/HEAD 모두 200
-  async healthz(ctx) {
-    // Koa는 HEAD 요청에서 body를 무시하므로 상태만 보장
-    ctx.status = 200;
-    if (ctx.method !== 'HEAD') {
-      ctx.body = { ok: true };
-    }
   }
 }));
-// keep file end
 

@@ -72,5 +72,31 @@ export default {
     } catch (error) {
       console.error('방문자 API 권한 설정 중 오류:', error);
     }
+
+    // 전역 헬스 체크 라우트 등록 (/healthz)
+    try {
+      strapi.server.routes([
+        {
+          method: 'GET',
+          path: '/healthz',
+          handler: (ctx: any) => {
+            ctx.status = 200;
+            ctx.body = { ok: true };
+          },
+          config: { auth: false },
+        },
+        {
+          method: 'HEAD',
+          path: '/healthz',
+          handler: (ctx: any) => {
+            ctx.status = 200;
+          },
+          config: { auth: false },
+        },
+      ]);
+      try { strapi.log.info('✅ Global /healthz route registered (GET/HEAD)'); } catch {}
+    } catch (e) {
+      try { strapi.log.warn('⚠️ Failed to register /healthz route'); } catch {}
+    }
   },
 };
