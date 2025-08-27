@@ -81,28 +81,92 @@ export default function CareerDetailClient({ companies, projects, careerDetails,
   }, [companies, projects, careerDetails]);
   
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.location.hash) {
-      const scrollToHash = () => {
-        const el = document.getElementById(window.location.hash.substring(1));
-        if (el) {
-          const y = el.getBoundingClientRect().top + window.scrollY - 100; // 상단 여백 100px
-          window.scrollTo({ top: y, behavior: 'smooth' });
-        } else {
-          let tries = 0;
-          const interval = setInterval(() => {
-            const el2 = document.getElementById(window.location.hash.substring(1));
-            if (el2) {
-              const y = el2.getBoundingClientRect().top + window.scrollY - 100;
-              window.scrollTo({ top: y, behavior: 'smooth' });
-              clearInterval(interval);
-            }
-            tries++;
-            if (tries > 10) clearInterval(interval);
-          }, 100);
+    if (typeof window === 'undefined' || !window.location.hash) return;
+    
+    let intervalId: NodeJS.Timeout | null = null;
+    let timeoutId: NodeJS.Timeout | null = null;
+    let animationFrameId: number | null = null;
+    let isMounted = true;
+
+    const scrollToElement = (element: HTMLElement) => {
+      if (!isMounted) return;
+      
+      const y = element.getBoundingClientRect().top + window.scrollY - 100; // 상단 여백 100px
+      
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      
+      animationFrameId = requestAnimationFrame(() => {
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      });
+    };
+
+    const scrollToHash = () => {
+      if (!isMounted) return;
+      
+      const targetId = window.location.hash.substring(1);
+      if (!targetId) return;
+      
+      // 즉시 요소 확인
+      const element = document.getElementById(targetId);
+      if (element) {
+        scrollToElement(element);
+        return;
+      }
+
+      // 요소가 아직 로드되지 않은 경우, 일정 시간 동안 폴링
+      let tries = 0;
+      const maxTries = 10;
+      const retryDelay = 100; // 100ms 간격으로 시도
+      
+      if (intervalId) clearInterval(intervalId);
+      
+      intervalId = setInterval(() => {
+        if (!isMounted) {
+          clearInterval(intervalId!);
+          return;
         }
-      };
-      scrollToHash();
-    }
+        
+        const el = document.getElementById(targetId);
+        if (el) {
+          clearInterval(intervalId!);
+          scrollToElement(el);
+          return;
+        }
+        
+        tries++;
+        if (tries >= maxTries) {
+          clearInterval(intervalId!);
+        }
+      }, retryDelay);
+      
+      // 최대 대기 시간 설정 (10초)
+      timeoutId = setTimeout(() => {
+        if (intervalId) clearInterval(intervalId);
+        intervalId = null;
+      }, 10000);
+    };
+    
+    // 초기 스크롤 실행
+    scrollToHash();
+    
+    // 클린업 함수
+    return () => {
+      isMounted = false;
+      
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+      
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
   }, []);
 
   return (

@@ -17,6 +17,8 @@ const ThreeShapesBackground: React.FC = () => {
   useEffect(() => {
     let width = window.innerWidth;
     let height = window.innerHeight;
+    let animationFrameId: number;
+    let resizeObserver: ResizeObserver | null = null;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
@@ -26,8 +28,9 @@ const ThreeShapesBackground: React.FC = () => {
     renderer.setClearColor(0xffffff, 0);
     renderer.setSize(width, height);
 
-    if (mountRef.current) {
-      mountRef.current.appendChild(renderer.domElement);
+    const mountNode = mountRef.current;
+    if (mountNode) {
+      mountNode.appendChild(renderer.domElement);
     }
 
     // 도형 생성 함수들
@@ -124,26 +127,58 @@ const ThreeShapesBackground: React.FC = () => {
       redDiamond.rotation.x += 0.012;
       redDiamond.rotation.y += 0.014;
       renderer.render(scene, camera);
-      frameId.current = requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     };
     animate();
 
     // 반응형
     const handleResize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
+      if (!mountNode) return;
+      
+      const newWidth = mountNode.clientWidth || window.innerWidth;
+      const newHeight = mountNode.clientHeight || window.innerHeight;
+      
+      if (newWidth === 0 || newHeight === 0) return;
+      
+      width = newWidth;
+      height = newHeight;
+      
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     };
-    window.addEventListener('resize', handleResize);
+
+    // ResizeObserver를 사용하여 부모 요소 크기 변경 감지
+    if (mountNode) {
+      resizeObserver = new ResizeObserver(handleResize);
+      resizeObserver.observe(mountNode);
+    }
+
+    // 초기 리사이즈
+    handleResize();
 
     return () => {
-      if (frameId.current) cancelAnimationFrame(frameId.current);
-      window.removeEventListener('resize', handleResize);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+      
+      // 씬의 모든 객체 정리
+      scene.traverse((object) => {
+        if (object instanceof THREE.Mesh) {
+          object.geometry?.dispose();
+          const materials = Array.isArray(object.material) 
+            ? object.material 
+            : [object.material];
+          materials.forEach(material => material.dispose());
+        }
+      });
+      
       renderer.dispose();
-      if (mountRef.current) {
-        mountRef.current.removeChild(renderer.domElement);
+      
+      if (mountNode && mountNode.contains(renderer.domElement)) {
+        mountNode.removeChild(renderer.domElement);
       }
     };
   }, []);
