@@ -344,24 +344,34 @@ npm run dev
 - **Backend**: Render (Strapi CMS)
 - **Database**: Neon (PostgreSQL, 서버리스)
 - **Image CDN/Storage**: Cloudinary
-- **Wake-up Trigger**: cron-job.org (주기적 호출로 서버 기상)
+- **Auto-Heal Trigger**: GitHub Actions (Puppeteer를 이용한 강제 기상)
+- **Wake-up Trigger(옵션)**: cron-job.org (주기적 호출로 서버 기상)
 - **Wake-up Monitoring(옵션)**: UptimeRobot (14분 주기 헬스 체크)
 
 Neon 사용 시 `DATABASE_URL`은 Render 환경 변수에 설정합니다. 예시: `postgres://<user>:<password>@<neon-host>/<db>?sslmode=require`.
 
 ### 💓 헬스 체크 / 웨이크업 설정
 
-- **헬스 엔드포인트**: `GET | HEAD /healthz`
-  - 예: `https://<render-app>.onrender.com/healthz`
+Render 무료 플랜의 서버 다운 및 휴면 상태에 대응하기 위해, GitHub Actions와 전용 헬스 체크 엔드포인트를 사용합니다.
+
+
+- **헬스 전용 엔드포인트**: `GET | HEAD /<health-check-endpoint>`
+  - 예: `https://<render-app>.onrender.com/<health-check-endpoint>`
   - GET: `200` + `{ ok: true }`
   - HEAD: `200` (본문 없음)
+- **GitHub Actions 설정**
+  - 역할: 서버 다운 및 휴면 시 Puppeteer(헤드리스 브라우저)를 이용해 강제로 서버를 재시작시키는 핵심 트리거입니다.
+  - 저장소: server-wakeup-bot
+  - Method: GET /git-wakeupbot
+  - Schedule: 15분 간격
+  - 용도: 강제 기상(프리 플랜 환경에서 안정적인 기상 보장)
 - **cron-job.org 설정**
-  - Method: GET
+  - Method: GET /cron-job
   - Schedule: 10~14분 간격
   - 용도: 보조 웨이크업(프리 플랜 환경에서 안정적인 기상 보장)
 - **UptimeRobot 설정(선택)**
   - Monitor Type: HTTP(s)
-  - Method: HEAD
+  - Method: HEAD /uptimerobot
   - URL: 위 헬스 엔드포인트
   - Interval: 14분 (Render Free의 15분 슬립 방지)
 
@@ -810,24 +820,34 @@ This portfolio demonstrates expertise in:
 - **Backend**: Render (Strapi CMS)
 - **Database**: Neon (PostgreSQL, serverless)
 - **Image CDN/Storage**: Cloudinary
-- **Wake-up Trigger**: cron-job.org (periodic GET to wake server)
+- **Auto-Heal Trigger**: GitHub Actions (Forced wake-up using Puppeteer)
+- **Wake-up Trigger (optional)**: cron-job.org (periodic GET to wake server)
 - **Wake-up Monitoring (optional)**: UptimeRobot (HEAD request every ~14 min)
 
 For Neon, set `DATABASE_URL` in Render environment variables. Example: `postgres://<user>:<password>@<neon-host>/<db>?sslmode=require`.
 
 ### 💓 Health Check / Wake-up Configuration
 
-- **Health Endpoint**: `GET | HEAD /healthz`
-  - Example: `https://<render-app>.onrender.com/healthz`
+To handle server crashes and spin-downs on Render's free tier, this project uses GitHub Actions and dedicated health check endpoints.
+
+- **Health Endpoint**: `GET | HEAD /<health-check-endpoint>`
+  - Example: `https://<render-app>.onrender.com/<health-check-endpoint>`
   - GET: `200` + `{ ok: true }`
   - HEAD: `200` (no body)
-- **cron-job.org**
-  - Method: GET
+
+- **GitHub Actions Configuration**
+  - Role: The core trigger that force-restarts the server using Puppeteer (a headless browser) in case of a crash or spin-down.
+  - Repository: server-wakeup-bot
+  - Method: GET /git-wakeupbot
+  - Schedule: 15-minute interval
+  - Purpose: Provides a robust, forced wake-up to ensure stability in a free-tier environment.
+- **cron-job.org (optional)**
+  - Method: GET /cron-job
   - Schedule: every 10–14 minutes
   - Purpose: auxiliary wake-up to ensure stable uptime on free tiers
 - **UptimeRobot (optional)**
   - Monitor Type: HTTP(s)
-  - Method: HEAD
+  - Method: HEAD /uptimerobot
   - URL: Health endpoint above
   - Interval: 14 minutes (avoids Render Free 15-min sleep)
 

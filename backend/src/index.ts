@@ -73,7 +73,7 @@ export default {
       console.error('방문자 API 권한 설정 중 오류:', error);
     }
 
-    // 전역 헬스 체크 라우트 등록 (/healthz)
+    // 전역 헬스 체크 라우트 등록
     try {
       strapi.server.routes([
         {
@@ -99,6 +99,7 @@ export default {
           path: '/uptimerobot',
           handler: (ctx: any) => {
             ctx.status = 200;
+            ctx.body = { ok: true };
           },
           config: { auth: false },
         },
