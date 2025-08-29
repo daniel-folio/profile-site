@@ -78,7 +78,16 @@ export default {
       strapi.server.routes([
         {
           method: 'GET',
-          path: '/healthz',
+          path: '/git-wakeupbot',
+          handler: (ctx: any) => {
+            ctx.status = 200;
+            ctx.body = { ok: true };
+          },
+          config: { auth: false },
+        },
+        {
+          method: 'GET',
+          path: '/cron-job',
           handler: (ctx: any) => {
             ctx.status = 200;
             ctx.body = { ok: true };
@@ -87,7 +96,7 @@ export default {
         },
         {
           method: 'HEAD',
-          path: '/healthz',
+          path: '/uptimerobot',
           handler: (ctx: any) => {
             ctx.status = 200;
           },
