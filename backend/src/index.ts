@@ -95,7 +95,7 @@ export default {
           config: { auth: false },
         },
         {
-          method: 'HEAD',
+          method: 'GET',
           path: '/uptimerobot',
           handler: (ctx: any) => {
             ctx.status = 200;
