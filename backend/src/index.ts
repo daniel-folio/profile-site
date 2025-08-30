@@ -1,5 +1,6 @@
 // import type { Core } from '@strapi/strapi';
-
+// src/index.ts
+import { startMemoryMonitor } from './config/memory-monitor'; // 모니터 함수 불러오기
 export default {
   /**
    * An asynchronous register function that runs before
@@ -103,10 +104,28 @@ export default {
           },
           config: { auth: false },
         },
+        {
+          method: 'GET',
+          path: '/restart-server', // 재시작을 위한 경로
+          handler: (ctx: any) => {
+            // 쿼리 파라미터로 전달된 시크릿 키를 확인합니다.
+            if (ctx.query.secret === process.env.RESTART_SECRET_KEY) {
+              ctx.send({ message: 'Server restarting...' });
+              strapi.log.info('🔄 Received valid restart command. Restarting server...');
+              // 1초 후 프로세스를 종료하여 Render가 자동으로 재시작하도록 유도
+              setTimeout(() => process.exit(0), 1000);
+            } else {
+              // 시크릿 키가 없거나 틀리면 403 Forbidden 에러를 보냅니다.
+              ctx.forbidden('Invalid secret key.');
+            }
+          },
+          config: { auth: false },
+        },
       ]);
       try { strapi.log.info('✅ Global /healthz route registered (GET/HEAD)'); } catch {}
     } catch (e) {
       try { strapi.log.warn('⚠️ Failed to register /healthz route'); } catch {}
     }
+    startMemoryMonitor(); // 애플리케이션 시작과 함께 메모리 감시 시작
   },
 };
