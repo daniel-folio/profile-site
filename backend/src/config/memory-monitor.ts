@@ -1,14 +1,32 @@
 // src/config/memory-monitor.ts
 interface StrapiLog {
-  fatal: (message: string) => void;
+  error: (message: string) => void;
   info: (message: string) => void;
   warn: (message: string) => void;
+}
+
+interface EntityService {
+  findOne: (uid: string, id: string | number, options?: any) => Promise<any>;
+  // 필요한 다른 메서드들도 여기에 추가할 수 있습니다.
+}
+
+interface DBQuery {
+  (uid: string): {
+    findOne: (params: { 
+      where: { id: any },
+      populate?: string[] 
+    }) => Promise<any>;
+  };
 }
 
 declare global {
   // eslint-disable-next-line no-var
   var strapi: {
     log: StrapiLog;
+    entityService: EntityService;
+    db: {
+      query: DBQuery;
+    };
   };
 }
 
@@ -23,7 +41,7 @@ export const startMemoryMonitor = () => {
   
       if (memoryUsage > MEMORY_LIMIT_MB) {
         // 위험 수위 도달 시, 심각한 에러 로그를 남기고 프로세스를 종료합니다.
-        strapi.log.fatal(
+        strapi.log.error(
           `🚨 Memory usage high (${memoryUsage.toFixed(2)} MB). Exceeds limit of ${MEMORY_LIMIT_MB} MB. Restarting server...`
         );
         process.exit(1); // 프로세스 종료 -> Render가 자동으로 재시작

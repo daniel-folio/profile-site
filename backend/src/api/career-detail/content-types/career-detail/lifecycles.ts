@@ -27,22 +27,32 @@ async function setCompanyName(event) {
   if (!projectId) {
     return;
   }
-  const project = await strapi.entityService.findOne('api::project.project', projectId, { populate: ['company'] }) as any;
+  // 프로젝트 조회 시 strapi.db.query 사용
+  const project = await strapi.db.query('api::project.project').findOne({
+    where: { id: projectId },
+    populate: ['company']
+  });
   
   if (!project || !project.company) {
     data.companyName = null;
     return;
   }
+  
   let companyId = null;
   if (typeof project.company === 'object' && project.company.id) {
     companyId = project.company.id;
   } else if (typeof project.company === 'number' || typeof project.company === 'string') {
     companyId = project.company;
   }
+  
   if (!companyId) {
     data.companyName = null;
     return;
   }
-  const company = await strapi.entityService.findOne('api::company.company', companyId) as any;
-  data.companyName = company && company.company ? company.company : null;
+  
+  // 회사 조회 시 strapi.db.query 사용
+  const company = await strapi.db.query('api::company.company').findOne({
+    where: { id: companyId }
+  });
+  data.companyName = company?.company || null;
 } 
