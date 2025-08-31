@@ -344,9 +344,14 @@ npm run dev
 - **Backend**: Render (Strapi CMS)
 - **Database**: Neon (PostgreSQL, 서버리스)
 - **Image CDN/Storage**: Cloudinary
-- **Auto-Heal Trigger**: GitHub Actions (Puppeteer를 이용한 강제 기상)
-- **Wake-up Trigger(옵션)**: cron-job.org (주기적 호출로 서버 기상)
-- **Wake-up Monitoring(옵션)**: UptimeRobot (14분 주기 헬스 체크)
+- **Auto-Heal & Wake-up System (서버 자동 복구 시스템)**
+    - **1차 방어 (지능형)**: 내장된 메모리 모니터 (`Memory Monitor`)가 메모리 임계값 초과 시 서버를 선제적으로 재시작합니다.
+    - **2차 방어 (최후의 보루)**: GitHub Actions (`server-wakeup-bot`)가 10분마다 서버 상태를 확인하고, 응답이 없을 경우 강제로 깨웁니다.
+      - ***Auto-Heal Trigger***: GitHub Actions (Puppeteer를 이용한 강제 기상)
+      - ***Wake-up Trigger(옵션)***: cron-job.org (주기적 호출로 서버 기상)
+      - ***Wake-up Monitoring(옵션)***: UptimeRobot (14분 주기 헬스 체크)
+    - **실시간 알림**: `Slack`을 통해 메모리 초과 및 서버 다운 이벤트에 대한 즉각적인 알림을 받습니다.
+
 
 Neon 사용 시 `DATABASE_URL`은 Render 환경 변수에 설정합니다. 예시: `postgres://<user>:<password>@<neon-host>/<db>?sslmode=require`.
 
@@ -355,25 +360,21 @@ Neon 사용 시 `DATABASE_URL`은 Render 환경 변수에 설정합니다. 예�
 Render 무료 플랜의 서버 다운 및 휴면 상태에 대응하기 위해, GitHub Actions와 전용 헬스 체크 엔드포인트를 사용합니다.
 
 
-- **헬스 전용 엔드포인트**: `GET | HEAD /<health-check-endpoint>`
-  - 예: `https://<render-app>.onrender.com/<health-check-endpoint>`
-  - GET: `200` + `{ ok: true }`
-  - HEAD: `200` (본문 없음)
-- **GitHub Actions 설정**
-  - 역할: 서버 다운 및 휴면 시 Puppeteer(헤드리스 브라우저)를 이용해 강제로 서버를 재시작시키는 핵심 트리거입니다.
-  - 저장소: server-wakeup-bot
-  - Method: GET /git-wakeupbot
-  - Schedule: 15분 간격
-  - 용도: 강제 기상(프리 플랜 환경에서 안정적인 기상 보장)
-- **cron-job.org 설정**
-  - Method: GET /cron-job
-  - Schedule: 10~14분 간격
-  - 용도: 보조 웨이크업(프리 플랜 환경에서 안정적인 기상 보장)
-- **UptimeRobot 설정(선택)**
-  - Monitor Type: HTTP(s)
-  - Method: HEAD /uptimerobot
-  - URL: 위 헬스 엔드포인트
-  - Interval: 14분 (Render Free의 15분 슬립 방지)
+- **1. 지능형 자가 복구 (메모리 모니터)**
+    - **역할**: Strapi 애플리케이션이 5분마다 스스로의 메모리 사용량을 체크하여, 설정된 임계값(450MB) 초과 시 **선제적으로** 자신을 재시작합니다. 갑작스러운 트래픽 증가로 인한 다운을 예방하는 1차 방어선입니다.
+    - **알림**: 재시작 시 `Slack`으로 "Memory usage high" 알림을 보냅니다.
+    - **구현**: `backend/src/config/memory-monitor.ts`
+
+- **2. 자동 복구 봇 (GitHub Actions)**
+    - **역할**: 메모리 모니터가 작동하지 못하는 등의 이유로 서버가 응답 불능 상태에 빠졌을 때를 대비한 최후의 보루입니다. 10분마다 Puppeteer(헤드리스 브라우저)를 이용해 서버에 접속하여 강제로 깨웁니다.
+    - **알림**: 서버 접속 실패 시 `Slack`으로 "Server Down Detected" 알림을 보냅니다.
+    - **저장소**: `server-wakeup-bot`
+
+- **3. 전용 헬스 체크 엔드포인트**
+    - 각 모니터링 도구의 역할을 명확히 구분하기 위해 등록된 커스텀 경로입니다.
+    - **GitHub Actions Bot**: `GET /git-wakeupbot`
+    - **UptimeRobot (선택)**: `GET /uptimerobot`
+    - **수동 재시작**: `GET /restart-server?secret=<SECRET_KEY>`
 
 ## 🔄 고가용성 및 배포 자동화
 
@@ -820,9 +821,15 @@ This portfolio demonstrates expertise in:
 - **Backend**: Render (Strapi CMS)
 - **Database**: Neon (PostgreSQL, serverless)
 - **Image CDN/Storage**: Cloudinary
-- **Auto-Heal Trigger**: GitHub Actions (Forced wake-up using Puppeteer)
-- **Wake-up Trigger (optional)**: cron-job.org (periodic GET to wake server)
-- **Wake-up Monitoring (optional)**: UptimeRobot (HEAD request every ~14 min)
+- **Auto-Heal & Wake-up System**:
+    - **1st Line Defense (Intelligent)**: An embedded `Memory Monitor` proactively restarts the server if the memory threshold is exceeded.
+    - **2nd Line Defense (Failsafe)**: A GitHub Actions bot (`server-wakeup-bot`) checks the server every 10 minutes and force-restarts it if unresponsive.
+      - ***Auto-Heal Trigger***: GitHub Actions (Forced wake-up using Puppeteer)
+      - ***Wake-up Trigger (optional)***: cron-job.org (periodic GET to wake server)
+      - ***Wake-up Monitoring (optional)***: UptimeRobot (HEAD request every ~14 min)
+    - **Real-time Alerting**: `Slack` integration provides instant notifications for high memory events and server downtime.
+
+
 
 For Neon, set `DATABASE_URL` in Render environment variables. Example: `postgres://<user>:<password>@<neon-host>/<db>?sslmode=require`.
 
@@ -830,26 +837,21 @@ For Neon, set `DATABASE_URL` in Render environment variables. Example: `postgres
 
 To handle server crashes and spin-downs on Render's free tier, this project uses GitHub Actions and dedicated health check endpoints.
 
-- **Health Endpoint**: `GET | HEAD /<health-check-endpoint>`
-  - Example: `https://<render-app>.onrender.com/<health-check-endpoint>`
-  - GET: `200` + `{ ok: true }`
-  - HEAD: `200` (no body)
+- **1. Intelligent Self-Heal (Memory Monitor)**
+    - **Role**: The Strapi application checks its own memory usage every 5 minutes. If it exceeds a set threshold (450MB), it **proactively** restarts itself. This is the first line of defense against crashes from traffic spikes.
+    - **Alerting**: Sends a "Memory usage high" notification to `Slack` upon restarting.
+    - **Implementation**: `backend/src/config/memory-monitor.ts`
 
-- **GitHub Actions Configuration**
-  - Role: The core trigger that force-restarts the server using Puppeteer (a headless browser) in case of a crash or spin-down.
-  - Repository: server-wakeup-bot
-  - Method: GET /git-wakeupbot
-  - Schedule: 15-minute interval
-  - Purpose: Provides a robust, forced wake-up to ensure stability in a free-tier environment.
-- **cron-job.org (optional)**
-  - Method: GET /cron-job
-  - Schedule: every 10–14 minutes
-  - Purpose: auxiliary wake-up to ensure stable uptime on free tiers
-- **UptimeRobot (optional)**
-  - Monitor Type: HTTP(s)
-  - Method: HEAD /uptimerobot
-  - URL: Health endpoint above
-  - Interval: 14 minutes (avoids Render Free 15-min sleep)
+- **2. Auto-Heal Bot (GitHub Actions)**
+    - **Role**: A failsafe for situations where the server becomes unresponsive for any reason (including a failed memory monitor). Every 10 minutes, a Puppeteer headless browser accesses the server to force a wake-up.
+    - **Alerting**: Sends a "Server Down Detected" notification to `Slack` if the server is unreachable.
+    - **Repository**: `server-wakeup-bot`
+
+- **3. Dedicated Health Check Endpoints**
+    - Custom routes registered to clearly distinguish the role of each monitoring tool.
+    - **GitHub Actions Bot**: `GET /git-wakeupbot`
+    - **UptimeRobot (Optional)**: `GET /uptimerobot`
+    - **Manual Restart**: `GET /restart-server?secret=<SECRET_KEY>`
 
 ### 📁 **Project Structure & Organization**
 
