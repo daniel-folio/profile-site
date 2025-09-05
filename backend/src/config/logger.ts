@@ -28,8 +28,18 @@ const logger = winston.createLogger({
       level: 'error',
       webhookUrl: process.env.SLACK_WEBHOOK_URL || '',
       formatter: (info: any) => {
+        const message = info.message;
+        let title = '🚨 Strapi 서버 에러 발생!';
+        if (message.includes('[Memory Monitor]')) {
+          title = '📈 메모리 임계값 초과!';
+        } else if (message.includes('[Uncaught Exception]')) {
+          title = '🐞 처리되지 않은 코드 에러 발생!';
+        } else if (message.includes('[Unhandled Rejection]')) {
+          title = ' PROMISE 에러 발생!';
+        }
+
         return {
-          text: `🚨 [${info.level.toUpperCase()}] 서버 에러 발생!\n\`\`\`${info.message}\`\`\``,
+          text: `${title}\n\`\`\`${message}\`\`\``,
         };
       },
     }),
