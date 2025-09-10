@@ -5,7 +5,7 @@ name: Sync to A Repository & Deploy
 on:
   push:
     branches:
-      - main # B 저장소의 메인 브랜치
+      - main   # B 저장소의 메인 브랜치
 
 jobs:
   sync-and-deploy:
@@ -14,25 +14,17 @@ jobs:
       # 1. B 저장소(소스) 코드를 가져옴
       - name: Checkout B Repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # 2. SSH 배포 키를 사용하여 A 저장소(대상)로 Push
+      # 2. PAT를 사용하여 A 저장소(대상)로 Push
       - name: Push to A Repo
         uses: peaceiris/actions-gh-pages@v4
         with:
-          # 3단계에서 B 저장소에 등록한 개인키 Secret
-          deploy_key: ${{ secrets.A_REPO_DEPLOY_KEY }}
-          # A 저장소의 '사용자이름/저장소이름'
+          personal_token: ${{ secrets.A_REPO_PAT }}
           external_repository: daniel-works0001/portfolio
-          # A 저장소에 push할 브랜치
           publish_branch: main
-          # B 저장소의 모든 내용을 A 저장소에 덮어씀
           publish_dir: .
-          # A 저장소의 히스토리를 새로 씀 (완벽한 미러링)
           force_orphan: true
-      # 3. Vercel 배포 훅 트리거
-      - name: Trigger Vercel Deploy Hook
-        run: curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_A }}"
-
-      # 4. Render 배포 훅 트리거 (새로 추가된 부분)
-      - name: Trigger Render Deploy Hook
-        run: curl "${{ secrets.RENDER_DEPLOY_HOOK_A }}"
+          user_name: 'daniel-works0001'
+          user_email: 'daniel.han.works0001@gmail.com'
