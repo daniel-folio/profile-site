@@ -22,11 +22,34 @@ export function HashLink({ href, className, ariaCurrent, children, onNavigate }:
 
   const handleClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (!href.includes('#')) return; // let Link handle it
-    e.preventDefault();
-
     const [base, section] = href.split('#');
     const basePath = base || '/';
     const targetId = section;
+
+    // If navigating to a different route, control the scroll to guarantee landing on the section
+    if (pathname !== basePath) {
+      e.preventDefault();
+      router.push(basePath + (targetId ? `#${targetId}` : ''), { scroll: false });
+
+      // Try scrolling ASAP after navigation paints
+      let attempts = 0;
+      const maxAttempts = 40; // ~40 frames
+      const tick = () => {
+        attempts += 1;
+        const el = targetId ? document.getElementById(targetId) : null;
+        if (el) {
+          el.scrollIntoView({ behavior: 'auto', block: 'start' });
+          if (onNavigate) onNavigate();
+          return;
+        }
+        if (attempts < maxAttempts) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+      return;
+    }
+
+    // Same-route: prevent default and do precise scroll with CSS scroll-mt
+    e.preventDefault();
 
     // Scroll using scrollIntoView; offset handled by CSS scroll-mt on sections
     const scrollToTarget = () => {
@@ -72,9 +95,16 @@ export function HashLink({ href, className, ariaCurrent, children, onNavigate }:
     }, 100);
   };
 
-  // Use Link for proper prefetch and accessibility, but intercept onClick
+  // Use Link for proper prefetch and accessibility
   return (
-    <Link href={href} className={className} aria-current={ariaCurrent} scroll={false} onClick={handleClick}>
+    <Link
+      href={href}
+      className={className}
+      aria-current={ariaCurrent}
+      // We control scroll manually for same-route and cross-route cases above
+      scroll={false}
+      onClick={handleClick}
+    >
       {children}
     </Link>
   );
