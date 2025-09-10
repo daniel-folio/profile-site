@@ -25,7 +25,7 @@ function isStrapiMediaArray(media: any): media is { url: string; alternativeText
 export function Projects({ projects, featured = false }: ProjectsProps) {
   if (!projects || projects.length === 0) {
     return (
-      <motion.section className="py-20 text-center" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }} viewport={{ once: false, amount: 0.2 }}>
+      <motion.section className="text-center" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }} viewport={{ once: false, amount: 0.2 }}>
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">프로젝트</h2>
           <p className="text-gray-700 dark:text-gray-300">등록된 프로젝트가 없습니다.</p>
@@ -35,7 +35,7 @@ export function Projects({ projects, featured = false }: ProjectsProps) {
   }
 
   return (
-    <motion.section className="py-20" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }} viewport={{ once: false, amount: 0.2 }}>
+    <motion.section className="" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }} viewport={{ once: false, amount: 0.2 }}>
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">

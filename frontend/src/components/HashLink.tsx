@@ -28,21 +28,12 @@ export function HashLink({ href, className, ariaCurrent, children, onNavigate }:
     const basePath = base || '/';
     const targetId = section;
 
-    // Helper: get fixed header height (fallback 64)
-    const getHeaderOffset = () => {
-      const headerEl = document.querySelector('header');
-      const rect = headerEl?.getBoundingClientRect();
-      return rect ? Math.ceil(rect.height) : 64;
-    };
-
-    // Scroll to element with header offset
+    // Scroll using scrollIntoView; offset handled by CSS scroll-mt on sections
     const scrollToTarget = () => {
       if (!targetId) return false;
       const el = document.getElementById(targetId);
       if (!el) return false;
-      const headerOffset = getHeaderOffset();
-      const y = Math.max(0, window.scrollY + el.getBoundingClientRect().top - headerOffset - 8);
-      window.scrollTo({ top: y, behavior: 'auto' });
+      el.scrollIntoView({ behavior: 'auto', block: 'start' });
       if (onNavigate) onNavigate();
       return true;
     };

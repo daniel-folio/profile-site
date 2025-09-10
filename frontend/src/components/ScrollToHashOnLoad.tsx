@@ -8,18 +8,10 @@ export default function ScrollToHashOnLoad() {
     const hash = window.location.hash?.replace('#','');
     if (!hash) return;
 
-    const getHeaderOffset = () => {
-      const headerEl = document.querySelector('header');
-      const rect = headerEl?.getBoundingClientRect();
-      return rect ? Math.ceil(rect.height) : 64;
-    };
-
     const tryScroll = () => {
       const el = document.getElementById(hash);
       if (!el) return false;
-      const headerOffset = getHeaderOffset();
-      const y = Math.max(0, window.scrollY + el.getBoundingClientRect().top - headerOffset - 8);
-      window.scrollTo({ top: y, behavior: 'auto' });
+      el.scrollIntoView({ behavior: 'auto', block: 'start' });
       return true;
     };
 

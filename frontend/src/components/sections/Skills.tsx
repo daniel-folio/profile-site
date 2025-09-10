@@ -13,7 +13,7 @@ export function Skills({ skills }: SkillsProps) {
   const visibleSkills = (skills || []).filter(skill => skill.isPublic !== false && skill.visible !== false) ;
   if (visibleSkills.length === 0) {
     return (
-      <motion.section className="py-16 md:py-24 text-center" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }} viewport={{ once: false, amount: 0.2 }}>
+      <motion.section className="text-center" initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }} viewport={{ once: false, amount: 0 }}>
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-gray-100">기술 스택</h2>
           <p className="text-gray-700 dark:text-gray-300">등록된 기술 스택이 없습니다.</p>
@@ -35,11 +35,11 @@ export function Skills({ skills }: SkillsProps) {
 
   return (
     <motion.section
-      className="py-16 md:py-24"
+      className=""
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: "easeOut" }}
-      viewport={{ once: false, amount: 0.2 }}
+      viewport={{ once: false, amount: 0 }}
     >
       <div className="container mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-gray-100">

@@ -28,3 +28,21 @@ jobs:
           force_orphan: true
           user_name: 'daniel-works0001'
           user_email: 'daniel.han.works0001@gmail.com'
+      
+       # 3. 작업 실패 시 Slack 알림
+      - name: Send Failure Notification
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: repo, commit, author, action, workflow
+          custom_payload: |
+            {
+              attachments: [{
+                color: 'danger',
+                title: `🚨 [${{ github.repository }}] 동기화 또는 배포 실패`,
+                text: `워크플로우 실행 로그를 확인해주세요: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`,
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
