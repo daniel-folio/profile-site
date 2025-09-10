@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { HashLink } from '@/components/HashLink';
+import { usePathname } from 'next/navigation';
+import { useActiveSection } from '@/hooks/useActiveSection';
 import { useTheme } from 'next-themes';
-import { Button } from '@/components/ui/Button';
 
 function SunIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -54,6 +56,19 @@ export function ThemeToggle() {
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const [hash, setHash] = useState<string>("");
+  const activeSection = useActiveSection(["hero", "skills", "projects"]);
+
+  useEffect(() => {
+    // 초기 해시 설정 및 변경 감지
+    if (typeof window !== 'undefined') {
+      const updateHash = () => setHash(window.location.hash || "");
+      updateHash();
+      window.addEventListener('hashchange', updateHash);
+      return () => window.removeEventListener('hashchange', updateHash);
+    }
+  }, []);
 
   const navLinks = [
     { href: '/#hero', label: '홈' },
@@ -62,6 +77,32 @@ export function Header() {
     { href: '/resume', label: '이력서' },
     { href: '/career-detail', label: '경력기술서' },
   ];
+
+  const isActive = (href: string) => {
+    const currentHash = typeof window !== 'undefined' ? (window.location.hash || '') : hash;
+    // 해시(#)가 포함된 섹션 링크 처리
+    if (href.includes('#')) {
+      const [base, section] = href.split('#');
+      const sectionHash = `#${section}`;
+      // 홈 경로에서는 현재 뷰포트 섹션(activeSection)을 우선으로 사용
+      if (pathname === (base || '/')) {
+        if (activeSection) {
+          return activeSection === section;
+        }
+        // 해시가 없고 activeSection도 없으면 hero를 기본 활성으로 처리
+        if (!currentHash) {
+          return section === 'hero';
+        }
+        // 해시가 있으면 해시 기준으로 처리
+        return currentHash === sectionHash;
+      }
+      // 홈이 아닌 경우에는 섹션 링크는 비활성 처리
+      return false;
+    }
+    // 상세 경로를 포함하는 경우 startsWith로 처리 (예: /career-detail/[id])
+    if (href === '/') return pathname === '/';
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   return (
     <header className="fixed top-0 z-50 w-full border-b border-gray-200/50 dark:border-gray-800/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
@@ -78,12 +119,31 @@ export function Header() {
               <ul className="flex items-center space-x-6">
                 {navLinks.map(({ href, label }) => (
                   <li key={href}>
-                    <Link
-                      href={href}
-                      className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-gradient-start dark:hover:text-primary-gradient-start transition-colors"
-                    >
-                      {label}
-                    </Link>
+                    {href.includes('#') ? (
+                      <HashLink
+                        href={href}
+                        className={`transition-colors inline-block pb-0.5 ${
+                          isActive(href)
+                            ? 'text-base font-extrabold text-slate-900 dark:text-slate-100 border-b-2 border-primary-gradient-start'
+                            : 'text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-gradient-start dark:hover:text-primary-gradient-start'
+                        }`}
+                        ariaCurrent={isActive(href) ? 'page' : undefined}
+                      >
+                        {label}
+                      </HashLink>
+                    ) : (
+                      <Link
+                        href={href}
+                        className={`transition-colors inline-block pb-0.5 ${
+                          isActive(href)
+                            ? 'text-base font-extrabold text-slate-900 dark:text-slate-100 border-b-2 border-primary-gradient-start'
+                            : 'text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-gradient-start dark:hover:text-primary-gradient-start'
+                        }`}
+                        aria-current={isActive(href) ? 'page' : undefined}
+                      >
+                        {label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -130,14 +190,35 @@ export function Header() {
           <div className="md:hidden border-t border-gray-200/50 dark:border-gray-800/50 py-4">
             <nav className="flex flex-col space-y-4">
               {navLinks.map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="text-gray-700 dark:text-gray-200 hover:text-primary-gradient-start dark:hover:text-primary-gradient-start transition-colors font-medium"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {label}
-                </Link>
+                href.includes('#') ? (
+                  <HashLink
+                    key={href}
+                    href={href}
+                    className={`transition-colors inline-block pb-0.5 ${
+                      isActive(href)
+                        ? 'text-lg font-extrabold text-gray-900 dark:text-white border-b-2 border-primary-gradient-start'
+                        : 'text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary-gradient-start dark:hover:text-primary-gradient-start'
+                    }`}
+                    ariaCurrent={isActive(href) ? 'page' : undefined}
+                    onNavigate={() => setIsMenuOpen(false)}
+                  >
+                    {label}
+                  </HashLink>
+                ) : (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={`transition-colors inline-block pb-0.5 ${
+                      isActive(href)
+                        ? 'text-lg font-extrabold text-gray-900 dark:text-white border-b-2 border-primary-gradient-start'
+                        : 'text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary-gradient-start dark:hover:text-primary-gradient-start'
+                    }`}
+                    aria-current={isActive(href) ? 'page' : undefined}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {label}
+                  </Link>
+                )
               ))}
             </nav>
           </div>

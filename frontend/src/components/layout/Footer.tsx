@@ -1,11 +1,28 @@
-import React from 'react';
+"use client";
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { HashLink } from '@/components/HashLink';
+import { usePathname } from 'next/navigation';
+import { useActiveSection } from '@/hooks/useActiveSection';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const pathname = usePathname();
+  const [hash, setHash] = useState<string>("");
+  const activeSection = useActiveSection(["hero", "skills", "projects"]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const updateHash = () => setHash(window.location.hash || "");
+      updateHash();
+      window.addEventListener('hashchange', updateHash);
+      return () => window.removeEventListener('hashchange', updateHash);
+    }
+  }, []);
 
   const quickLinks = [
-    { href: '/', label: '홈', icon: (
+    { href: '/#hero', label: '홈', icon: (
       <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
       </svg>
@@ -33,6 +50,25 @@ export function Footer() {
     )}
   ];
 
+  const isActive = (href: string) => {
+    if (href.includes('#')) {
+      const [base, section] = href.split('#');
+      const sectionHash = `#${section}`;
+      // 홈 경로에서는 현재 뷰포트 섹션(activeSection)을 우선으로 사용
+      if (pathname === (base || '/')) {
+        if (activeSection) {
+          return activeSection === section;
+        }
+      }
+      if (section === 'hero') {
+        return pathname === (base || '/') && (hash === '' || hash === '#hero');
+      }
+      return pathname === (base || '/') && hash === sectionHash;
+    }
+    if (href === '/') return pathname === '/';
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
   return (
     <footer className="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white py-12">
       <div className="container mx-auto px-4">
@@ -51,16 +87,33 @@ export function Footer() {
             <div className="md:hidden overflow-x-auto">
               <div className="flex space-x-4 pb-2">
                 {quickLinks.map(({ href, label, icon }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    className="flex flex-col items-center min-w-[80px] p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <span className="text-gray-600 dark:text-gray-400 mb-1">
-                      {icon}
-                    </span>
-                    <span className="text-sm text-center">{label}</span>
-                  </Link>
+                  href.includes('#') ? (
+                    <HashLink
+                      key={href}
+                      href={href}
+                      className={`flex flex-col items-center min-w-[80px] p-2 rounded-lg transition-colors hover:bg-gray-200 dark:hover:bg-gray-800 ${
+                        isActive(href) ? 'text-base font-extrabold underline underline-offset-4 decoration-2 text-gray-900 dark:text-white' : ''
+                      }`}
+                    >
+                      <span className={`mb-1 ${isActive(href) ? '' : 'text-gray-600 dark:text-gray-400'}`}>
+                        {icon}
+                      </span>
+                      <span className={`text-sm text-center ${isActive(href) ? '' : ''}`}>{label}</span>
+                    </HashLink>
+                  ) : (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`flex flex-col items-center min-w-[80px] p-2 rounded-lg transition-colors hover:bg-gray-200 dark:hover:bg-gray-800 ${
+                        isActive(href) ? 'text-base font-extrabold underline underline-offset-4 decoration-2 text-gray-900 dark:text-white' : ''
+                      }`}
+                    >
+                      <span className={`mb-1 ${isActive(href) ? '' : 'text-gray-600 dark:text-gray-400'}`}>
+                        {icon}
+                      </span>
+                      <span className={`text-sm text-center ${isActive(href) ? '' : ''}`}>{label}</span>
+                    </Link>
+                  )
                 ))}
               </div>
             </div>
@@ -68,13 +121,27 @@ export function Footer() {
             <ul className="hidden md:block space-y-2">
               {quickLinks.map(({ href, label, icon }) => (
                 <li key={href}>
-                  <Link
-                    href={href}
-                    className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
-                  >
-                    <span>{icon}</span>
-                    <span>{label}</span>
-                  </Link>
+                  {href.includes('#') ? (
+                    <HashLink
+                      href={href}
+                      className={`flex items-center space-x-2 transition-colors hover:text-black dark:hover:text-white ${
+                        isActive(href) ? 'text-base font-extrabold underline underline-offset-4 decoration-2 text-black dark:text-white' : 'text-sm text-gray-600 dark:text-gray-400'
+                      }`}
+                    >
+                      <span>{icon}</span>
+                      <span>{label}</span>
+                    </HashLink>
+                  ) : (
+                    <Link
+                      href={href}
+                      className={`flex items-center space-x-2 transition-colors hover:text-black dark:hover:text-white ${
+                        isActive(href) ? 'text-base font-extrabold underline underline-offset-4 decoration-2 text-black dark:text-white' : 'text-sm text-gray-600 dark:text-gray-400'
+                      }`}
+                    >
+                      <span>{icon}</span>
+                      <span>{label}</span>
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

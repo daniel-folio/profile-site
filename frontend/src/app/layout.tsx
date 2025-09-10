@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import ThreeShapesBackground from "@/components/layout/ThreeShapesBackground";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { VisitorTracker } from "@/components/VisitorTracker";
+import ScrollToHashOnLoad from "@/components/ScrollToHashOnLoad";
 import { MaintenanceMode } from "@/components/MaintenanceMode";
 import type { Metadata } from "next";
 
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <VisitorTracker />
             <ThreeShapesBackground />
             <div className="relative z-10 flex flex-col min-h-screen">
+              <ScrollToHashOnLoad />
               <Header />
               <main className="flex-grow">{children}</main>
               <Footer />
