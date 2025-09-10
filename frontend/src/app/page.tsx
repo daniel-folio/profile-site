@@ -15,13 +15,13 @@ export default async function Home() {
   return (
     <div className="container mx-auto px-4">
       <div>
-        <section id="hero" className="pt-16 md:pt-24 pb-16 md:pb-24 scroll-mt-[72px] md:scroll-mt-[80px]">
+        <section id="hero" className="pt-16 md:pt-24 pb-16 md:pb-24 scroll-mt-[72px] md:scroll-mt-[80px]" style={{ scrollMarginTop: '80px' }}>
           <Hero profile={profile ? profile.data : null} />
         </section>
-        <section id="skills" className="pt-0 md:pt-0 pb-16 md:pb-24 bg-transparent scroll-mt-[72px] md:scroll-mt-[80px]">
+        <section id="skills" className="pt-0 md:pt-0 pb-16 md:pb-24 bg-transparent scroll-mt-[72px] md:scroll-mt-[80px]" style={{ scrollMarginTop: '80px' }}>
           <Skills skills={skills ? skills.data : null} />
         </section>
-        <section id="projects" className="pt-0 md:pt-0 pb-16 md:pb-24 bg-transparent scroll-mt-[72px] md:scroll-mt-[80px]">
+        <section id="projects" className="pt-0 md:pt-0 pb-16 md:pb-24 bg-transparent scroll-mt-[72px] md:scroll-mt-[80px]" style={{ scrollMarginTop: '80px' }}>
           <Projects projects={projects ? projects.data : null} />
         </section>
       </div>

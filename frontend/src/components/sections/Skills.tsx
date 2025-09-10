@@ -2,7 +2,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { Skill } from '@/types/skill';
-import { getImageUrl, getProficiencyStars } from '@/lib/utils';
+import { getImageUrl } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 interface SkillsProps {

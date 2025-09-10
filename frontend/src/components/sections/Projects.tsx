@@ -4,7 +4,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Project } from '@/types/project';
 import { getImageUrl, getStatusColor, getProjectTypeIcon, formatDateRange } from '@/lib/utils';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { motion } from 'framer-motion';
 import { RichTextRenderer } from '@/components/ui/RichTextRenderer';
