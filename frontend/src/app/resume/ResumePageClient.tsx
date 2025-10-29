@@ -62,7 +62,10 @@ export default function ResumePageClient({
     if (a.order != null && b.order == null) return -1;
     if (a.order == null && b.order != null) return 1;
     // order가 둘 다 없으면 startDate 내림차순(최신순)
-    return b.startDate.localeCompare(a.startDate);
+    if (a.startDate && b.startDate) return b.startDate.localeCompare(a.startDate);
+    if (a.startDate) return -1;
+    if (b.startDate) return 1;
+    return 0;
   });
   const classExperiences = sortedExperiences.filter(a => a.category === 'Class');
   const etcExperiences = sortedExperiences.filter(a => a.category === 'ETC');
