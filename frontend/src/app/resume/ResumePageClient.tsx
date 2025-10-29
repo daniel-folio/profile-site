@@ -57,7 +57,13 @@ export default function ResumePageClient({
   }, []);
   // 기존 resume/page.tsx의 데이터 가공 및 렌더링 로직 복사
   const visibleExperiences = otherExperiences.filter(a => a.visible);
-  const sortedExperiences = [...visibleExperiences].sort((a, b) => b.startDate.localeCompare(a.startDate));
+  const sortedExperiences = [...visibleExperiences].sort((a, b) => {
+    if (a.order != null && b.order != null && a.order !== b.order) return a.order - b.order;
+    if (a.order != null && b.order == null) return -1;
+    if (a.order == null && b.order != null) return 1;
+    // order가 둘 다 없으면 startDate 내림차순(최신순)
+    return b.startDate.localeCompare(a.startDate);
+  });
   const classExperiences = sortedExperiences.filter(a => a.category === 'Class');
   const etcExperiences = sortedExperiences.filter(a => a.category === 'ETC');
   const filteredCompanies = companies.filter(company => {
