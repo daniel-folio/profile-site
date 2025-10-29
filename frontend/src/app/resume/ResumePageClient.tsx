@@ -393,7 +393,7 @@ export default function ResumePageClient({
             </>
           )}
           {/* 기타 경험 (Other Experience) */}
-          {visibleExperiences.length > 0 && (
+          {sortedExperiences.length > 0 && (
             <>
               <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
               <section style={{ marginBottom: 32 }}>
@@ -401,7 +401,7 @@ export default function ResumePageClient({
                 <ul style={{ marginLeft: 0 }}>
                   {(() => {
                     const categories = ['Class', 'ETC'];
-                    const categoryExps = categories.map(category => visibleExperiences.filter(exp => exp.category === category));
+                    const categoryExps = categories.map(category => sortedExperiences.filter(exp => exp.category === category));
                     const bothExist = categoryExps.every(exps => exps.length > 0);
                     return (
                       <>
