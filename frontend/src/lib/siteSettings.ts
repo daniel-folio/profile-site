@@ -20,7 +20,10 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   // 런타임마다 URL을 동적으로 결정 (테스트/운영 서버 대응)
   const apiUrl = getApiUrl();
   try {
-    const response = await fetch(`${apiUrl}/api/site-settings/public`, {
+    const url = `${apiUrl}/api/site-settings/public?t=${Date.now()}`;
+    console.log('[getSiteSettings] API Request:', url);
+
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -29,10 +32,12 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     });
 
     if (!response.ok) {
+      console.error(`[getSiteSettings] API Error: ${response.status}`);
       return getDefaultSettings();
     }
 
     const data = await response.json();
+    console.log('[getSiteSettings] Loaded Version:', data.data?.portfolioVersion);
     return data.data || getDefaultSettings();
   } catch (error) {
     return getDefaultSettings();

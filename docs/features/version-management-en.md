@@ -59,10 +59,31 @@ We moved from a complex `if/else` logic to a more standardized **"Version Map (S
 
 When you want to add a new **`v3`** design, **you don't have to touch a single line of existing V1 or V2 code.**
 
-1. Create a `src/components/v3/` folder and develop your new design.
-2. In each `app/` page file, just add a single line like `v3: PageV3` to the `VERSION_COMPONENTS` map.
-3. Because previous code remains untouched, there is zero risk of regressions, and you can roll back to any version instantly.
+1.  Create a `src/components/v3/` folder and develop your new design.
+2.  In each `app/` page file, just add a single line like `v3: PageV3` to the `VERSION_COMPONENTS` map.
+3.  Because previous code remains untouched, there is zero risk of regressions, and you can roll back to any version instantly.
 
-> [!IMPORTANT]
-> **API Permissions Notice**  
-> If the design doesn't change after deployment, ensure that the `find` permission for `site-setting` is enabled in Strapi under `Settings > Roles > Public`. Without this, the frontend won't be able to fetch the version data.
+---
+
+## 📋 5. Backend Admin Final Checklist
+
+When deploying to a new server or setting up the system for the first time, **ensure you perform these 3 steps in the Strapi Admin**. If skipped, the version switching may not function correctly.
+
+### 1️⃣ Public API Permissions
+You must open the door so the frontend can read the settings.
+- **Menu**: `Settings` > `Users & Permissions Plugin` > `Roles` > `Public`
+- **Action**: Find **`Site-setting`** and check the **`find`** checkbox. Don't forget to **Save**.
+
+### 2️⃣ Initial Data Entry
+Even as a Single Type, the data must be created at least once.
+- **Menu**: `Content Manager` > `Site Settings`
+- **Action**: Fill in the fields and click **Save**. (In the current config, a separate Publish step is not required for this type.)
+
+### 3️⃣ Category Setup
+Required for the project filtering feature.
+- **Create Categories**: Use the `23. Project Category` menu to create labels like 'Web', 'Mobile', or 'AI'.
+- **Link Projects**: Go to `22. Project` and assign a category to each project via the `Category` field.
+
+> [!TIP]
+> **Not seeing the changes?**  
+> Check the 'Network' tab in your browser's DevTools (F12). If the call to `api/site-setting` returns `403 Forbidden`, revisit **Step 1 (Permissions)**. If the data is correct but the UI hasn't changed, try a **Hard Refresh (Ctrl+F5)**.
