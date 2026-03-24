@@ -183,8 +183,8 @@ export default function ResumePageClientV2({
               <div style={{ borderTop: '1px solid var(--v2-line)', margin: '16px 0' }} />
               <section>
                 <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--v2-accent)', marginBottom: 16 }}>소개 (Introduce)</h2>
-                <div className="prose max-w-none" style={{ color: 'var(--v2-t-body)', fontSize: '15px', lineHeight: 1.7 }}>
-                  <RichTextRenderer text={profile.resumeBio} className="prose max-w-none" />
+                <div style={{ color: 'var(--v2-t-body)', fontSize: '15px', lineHeight: 1.7 }}>
+                  <RichTextRenderer text={profile.resumeBio} />
                 </div>
               </section>
             </>
@@ -244,7 +244,7 @@ export default function ResumePageClientV2({
                                     </div>
 
                                     {proj.shortDescription && (
-                                      <div className="mt-2 text-[14px] prose max-w-none" style={{ color: 'var(--v2-t-body)' }}>
+                                      <div className="mt-2 text-[14px]" style={{ color: 'var(--v2-t-body)' }}>
                                         <RichTextRenderer text={proj.shortDescription} />
                                       </div>
                                     )}
@@ -303,7 +303,7 @@ export default function ResumePageClientV2({
                         </div>
 
                         {proj.shortDescription && (
-                          <div className="mt-2 text-[14px] prose max-w-none" style={{ color: 'var(--v2-t-body)' }}>
+                          <div className="mt-2 text-[14px]" style={{ color: 'var(--v2-t-body)' }}>
                             <RichTextRenderer text={proj.shortDescription} />
                           </div>
                         )}
@@ -369,7 +369,7 @@ export default function ResumePageClientV2({
                         <div className="font-bold text-[16px]" style={{ color: 'var(--v2-t-hi)' }}>{edu.institution}{edu.field && ` ${edu.field}`}</div>
                         <div className="text-[14px] mt-1" style={{ color: 'var(--v2-t-sub)' }}>{edu.startDate} ~ {edu.endDate || '현재'}</div>
                         {edu.description && (
-                          <div className="mt-2 text-[14px] prose max-w-none" style={{ color: 'var(--v2-t-body)' }}>
+                          <div className="mt-2 text-[14px]" style={{ color: 'var(--v2-t-body)' }}>
                             <RichTextRenderer text={edu.description} />
                           </div>
                         )}
@@ -405,7 +405,7 @@ export default function ResumePageClientV2({
                                     <span className="text-[13px]" style={{ color: 'var(--v2-t-sub)' }}>{exp.startDate} ~ {exp.endDate || '현재'}</span>
                                   </div>
                                   {exp.description && (
-                                    <div className="mt-2 text-[14px] prose max-w-none" style={{ color: 'var(--v2-t-body)' }}>
+                                    <div className="mt-2 text-[14px]" style={{ color: 'var(--v2-t-body)' }}>
                                       <RichTextRenderer text={exp.description} />
                                     </div>
                                   )}
@@ -427,7 +427,7 @@ export default function ResumePageClientV2({
                                     <span className="text-[13px]" style={{ color: 'var(--v2-t-sub)' }}>{exp.startDate} ~ {exp.endDate || '현재'}</span>
                                   </div>
                                   {exp.description && (
-                                    <div className="mt-2 text-[14px] prose max-w-none" style={{ color: 'var(--v2-t-body)' }}>
+                                    <div className="mt-2 text-[14px]" style={{ color: 'var(--v2-t-body)' }}>
                                       <RichTextRenderer text={exp.description} />
                                     </div>
                                   )}

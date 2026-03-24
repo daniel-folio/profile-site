@@ -205,7 +205,7 @@ export default function CareerDetailClientV2({ companies, projects, careerDetail
                                     {cd.results && (
                                       <div className="flex flex-col sm:flex-row gap-1 sm:gap-4">
                                         <strong className="min-w-[80px] shrink-0 text-[14px]" style={{ color: 'var(--v2-t-hi)' }}>성과</strong>
-                                        <div className="text-[14px] prose max-w-none" style={{ color: 'var(--v2-t-body)' }}>
+                                        <div className="text-[14px]" style={{ color: 'var(--v2-t-body)' }}>
                                           <RichTextRenderer text={cd.results} />
                                         </div>
                                       </div>
@@ -213,7 +213,7 @@ export default function CareerDetailClientV2({ companies, projects, careerDetail
                                     {cd.responsibilities && (
                                       <div className="flex flex-col sm:flex-row gap-1 sm:gap-4">
                                         <strong className="min-w-[80px] shrink-0 text-[14px]" style={{ color: 'var(--v2-t-hi)' }}>주요 업무</strong>
-                                        <div className="text-[14px] prose max-w-none" style={{ color: 'var(--v2-t-body)' }}>
+                                        <div className="text-[14px]" style={{ color: 'var(--v2-t-body)' }}>
                                           <RichTextRenderer text={cd.responsibilities as any} />
                                         </div>
                                       </div>
@@ -244,7 +244,7 @@ export default function CareerDetailClientV2({ companies, projects, careerDetail
                                           {cd.challenges && (
                                             <div className="flex flex-col sm:flex-row gap-1 sm:gap-4">
                                               <strong className="min-w-[80px] shrink-0 text-[14px]" style={{ color: 'var(--v2-accent)' }}>과제</strong>
-                                              <div className="text-[14px] prose max-w-none" style={{ color: 'var(--v2-t-body)' }}>
+                                              <div className="text-[14px]" style={{ color: 'var(--v2-t-body)' }}>
                                                 <RichTextRenderer text={cd.challenges} />
                                               </div>
                                             </div>
@@ -252,7 +252,7 @@ export default function CareerDetailClientV2({ companies, projects, careerDetail
                                           {cd.solutions && (
                                             <div className="flex flex-col sm:flex-row gap-1 sm:gap-4">
                                               <strong className="min-w-[80px] shrink-0 text-[14px]" style={{ color: '#2db864' }}>해결</strong>
-                                              <div className="text-[14px] prose max-w-none" style={{ color: 'var(--v2-t-body)' }}>
+                                              <div className="text-[14px]" style={{ color: 'var(--v2-t-body)' }}>
                                                 <RichTextRenderer text={cd.solutions} />
                                               </div>
                                             </div>
@@ -260,7 +260,7 @@ export default function CareerDetailClientV2({ companies, projects, careerDetail
                                           {cd.lessonsLearned && (
                                             <div className="flex flex-col sm:flex-row gap-1 sm:gap-4">
                                               <strong className="min-w-[80px] shrink-0 text-[14px]" style={{ color: '#3a8cc6' }}>배운점</strong>
-                                              <div className="text-[14px] prose max-w-none" style={{ color: 'var(--v2-t-body)' }}>
+                                              <div className="text-[14px]" style={{ color: 'var(--v2-t-body)' }}>
                                                 <RichTextRenderer text={cd.lessonsLearned} />
                                               </div>
                                             </div>

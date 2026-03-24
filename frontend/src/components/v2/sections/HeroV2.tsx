@@ -150,7 +150,7 @@ export default function HeroV2({ profile }: HeroV2Props) {
                         <div>
                             {mainBio && (
                                 <div
-                                    className="text-base leading-[1.75] prose prose-invert max-w-none"
+                                    className="text-base leading-[1.75]"
                                     style={{ color: 'var(--v2-t-body)', fontWeight: 400 }}
                                 >
                                     <RichTextRenderer text={mainBio} className="" />
@@ -239,23 +239,31 @@ export default function HeroV2({ profile }: HeroV2Props) {
                         padding: '0 var(--v2-pad)',
                     }}
                 >
-                    <MetaCell label="Status" value={headline || '적극 구직 중'} />
-                    <MetaCell label="Current" value={title || 'Developer'} />
+                    <MetaCell label="Status" value={headline || '적극 구직 중'} isMobileRow1 />
+                    <MetaCell label="Current" value={title || 'Developer'} isMobileRow1 isMobileLast />
                     <MetaCell label="Background" value={profile.bio || '웹 풀스택 개발 / 데이터 엔지니어링'} />
-                    <MetaCell label="Location" value={location || 'Seoul · 원격 가능'} isLast />
+                    <MetaCell label="Location" value={location || 'Seoul · 원격 가능'} isLast isMobileLast />
                 </div>
             </div>
         </div>
     );
 }
 
-function MetaCell({ label, value, isLast }: { label: string; value: string; isLast?: boolean }) {
+function MetaCell({ label, value, isLast, isMobileLast, isMobileRow1 }: { label: string; value: string; isLast?: boolean; isMobileLast?: boolean; isMobileRow1?: boolean }) {
+    let borderClass = '';
+    // 우측 가로선 로직
+    if (isLast) borderClass += 'border-r-0';
+    else if (isMobileLast) borderClass += 'border-r-0 md:border-r';
+    else borderClass += 'border-r';
+
+    // 하단 가로선 로직 (모바일 1,2번째 아이템)
+    if (isMobileRow1) borderClass += ' border-b md:border-b-0';
+
     return (
         <div
-            className="py-[16px] md:py-[22px] px-3 md:px-6 first:pl-0 transition-colors border-r"
+            className={`py-[16px] md:py-[22px] px-3 md:px-6 first:pl-0 transition-colors ${borderClass}`}
             style={{ 
-                borderRight: isLast ? 'none' : '1px solid var(--v2-line)',
-                borderBottom: 'none'
+                borderColor: 'var(--v2-line)',
             }}
         >
             <p
