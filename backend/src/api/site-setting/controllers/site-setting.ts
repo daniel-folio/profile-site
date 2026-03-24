@@ -67,7 +67,7 @@ export default factories.createCoreController('api::site-setting.site-setting', 
         siteDescription: s.siteDescription ?? null,
         siteUsed: s.siteUsed ?? true,
         maxVisitorsPerDay: s.maxVisitorsPerDay ?? 10000,
-        portfolioVersion: s.portfolioVersion ?? 'v1',
+        portfolioVersion: s.portfolioVersion || 'v1',
       } : {
         enableVisitorTracking: true,
         siteName: null,
@@ -88,17 +88,13 @@ export default factories.createCoreController('api::site-setting.site-setting', 
     try {
       const { password } = ctx.request.body;
 
-      console.log('🔍 패스워드 검증 요청');
-      console.log('🔍 입력된 패스워드:', password);
-
       if (!password) {
         return ctx.badRequest('Password is required');
       }
 
       const target = await getSiteSettingSingleton(strapi);
-      const settings = await strapi.entityService.findOne('api::site-setting.site-setting', target.id, {
-        fields: ['adminPassword', 'enableVisitorTracking', 'siteName', 'siteDescription', 'siteUsed', 'maxVisitorsPerDay']
-      });
+      // 타입 오류 방지를 위해 필드를 수동으로 지정하지 않고 전체 조회 후 필요한 것만 사용
+      const settings = (await strapi.entityService.findOne('api::site-setting.site-setting', target.id)) as any;
 
       console.log('🔍 DB에서 조회한 설정 데이터:', JSON.stringify(settings, null, 2));
       console.log('🔍 DB 저장된 adminPassword 해시:', settings?.adminPassword);

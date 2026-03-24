@@ -3,29 +3,27 @@ import { getSiteSettings } from '@/lib/siteSettings';
 import HomePageClientV1 from '@/components/v1/pages/HomePageClientV1';
 import HomePageClientV2 from '@/components/v2/pages/HomePageClientV2';
 
-export const revalidate = 0; // 이 페이지를 항상 동적으로 렌더링하도록 설정 (SSR)
+export const revalidate = 0;
+
+// 버전-컴포넌트 맵: 새 버전 추가 시 여기 한 줄만 추가하면 됩니다.
+const VERSION_COMPONENTS = {
+  v1: HomePageClientV1,
+  v2: HomePageClientV2,
+  // v3: HomePageClientV3,
+} as const;
 
 export default async function Home() {
   const profile = await getProfile(undefined, { cache: 'no-store' });
   const skills = await getSkills({ cache: 'no-store' });
   const projects = await getProjects(true, { cache: 'no-store' });
 
-  // 백엔드 설정에서 버전 확인
   const settings = await getSiteSettings();
-  const isV2 = settings.portfolioVersion === 'v2';
-
-  if (isV2) {
-    return (
-      <HomePageClientV2
-        profile={profile ? profile.data : null}
-        skills={skills ? skills.data : null}
-        projects={projects ? projects.data : null}
-      />
-    );
-  }
+  const version = settings.portfolioVersion || 'v1';
+  // 버전 맵에 없는 값이 오면 v1으로 안전하게 폴백
+  const PageComponent = VERSION_COMPONENTS[version as keyof typeof VERSION_COMPONENTS] ?? HomePageClientV1;
 
   return (
-    <HomePageClientV1
+    <PageComponent
       profile={profile ? profile.data : null}
       skills={skills ? skills.data : null}
       projects={projects ? projects.data : null}

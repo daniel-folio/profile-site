@@ -43,7 +43,7 @@ jobs:
           user_name: 'daniel-dataflow'
           user_email: 'daniel.han.developer@gmail.com'
       
-       # 3. 작업 실패 시 Slack 알림
+      # 4. 작업 실패 시 Slack 알림
       - name: Send Failure Notification
         if: failure()
         uses: 8398a7/action-slack@v3

@@ -23,10 +23,18 @@ export const metadata: Metadata = {
   },
 };
 
+// 버전-레이아웃 맵: 새 버전 추가 시 여기에 한 줄만 추가하면 됩니다.
+const LAYOUT_MAP: Record<string, React.ComponentType<{ children: React.ReactNode }>> = {
+  v1: LayoutV1,
+  v2: LayoutV2,
+  // v3: LayoutV3,
+};
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // 백엔드 설정에서 포트폴리오 버전 확인 (기본값: v1)
   const settings = await getSiteSettings();
-  const isV2 = settings.portfolioVersion === 'v2';
+  const version = settings.portfolioVersion || 'v1';
+  // 버전 맵에 없는 값이 오면 v1으로 폴백
+  const Layout = LAYOUT_MAP[version] ?? LayoutV1;
 
   return (
     <html lang="ko" suppressHydrationWarning>
@@ -45,11 +53,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           <MaintenanceMode>
             <VisitorTracker />
-            {isV2 ? (
-              <LayoutV2>{children}</LayoutV2>
-            ) : (
-              <LayoutV1>{children}</LayoutV1>
-            )}
+            <Layout>{children}</Layout>
           </MaintenanceMode>
         </ThemeProvider>
       </body>
