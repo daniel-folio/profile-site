@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 interface HashLinkProps extends React.PropsWithChildren<{}> {
   href: string;
   className?: string;
+  style?: React.CSSProperties;
   ariaCurrent?: "page" | undefined;
   onNavigate?: () => void;
 }
@@ -16,7 +17,7 @@ interface HashLinkProps extends React.PropsWithChildren<{}> {
  * - Prevents default navigation to control scroll timing
  * - Navigates to base path without auto-scroll, then scrolls to the target id
  */
-export function HashLink({ href, className, ariaCurrent, children, onNavigate }: HashLinkProps) {
+export function HashLink({ href, className, style, ariaCurrent, children, onNavigate }: HashLinkProps) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -71,7 +72,7 @@ export function HashLink({ href, className, ariaCurrent, children, onNavigate }:
   };
 
   return (
-    <Link href={href} className={className} aria-current={ariaCurrent} scroll={false} onClick={handleClick}>
+    <Link href={href} className={className} style={style} aria-current={ariaCurrent} scroll={false} onClick={handleClick}>
       {children}
     </Link>
   );

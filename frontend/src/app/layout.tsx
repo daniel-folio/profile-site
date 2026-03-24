@@ -1,13 +1,12 @@
 import './globals.css'
 import { GeistSans } from 'geist/font/sans'
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import ThreeShapesBackground from "@/components/layout/ThreeShapesBackground";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { VisitorTracker } from "@/components/VisitorTracker";
-import HashScrollManager from "@/components/HashScrollManager";
-import { MaintenanceMode } from "@/components/MaintenanceMode";
+import { ThemeProvider } from "@/components/common/ThemeProvider";
+import { VisitorTracker } from "@/components/common/VisitorTracker";
+import { MaintenanceMode } from "@/components/common/MaintenanceMode";
 import type { Metadata } from "next";
+import LayoutV1 from '@/components/v1/layout/LayoutV1';
+import LayoutV2 from '@/components/v2/layout/LayoutV2';
+import { getSiteSettings } from '@/lib/siteSettings';
 
 // 이 설정을 추가하면 앱 전체가 동적으로 렌더링됩니다.
 export const dynamic = 'force-dynamic';
@@ -24,7 +23,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // 백엔드 설정에서 포트폴리오 버전 확인 (기본값: v1)
+  const settings = await getSiteSettings();
+  const isV2 = settings.portfolioVersion === 'v2';
+
   return (
     <html lang="ko" suppressHydrationWarning>
       <head>
@@ -34,7 +37,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#fff" />
-        {/* <link rel="icon" type="image/x-icon" href="/favicon.ico" /> */}
       </head>
       <body className={GeistSans.className}>
         <ThemeProvider
@@ -43,13 +45,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           <MaintenanceMode>
             <VisitorTracker />
-            <ThreeShapesBackground />
-            <div className="relative z-10 flex flex-col min-h-screen">
-              <HashScrollManager />
-              <Header />
-              <main className="flex-grow">{children}</main>
-              <Footer />
-            </div>
+            {isV2 ? (
+              <LayoutV2>{children}</LayoutV2>
+            ) : (
+              <LayoutV1>{children}</LayoutV1>
+            )}
           </MaintenanceMode>
         </ThemeProvider>
       </body>

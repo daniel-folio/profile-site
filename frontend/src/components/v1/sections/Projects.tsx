@@ -4,9 +4,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Project } from '@/types/project';
 import { getImageUrl, getStatusColor, getProjectTypeIcon, formatDateRange } from '@/lib/utils';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/common/ui/Button';
 import { motion } from 'framer-motion';
-import { RichTextRenderer } from '@/components/ui/RichTextRenderer';
+import { RichTextRenderer } from '@/components/common/ui/RichTextRenderer';
 
 interface ProjectsProps {
   projects: Project[] | null;
@@ -82,7 +82,7 @@ export function Projects({ projects, featured = false }: ProjectsProps) {
                 <div className="flex flex-col space-y-1.5 p-6">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-2xl text-gray-700 dark:text-gray-300">
-                      {getProjectTypeIcon(project.projectType)}
+                      {getProjectTypeIcon(project.category?.data?.attributes?.name || project.projectType || '')}
                     </span>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.projectStatus)}`}>
                       {project.projectStatus}

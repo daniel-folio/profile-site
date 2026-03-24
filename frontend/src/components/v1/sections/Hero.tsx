@@ -7,15 +7,15 @@ import { SiVelog, SiTistory, SiNotion } from 'react-icons/si';
 import { getStrapiMedia } from "@/lib/api";
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "../ui/Button";
+import { Button } from "@/components/common/ui/Button";
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TypeAnimation } from 'react-type-animation';
 import { useState, useEffect } from "react";
 import { marked } from 'marked';
-import { RichTextRenderer } from '@/components/ui/RichTextRenderer';
+import { RichTextRenderer } from '@/components/common/ui/RichTextRenderer';
 
-const VantaBackground = dynamic(() => import('@/components/layout/VantaBackground'), {
+const VantaBackground = dynamic(() => import('@/components/v2/layout/VantaBackground'), {
   ssr: false,
 });
 

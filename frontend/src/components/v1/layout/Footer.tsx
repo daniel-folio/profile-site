@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { HashLink } from '@/components/HashLink';
+import { HashLink } from '@/components/common/HashLink';
 import { usePathname } from 'next/navigation';
 import { useActiveSection } from '@/hooks/useActiveSection';
 
