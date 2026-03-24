@@ -44,8 +44,16 @@
       "default": 10000,
       "min": 100,
       "max": 1000000
-    }
-    ,
+    },
+    "portfolioVersion": {
+      "type": "enumeration",
+      "enum": [
+        "v1",
+        "v2"
+      ],
+      "default": "v1",
+      "required": false
+    },
     "ownerIpAllowlist": {
       "type": "json",
       "default": [],

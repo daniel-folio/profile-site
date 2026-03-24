@@ -2,7 +2,7 @@ import { getCareerDetails } from '@/lib/api';
 import { CareerDetail } from '@/types/career-detail';
 import { notFound } from 'next/navigation';
 import { marked } from 'marked';
-import { RichTextRenderer } from '@/components/ui/RichTextRenderer';
+import { RichTextRenderer } from '@/components/common/ui/RichTextRenderer';
 
 interface CareerDetailPageProps {
   params: { id: string };

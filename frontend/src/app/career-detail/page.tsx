@@ -3,7 +3,9 @@ import { Company } from '@/types/company';
 import { Project } from '@/types/project';
 import { Profile } from '@/types/profile';
 import { CareerDetail } from '@/types/career-detail';
-import CareerDetailClient from './CareerDetailClient';
+import CareerDetailClientV1 from '@/components/v1/pages/CareerDetailClientV1';
+import CareerDetailClientV2 from '@/components/v2/pages/CareerDetailClientV2';
+import { getSiteSettings } from '@/lib/siteSettings';
 
 // 이 페이지를 항상 동적으로 렌더링하여 캐시를 사용하지 않도록 설정합니다.
 export const dynamic = 'force-dynamic';

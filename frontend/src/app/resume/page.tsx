@@ -6,7 +6,9 @@ import { Project } from '@/types/project';
 import { Profile } from '@/types/profile';
 import { CareerDetail } from '@/types/career-detail';
 import { OtherExperience } from '@/types/other-experience';
-import ResumePageClient from './ResumePageClient';
+import ResumePageClientV1 from '@/components/v1/pages/ResumePageClientV1';
+import ResumePageClientV2 from '@/components/v2/pages/ResumePageClientV2';
+import { getSiteSettings } from '@/lib/siteSettings';
 
 export default async function ResumePage() {
   const [profileRes, companiesRes, educationsRes, skillsRes, projectsRes, careerDetailsResRaw, otherExperiencesRes]: any[] = await Promise.all([
@@ -70,8 +72,11 @@ export default async function ResumePage() {
       };
     });
   }
-  return (
-    <ResumePageClient
+  const settings = await getSiteSettings();
+  const isV2 = settings.portfolioVersion === 'v2';
+  
+  if (isV2) {
+    return <ResumePageClientV2
       profile={profile}
       companies={companies}
       educations={educations}
@@ -79,6 +84,15 @@ export default async function ResumePage() {
       projects={projects}
       careerDetails={careerDetails}
       otherExperiences={otherExperiences}
-    />
-  );
+    />;
+  }
+  return <ResumePageClientV1
+      profile={profile}
+      companies={companies}
+      educations={educations}
+      skills={skills}
+      projects={projects}
+      careerDetails={careerDetails}
+      otherExperiences={otherExperiences}
+    />;
 } 
