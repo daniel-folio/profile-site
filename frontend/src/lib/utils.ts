@@ -61,6 +61,8 @@ export function getProjectTypeIcon(type: string): string {
       return '💻';
     case 'API':
       return '🔌';
+    case 'AI':
+      return '🧠';
     case 'Library':
       return '📚';
     default:

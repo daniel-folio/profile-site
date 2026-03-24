@@ -14,40 +14,37 @@
   "attributes": {
     "title": {
       "type": "string",
-      "required": true,
-      "displayName": "Title(프로젝트명)"
+      "required": true
     },
     "slug": {
       "type": "uid",
       "targetField": "title",
-      "required": true,
-      "displayName": "Slug(슬러그)"
+      "required": true
     },
     "projectType": {
       "type": "enumeration",
+      "required": true,
+      "default": "Web",
       "enum": [
         "Web",
+        "Ai",
         "Mobile",
         "Desktop",
         "API",
         "Library",
         "Other"
-      ],
-      "default": "Web",
-      "required": true,
-      "displayName": "Project Type(유형)"
+      ]
     },
     "projectStatus": {
       "type": "enumeration",
+      "required": true,
+      "default": "Completed",
       "enum": [
         "Completed",
         "In Progress",
         "Planned",
         "On Hold"
-      ],
-      "default": "Completed",
-      "required": true,
-      "displayName": "Project Status(상태)"
+      ]
     },
     "images": {
       "type": "media",
@@ -55,8 +52,7 @@
       "required": false,
       "allowedTypes": [
         "images"
-      ],
-      "displayName": "Images(이미지)"
+      ]
     },
     "thumbnailImage": {
       "type": "media",
@@ -64,66 +60,60 @@
       "required": false,
       "allowedTypes": [
         "images"
-      ],
-      "displayName": "Thumbnail(썸네일)"
+      ]
     },
     "startDate": {
-      "type": "string",
-      "displayName": "Start Date(시작년월)"
+      "type": "string"
     },
     "endDate": {
-      "type": "string",
-      "displayName": "End Date(종료년월)"
+      "type": "string"
     },
     "order": {
       "type": "integer",
-      "default": 0,
-      "displayName": "Order(정렬순서)"
+      "default": 0
     },
     "visible": {
       "type": "boolean",
-      "default": true,
-      "displayName": "Visible(공개여부)"
+      "default": true
     },
     "featured": {
       "type": "boolean",
-      "default": false,
-      "displayName": "Featured(대표)"
+      "default": false
     },
     "featuredOrder": {
       "type": "integer",
-      "default": 0,
-      "displayName": "Featured Order(대표 프로젝트 정렬순서)"
+      "default": 0
     },
     "liveUrl": {
-      "type": "string",
-      "displayName": "Live URL(배포주소)"
+      "type": "string"
     },
     "githubUrl": {
-      "type": "string",
-      "displayName": "GitHub URL(깃허브)"
+      "type": "string"
     },
     "shortDescription": {
-      "type": "richtext",
-      "displayName": "Short Description(요약설명)"
+      "type": "richtext"
     },
     "fullDescription": {
-      "type": "richtext",
-      "displayName": "Full Description(상세설명)"
+      "type": "richtext"
     },
     "company": {
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::company.company",
-      "displayName": "Company(회사)",
-      "required": false
+      "displayName": "Company(회사)"
     },
     "skills": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::skill.skill",
-      "displayName": "Technologies(기술스택)",
-      "required": false
+      "displayName": "Technologies(기술스택)"
+    },
+    "category": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::project-category.project-category",
+      "displayName": "Category(유형)",
+      "inversedBy": "projects"
     }
   }
 }

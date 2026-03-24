@@ -9,7 +9,16 @@ export interface Project {
   fullDescription?: string;
   thumbnailImage?: StrapiMediaResponse;
   images?: StrapiMultipleMediaResponse;
-  projectType: 'Web' | 'Mobile' | 'Desktop' | 'API' | 'Library' | 'Other';
+  projectType?: 'Web' | 'Mobile' | 'Desktop' | 'API' | 'Library' | 'Other';
+  category?: {
+    data: {
+      id: number;
+      attributes: {
+        name: string;
+        slug: string;
+      };
+    };
+  };
   projectStatus: 'Completed' | 'In Progress' | 'Planned' | 'On Hold';
   startDate?: string;
   endDate?: string;

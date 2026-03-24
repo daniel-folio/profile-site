@@ -2,14 +2,12 @@ import { getProjectBySlug, getAllProjectSlugs } from '@/lib/api';
 import { notFound } from 'next/navigation';
 import { formatDateRange, getImageUrl } from '@/lib/utils';
 import Image from 'next/image';
-import { Button } from '@/components/ui/Button';
-import { InfoItem, InfoSection } from '@/components/ui/InfoItem';
+import Link from 'next/link';
 import { Skill } from '@/types/skill';
 import { StrapiMedia } from '@/types/media';
-import { marked } from 'marked';
-import { RichTextRenderer } from '@/components/ui/RichTextRenderer';
+import { RichTextRenderer } from '@/components/common/ui/RichTextRenderer';
 
-// --- 타입 정의: 각 데이터의 형태를 명확하게 정의합니다 ---
+// --- 타입 정의 ---
 
 interface ProjectAttributes {
   title: string;
@@ -26,12 +24,10 @@ interface ProjectAttributes {
   thumbnailImage?: StrapiMedia | null;
 }
 
-// Strapi API의 여러 항목(컬렉션) 응답 형태
 interface StrapiApiCollectionResponse<T> {
   data: { id: number; attributes: T }[];
 }
 
-// 페이지가 받는 Props의 정확한 타입
 type PageProps = {
   params: { slug: string };
 };
@@ -44,7 +40,6 @@ export default async function ProjectPage(props: any) {
 
   const response = await getProjectBySlug(slug, { next: { revalidate: 3600 } });
 
-  // 유연하게 flat/attributes 구조 모두 지원
   const projectData = response?.data?.[0];
   const project = (projectData as any)?.attributes || projectData;
 
@@ -65,9 +60,12 @@ export default async function ProjectPage(props: any) {
     githubUrl = '',
     liveUrl = '',
     thumbnailImage = null,
+    category = null,
   } = project;
 
-  // 이미지 추출 로직 유연하게
+  const displayCategory = category?.data?.attributes?.name || projectType || 'Project';
+
+  // 이미지 추출 로직
   let mainImage: any = null;
   let otherImages: any[] = [];
   if (Array.isArray(images) && images.length > 0) {
@@ -79,21 +77,77 @@ export default async function ProjectPage(props: any) {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-16">
-        {/* ----- 상단: 제목과 기본 정보 ----- */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-gray-100">{title}</h1>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <InfoItem label="프로젝트 형태" value={projectType} />
-            <InfoItem label="상태" value={projectStatus} />
-            <InfoItem label="기간" value={formatDateRange(startDate, endDate)} />
+    <div style={{ background: 'var(--v2-bg)', minHeight: '100vh' }}>
+      <div
+        style={{
+          maxWidth: 'var(--v2-max)',
+          margin: '0 auto',
+          padding: 'clamp(100px, 12vh, 140px) var(--v2-pad) 80px',
+        }}
+      >
+        {/* 뒤로가기 */}
+        <Link
+          href="/#projects"
+          className="v2-back-link"
+        >
+          ← Back to Projects
+        </Link>
+
+        {/* 상단: 프로젝트 제목 + 메타 정보 */}
+        <div style={{ marginBottom: 48 }}>
+          <p
+            style={{
+              fontFamily: 'var(--v2-mono)',
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase' as const,
+              color: 'var(--v2-accent)',
+              marginBottom: 16,
+            }}
+          >
+            {displayCategory}
+          </p>
+          <h1
+            style={{
+              fontSize: 'clamp(32px, 5vw, 56px)',
+              fontWeight: 600,
+              letterSpacing: '-0.03em',
+              lineHeight: 1.1,
+              color: 'var(--v2-t-hi)',
+              marginBottom: 24,
+            }}
+          >
+            {title}
+          </h1>
+
+          {/* 메타 바 */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              borderTop: '1px solid var(--v2-line)',
+              borderBottom: '1px solid var(--v2-line)',
+            }}
+          >
+            <MetaCell label="Type" value={displayCategory} />
+            <MetaCell label="Status" value={projectStatus} />
+            <MetaCell label="Period" value={formatDateRange(startDate, endDate)} isLast />
           </div>
         </div>
 
-        {/* ----- 메인 이미지 (있는 경우에만 표시) ----- */}
+        {/* 메인 이미지 */}
         {mainImage && (
-          <div className="relative aspect-video mb-8 overflow-hidden rounded-lg">
+          <div
+            style={{
+              position: 'relative',
+              aspectRatio: '16/9',
+              marginBottom: 56,
+              overflow: 'hidden',
+              borderRadius: 8,
+              border: '1px solid var(--v2-line)',
+            }}
+          >
             <Image
               src={getImageUrl(mainImage.url)}
               alt={mainImage.alternativeText || title}
@@ -104,22 +158,69 @@ export default async function ProjectPage(props: any) {
           </div>
         )}
 
-        {/* ----- 하단: 설명과 부가 정보를 나란히 배치 ----- */}
-        <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
+        {/* 본문: 설명 + 사이드바 */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 300px',
+            gap: 64,
+          }}
+          className="v2-detail-grid"
+        >
           {/* 왼쪽: 프로젝트 설명 */}
-          <div className="lg:col-span-2">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">프로젝트 소개</h2>
-              <RichTextRenderer text={fullDescription} className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300" />
-            </div>
+          <div>
+            <h2
+              style={{
+                fontFamily: 'var(--v2-mono)',
+                fontSize: 10,
+                fontWeight: 500,
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase' as const,
+                color: 'var(--v2-accent)',
+                marginBottom: 24,
+              }}
+            >
+              ─── About the Project
+            </h2>
+            <RichTextRenderer
+              text={fullDescription}
+              className="v2-prose"
+            />
 
-            {/* 추가 스크린샷들 */}
+            {/* 추가 스크린샷 */}
             {otherImages.length > 0 && (
-              <div className="mt-12">
-                <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">스크린샷</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {otherImages.map((image) => (
-                    <div key={image.url} className="relative aspect-video overflow-hidden rounded-lg">
+              <div style={{ marginTop: 64 }}>
+                <h3
+                  style={{
+                    fontFamily: 'var(--v2-mono)',
+                    fontSize: 10,
+                    fontWeight: 500,
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase' as const,
+                    color: 'var(--v2-accent)',
+                    marginBottom: 24,
+                  }}
+                >
+                  ─── Screenshots
+                </h3>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: 16,
+                  }}
+                >
+                  {otherImages.map((image: any) => (
+                    <div
+                      key={image.url}
+                      style={{
+                        position: 'relative',
+                        aspectRatio: '16/9',
+                        overflow: 'hidden',
+                        borderRadius: 6,
+                        border: '1px solid var(--v2-line)',
+                      }}
+                    >
                       <Image
                         src={getImageUrl(image.url)}
                         alt={image.alternativeText || `${title} 스크린샷`}
@@ -132,36 +233,75 @@ export default async function ProjectPage(props: any) {
               </div>
             )}
           </div>
-          
-          {/* 오른쪽: 기술 스택과 링크 */}
-          <aside className="h-fit">
-            <div className="space-y-8">
+
+          {/* 오른쪽: 기술 스택 + 링크 */}
+          <aside>
+            <div style={{ position: 'sticky', top: 100 }}>
+              {/* 기술 스택 */}
               {technologies?.data && technologies.data.length > 0 && (
-                <InfoSection title="사용 기술">
-                  <div className="flex flex-wrap gap-2">
+                <div style={{ marginBottom: 40 }}>
+                  <h3
+                    style={{
+                      fontFamily: 'var(--v2-mono)',
+                      fontSize: 10,
+                      fontWeight: 500,
+                      letterSpacing: '0.2em',
+                      textTransform: 'uppercase' as const,
+                      color: 'var(--v2-accent)',
+                      marginBottom: 16,
+                    }}
+                  >
+                    ─── Tech Stack
+                  </h3>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {technologies.data.map((skill: { id: number; attributes: Skill }) => (
                       <span
                         key={skill.id}
-                        className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm rounded-full"
+                        style={{
+                          fontFamily: 'var(--v2-mono)',
+                          fontSize: 10,
+                          fontWeight: 400,
+                          letterSpacing: '0.07em',
+                          textTransform: 'uppercase' as const,
+                          padding: '5px 10px',
+                          border: '1px solid var(--v2-line-up)',
+                          color: 'var(--v2-t-sub)',
+                          transition: 'all .2s',
+                        }}
                       >
                         {skill.attributes.name}
                       </span>
                     ))}
                   </div>
-                </InfoSection>
+                </div>
               )}
 
+              {/* 관련 링크 */}
               {(githubUrl || liveUrl) && (
-                <InfoSection title="관련 링크">
-                  <div className="flex flex-col gap-3">
+                <div>
+                  <h3
+                    style={{
+                      fontFamily: 'var(--v2-mono)',
+                      fontSize: 10,
+                      fontWeight: 500,
+                      letterSpacing: '0.2em',
+                      textTransform: 'uppercase' as const,
+                      color: 'var(--v2-accent)',
+                      marginBottom: 16,
+                    }}
+                  >
+                    ─── Links
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {githubUrl && (
                       <a
                         href={githubUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block px-4 py-2 rounded bg-gradient-to-r from-primary-gradient-start to-primary-gradient-end text-white font-semibold shadow hover:opacity-90 transition text-center"
+                        className="v2-btn v2-btn-fill"
+                        style={{ textAlign: 'center' }}
                       >
-                        GitHub 저장소
+                        GitHub Repository
                       </a>
                     )}
                     {liveUrl && (
@@ -169,13 +309,14 @@ export default async function ProjectPage(props: any) {
                         href={liveUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-semibold shadow hover:opacity-90 transition text-center"
+                        className="v2-btn v2-btn-outline"
+                        style={{ textAlign: 'center' }}
                       >
-                        라이브 데모
+                        Live Demo
                       </a>
                     )}
                   </div>
-                </InfoSection>
+                </div>
               )}
             </div>
           </aside>
@@ -185,13 +326,47 @@ export default async function ProjectPage(props: any) {
   );
 }
 
-// 빌드 시점에 정적 페이지를 미리 생성하기 위한 함수입니다.
+function MetaCell({ label, value, isLast }: { label: string; value: string; isLast?: boolean }) {
+  return (
+    <div
+      style={{
+        padding: '18px 20px',
+        borderRight: isLast ? 'none' : '1px solid var(--v2-line)',
+      }}
+    >
+      <p
+        style={{
+          fontFamily: 'var(--v2-mono)',
+          fontSize: 10,
+          fontWeight: 500,
+          letterSpacing: '0.15em',
+          textTransform: 'uppercase' as const,
+          color: 'var(--v2-accent)',
+          marginBottom: 4,
+        }}
+      >
+        {label}
+      </p>
+      <p
+        style={{
+          fontSize: 13,
+          lineHeight: 1.55,
+          color: 'var(--v2-t-body)',
+          fontWeight: 400,
+        }}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
+// 빌드 시점에 정적 페이지를 미리 생성하기 위한 함수
 export async function generateStaticParams() {
   const allProjects = await getAllProjectSlugs();
   if (!allProjects?.data || !Array.isArray(allProjects.data)) {
     return [];
   }
-  // flat 구조와 attributes 구조 모두 지원
   const slugs = allProjects.data
     .map((item: any) => item?.attributes?.slug || item?.slug)
     .filter((slug: any) => typeof slug === 'string' && !!slug);
