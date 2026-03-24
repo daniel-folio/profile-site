@@ -233,7 +233,7 @@ export default function CareerDetailClientV1({ companies, projects, careerDetail
                                       transition={{ duration: 0.3, ease: 'easeInOut' }}
                                       className="overflow-hidden"
                                     >
-                                       <div className="space-y-1 pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
+                                       <div className="space-y-1 pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
                                         {cd.challenges && (
                                           <div>
                                             <strong>과제 : </strong>
@@ -312,19 +312,23 @@ export default function CareerDetailClientV1({ companies, projects, careerDetail
                             </span>
                           </div>
                         )}
-                        {cd.challenges && (
-                          <div style={{ marginBottom: 4 }}><strong>과제 : </strong>
-                            <RichTextRenderer text={cd.challenges} className="print-richtext" />
-                          </div>
-                        )}
-                        {cd.solutions && (
-                          <div style={{ marginBottom: 4 }}><strong>해결 : </strong>
-                            <RichTextRenderer text={cd.solutions} className="print-richtext" />
-                          </div>
-                        )}
-                        {cd.lessonsLearned && (
-                          <div style={{ marginBottom: 4 }}><strong>배운점 : </strong>
-                            <RichTextRenderer text={cd.lessonsLearned} className="print-richtext" />
+                        {(cd.challenges || cd.solutions || cd.lessonsLearned) && (
+                          <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid #e5e7eb' }}>
+                            {cd.challenges && (
+                              <div style={{ marginBottom: 4 }}><strong>과제 : </strong>
+                                <RichTextRenderer text={cd.challenges} className="print-richtext" />
+                              </div>
+                            )}
+                            {cd.solutions && (
+                              <div style={{ marginBottom: 4 }}><strong>해결 : </strong>
+                                <RichTextRenderer text={cd.solutions} className="print-richtext" />
+                              </div>
+                            )}
+                            {cd.lessonsLearned && (
+                              <div style={{ marginBottom: 4 }}><strong>배운점 : </strong>
+                                <RichTextRenderer text={cd.lessonsLearned} className="print-richtext" />
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
