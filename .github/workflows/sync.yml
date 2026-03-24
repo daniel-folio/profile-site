@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
 
       # 2. PAT를 사용하여 A 저장소(대상)로 Push
-      - name: Push to A Repo
+      - name: Push to A Repo (daniel-works0001)
         uses: peaceiris/actions-gh-pages@v4
         with:
           personal_token: ${{ secrets.A_REPO_PAT }}
@@ -26,8 +26,22 @@ jobs:
           publish_branch: main
           publish_dir: .
           force_orphan: true
+          commit_message: ${{ github.event.head_commit.message }}
           user_name: 'daniel-works0001'
           user_email: 'daniel.han.works0001@gmail.com'
+
+      # 3. 추가된 daniel-dataflow 저장소로 Push 배포
+      - name: Push to B Repo (daniel-dataflow)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ secrets.DATAFLOW_REPO_PAT }}
+          external_repository: daniel-dataflow/portfolio-website
+          publish_branch: main
+          publish_dir: .
+          force_orphan: true
+          commit_message: ${{ github.event.head_commit.message }}
+          user_name: 'daniel-dataflow'
+          user_email: 'daniel.han.developer@gmail.com'
       
        # 3. 작업 실패 시 Slack 알림
       - name: Send Failure Notification
