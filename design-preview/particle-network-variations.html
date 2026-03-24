@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Particle Network Variations · 10 Concepts</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #05080f;
+    --surface: #090e18;
+    --muted: #2e4560;
+    --text: #8aaac8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'DM Mono', monospace;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    padding: 64px 24px 44px;
+  }
+  .header-eyebrow {
+    font-size: .6rem;
+    letter-spacing: .3em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    color: #d8e8f5;
+    letter-spacing: .1em;
+    margin-bottom: 10px;
+  }
+  .header h1 em {
+    font-style: italic;
+    color: #7ab0d8;
+  }
+  .header p {
+    font-size: .65rem;
+    color: var(--muted);
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+
+  /* ── Grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 1px;
+    background: #0d1620;
+    padding: 1px;
+  }
+
+  /* ── Card ── */
+  .card {
+    position: relative;
+    height: 290px;
+    overflow: hidden;
+    background: var(--surface);
+    cursor: default;
+  }
+  .card canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Hover overlay */
+  .card-info {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 20px 22px 16px;
+    background: linear-gradient(transparent, rgba(5,8,15,.96) 55%);
+    z-index: 50;
+    transform: translateY(100%);
+    transition: transform .45s cubic-bezier(.16,1,.3,1);
+  }
+  .card:hover .card-info { transform: translateY(0); }
+
+  .card-info h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+    font-size: 1rem;
+    color: #e8f2ff;
+    letter-spacing: .06em;
+    margin-bottom: 5px;
+  }
+  .card-info p {
+    font-size: .58rem;
+    color: #5a80a8;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    line-height: 1.7;
+  }
+
+  /* Number badge */
+  .card-num {
+    position: absolute;
+    top: 14px; left: 18px;
+    font-size: .58rem;
+    letter-spacing: .22em;
+    color: var(--muted);
+    z-index: 50;
+    opacity: .7;
+  }
+
+  /* Thin top accent line */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(74,140,220,.25), transparent);
+    z-index: 50;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 48px 20px;
+    font-size: .58rem;
+    letter-spacing: .22em;
+    color: var(--muted);
+    text-transform: uppercase;
+    border-top: 1px solid #0d1a2a;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <p class="header-eyebrow">Data Engineer Portfolio · Background Series</p>
+  <h1>Particle Network <em>Variations</em></h1>
+  <p>10 gentle, slow-moving concepts · Hover to reveal details</p>
+</div>
+
+<div class="grid">
+  <div class="card" id="c1"><canvas id="cv1"></canvas><span class="card-num">01</span><div class="card-info"><h3>Classic Drift</h3><p>원형 입자가 무작위 방향으로 천천히 부유 · 근접 시 연결선 생성 · 가장 순수한 형태</p></div></div>
+  <div class="card" id="c2"><canvas id="cv2"></canvas><span class="card-num">02</span><div class="card-info"><h3>Depth Layers</h3><p>입자를 3개의 깊이 레이어로 분리 · 앞 레이어는 크고 밝게, 뒷 레이어는 작고 희미하게 · 원근감 형성</p></div></div>
+  <div class="card" id="c3"><canvas id="cv3"></canvas><span class="card-num">03</span><div class="card-info"><h3>Orbital Clusters</h3><p>중심점 주변을 입자 무리가 서서히 공전 · 다수의 클러스터가 독립적으로 회전 · 은하계 모티브</p></div></div>
+  <div class="card" id="c4"><canvas id="cv4"></canvas><span class="card-num">04</span><div class="card-info"><h3>Breathing Field</h3><p>Sine 파동 기반 수축·팽창 반복 · 입자 전체가 살아 숨쉬는 듯한 리듬감 · 극도로 평온한 느낌</p></div></div>
+  <div class="card" id="c5"><canvas id="cv5"></canvas><span class="card-num">05</span><div class="card-info"><h3>Flow Field</h3><p>Perlin noise 벡터 필드로 입자가 안개처럼 흐름 · 예측 불가능하지만 자연스러운 궤적 · 강 같은 흐름</p></div></div>
+  <div class="card" id="c6"><canvas id="cv6"></canvas><span class="card-num">06</span><div class="card-info"><h3>Constellation Web</h3><p>고정된 별자리 배치에 가까운 입자들이 선을 연결 · 연결선 굵기가 거리에 따라 변화 · 우주적 정적감</p></div></div>
+  <div class="card" id="c7"><canvas id="cv7"></canvas><span class="card-num">07</span><div class="card-info"><h3>Gradient Drift</h3><p>두 가지 색상 그룹이 캔버스 한쪽에서 반대편으로 완만하게 이동 · 색 전이 구역에서 혼합 연결 발생</p></div></div>
+  <div class="card" id="c8"><canvas id="cv8"></canvas><span class="card-num">08</span><div class="card-info"><h3>Pulse Ripple Network</h3><p>특정 입자에서 주기적으로 파문이 퍼짐 · 파문 반경 내 연결선만 일시 강조 · 심박 같은 리듬</p></div></div>
+  <div class="card" id="c9"><canvas id="cv9"></canvas><span class="card-num">09</span><div class="card-info"><h3>Sparse Wanderers</h3><p>매우 적은 수의 큰 입자 · 연결선이 드문드문 · 여백이 주인공 · 가장 미니멀하고 고급스러운 변형</p></div></div>
+  <div class="card" id="c10"><canvas id="cv10"></canvas><span class="card-num">10</span><div class="card-info"><h3>Data Mesh</h3><p>입자가 격자 위에 느슨하게 배치 · 이웃 입자와 항상 연결 유지 · 구조화된 네트워크 · 데이터 그리드 모티브</p></div></div>
+</div>
+
+<div class="footer">Particle Network Variations · Canvas 2D · Gentle Motion · Data Engineer Portfolio</div>
+
+<script>
+/* ═══════════════════════════════════════
+   SHARED UTILITIES
+═══════════════════════════════════════ */
+function initCanvas(cardId, cvId) {
+  const card = document.getElementById(cardId);
+  const cv = document.getElementById(cvId);
+  cv.width  = card.offsetWidth  || 380;
+  cv.height = card.offsetHeight || 290;
+  return { cv, ctx: cv.getContext('2d'), W: cv.width, H: cv.height };
+}
+
+function rand(a, b) { return a + Math.random() * (b - a); }
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+/* tiny simplex-like smooth noise (2D, no deps) */
+function smoothNoise(x, y) {
+  const X = Math.floor(x), Y = Math.floor(y);
+  const fx = x - X, fy = y - Y;
+  const u = fx*fx*(3-2*fx), v = fy*fy*(3-2*fy);
+  const h = (n) => {
+    let h = n * 127.1 + 311.7;
+    h = Math.sin(h) * 43758.5453123;
+    return h - Math.floor(h);
+  };
+  return lerp(
+    lerp(h(X + Y*57), h(X+1 + Y*57), u),
+    lerp(h(X + (Y+1)*57), h(X+1 + (Y+1)*57), u),
+    v
+  );
+}
+
+/* ═══════════════════════════════════════
+   01. CLASSIC DRIFT
+   Simple particles drifting slowly,
+   connect when within threshold distance
+═══════════════════════════════════════ */
+(function(){
+  const { ctx, W, H } = initCanvas('c1','cv1');
+  const N = 55, DIST = 110, SPEED = 0.18;
+  const pts = Array.from({length:N}, () => ({
+    x: rand(0,W), y: rand(0,H),
+    vx: rand(-SPEED,SPEED), vy: rand(-SPEED,SPEED),
+    r: rand(1.2,2.4),
+  }));
+
+  function draw() {
+    ctx.fillStyle = 'rgba(9,14,24,0.18)';
+    ctx.fillRect(0,0,W,H);
+
+    // move
+    pts.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > W) p.vx *= -1;
+      if (p.y < 0 || p.y > H) p.vy *= -1;
+    });
+
+    // edges
+    for (let i=0; i<N; i++) {
+      for (let j=i+1; j<N; j++) {
+        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if (d < DIST) {
+          const a = (1-d/DIST)*0.22;
+          ctx.strokeStyle = `rgba(74,140,220,${a})`;
+          ctx.lineWidth = 0.7;
+          ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y); ctx.stroke();
+        }
+      }
+    }
+    // dots
+    pts.forEach(p => {
+      ctx.fillStyle = 'rgba(120,180,240,0.55)';
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#090e18'; ctx.fillRect(0,0,W,H);
+  draw();
+})();
+
+/* ═══════════════════════════════════════
+   02. DEPTH LAYERS
+   3 z-layers: back=small+dim, front=large+bright
+═══════════════════════════════════════ */
+(function(){
+  const { ctx, W, H } = initCanvas('c2','cv2');
+
+  const layers = [
+    { n:30, speed:0.06, alpha:0.12, r:0.8,  linkAlpha:0.08, linkDist:130, color:'100,160,220' },
+    { n:25, speed:0.13, alpha:0.30, r:1.5,  linkAlpha:0.16, linkDist:105, color:'90,160,240' },
+    { n:15, speed:0.22, alpha:0.60, r:2.4,  linkAlpha:0.28, linkDist: 80, color:'140,200,255' },
+  ];
+
+  const allPts = layers.flatMap(l =>
+    Array.from({length:l.n}, () => ({
+      x: rand(0,W), y: rand(0,H),
+      vx: rand(-l.speed,l.speed), vy: rand(-l.speed,l.speed),
+      ...l
+    }))
+  );
+
+  function draw() {
+    ctx.fillStyle='rgba(9,14,24,0.20)'; ctx.fillRect(0,0,W,H);
+
+    allPts.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>W) p.vx*=-1;
+      if(p.y<0||p.y>H) p.vy*=-1;
+    });
+
+    // draw back-to-front per layer
+    layers.forEach(l => {
+      const group = allPts.filter(p=>p.r===l.r);
+      for(let i=0;i<group.length;i++){
+        for(let j=i+1;j<group.length;j++){
+          const dx=group[i].x-group[j].x, dy=group[i].y-group[j].y;
+          const d=Math.sqrt(dx*dx+dy*dy);
+          if(d<l.linkDist){
+            ctx.strokeStyle=`rgba(${l.color},${(1-d/l.linkDist)*l.linkAlpha})`;
+            ctx.lineWidth=l.r*.5;
+            ctx.beginPath(); ctx.moveTo(group[i].x,group[i].y); ctx.lineTo(group[j].x,group[j].y); ctx.stroke();
+          }
+        }
+      }
+      group.forEach(p=>{
+        ctx.fillStyle=`rgba(${l.color},${l.alpha})`;
+        ctx.beginPath(); ctx.arc(p.x,p.y,l.r,0,Math.PI*2); ctx.fill();
+      });
+    });
+    requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#090e18'; ctx.fillRect(0,0,W,H);
+  draw();
+})();
+
+/* ═══════════════════════════════════════
+   03. ORBITAL CLUSTERS
+   Multiple cluster centers, particles orbit slowly
+═══════════════════════════════════════ */
+(function(){
+  const { ctx, W, H } = initCanvas('c3','cv3');
+
+  const clusters = [
+    { cx:W*.25, cy:H*.35, r:60,  n:12, speed:0.0004 },
+    { cx:W*.72, cy:H*.28, r:45,  n:9,  speed:0.0006 },
+    { cx:W*.55, cy:H*.72, r:70,  n:14, speed:0.0003 },
+    { cx:W*.15, cy:H*.75, r:38,  n:7,  speed:0.0007 },
+    { cx:W*.88, cy:H*.65, r:50,  n:10, speed:0.0005 },
+  ];
+
+  const particles = clusters.flatMap(cl =>
+    Array.from({length:cl.n}, (_, i) => {
+      const baseAngle = (i/cl.n)*Math.PI*2;
+      const dist = rand(cl.r*.3, cl.r);
+      return {
+        cx: cl.cx, cy: cl.cy,
+        angle: baseAngle + rand(-.2,.2),
+        dist,
+        speed: cl.speed * rand(.7,1.4) * (Math.random()<.5?1:-1),
+        r: rand(1.0, 2.2),
+        drift: { x:0, y:0 }, // slow center drift
+        driftV: { x:rand(-.008,.008), y:rand(-.008,.008) },
+      };
+    })
+  );
+
+  // drift cluster centers slowly
+  clusters.forEach(cl => {
+    cl.vx = rand(-.04,.04); cl.vy = rand(-.04,.04);
+    cl.ox = cl.cx; cl.oy = cl.cy;
+  });
+
+  function draw() {
+    ctx.fillStyle='rgba(9,14,24,0.18)'; ctx.fillRect(0,0,W,H);
+
+    clusters.forEach(cl=>{
+      cl.cx += cl.vx; cl.cy += cl.vy;
+      if(cl.cx<60||cl.cx>W-60) cl.vx*=-1;
+      if(cl.cy<50||cl.cy>H-50) cl.vy*=-1;
+    });
+
+    // update particle positions
+    particles.forEach(p=>{
+      p.angle += p.speed;
+      const cl = clusters.find(c=>Math.abs(c.ox-p.cx)<1&&Math.abs(c.oy-p.cy)<1) || clusters[0];
+      p.px = p.cx + Math.cos(p.angle)*p.dist;
+      p.py = p.cy + Math.sin(p.angle)*p.dist;
+    });
+    // sync cx/cy to drifted cluster
+    clusters.forEach((cl,ci) => {
+      particles.filter((_,i)=>Math.floor(i/clusters[ci].n)===ci).forEach(p=>{
+        p.cx=cl.cx; p.cy=cl.cy;
+      });
+    });
+
+    // recompute positions
+    particles.forEach(p=>{
+      p.angle += p.speed;
+      p.px = p.cx + Math.cos(p.angle)*p.dist;
+      p.py = p.cy + Math.sin(p.angle)*p.dist;
+    });
+
+    // connect within cluster (same cx)
+    clusters.forEach(cl=>{
+      const group = particles.filter(p=>Math.abs(p.cx-cl.cx)<2);
+      for(let i=0;i<group.length;i++){
+        for(let j=i+1;j<group.length;j++){
+          const dx=group[i].px-group[j].px, dy=group[i].py-group[j].py;
+          const d=Math.sqrt(dx*dx+dy*dy);
+          if(d<90){
+            const a=(1-d/90)*.18;
+            ctx.strokeStyle=`rgba(80,150,230,${a})`; ctx.lineWidth=.6;
+            ctx.beginPath(); ctx.moveTo(group[i].px,group[i].py); ctx.lineTo(group[j].px,group[j].py); ctx.stroke();
+          }
+        }
+      }
+    });
+
+    // dots
+    particles.forEach(p=>{
+      ctx.fillStyle='rgba(110,175,245,0.5)';
+      ctx.beginPath(); ctx.arc(p.px,p.py,p.r,0,Math.PI*2); ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#090e18'; ctx.fillRect(0,0,W,H);
+  draw();
+})();
+
+/* ═══════════════════════════════════════
+   04. BREATHING FIELD
+   All particles rhythmically expand/contract
+═══════════════════════════════════════ */
+(function(){
+  const { ctx, W, H } = initCanvas('c4','cv4');
+  const N = 60, DIST = 115;
+  let t = 0;
+
+  const base = Array.from({length:N}, ()=>({
+    bx: rand(W*.05,W*.95), by: rand(H*.05,H*.95),
+    phase: rand(0,Math.PI*2),
+    amp: rand(6,18),
+    freq: rand(.4,.7),
+    r: rand(1.1,2.0),
+    px:0, py:0,
+  }));
+
+  function draw(){
+    ctx.fillStyle='rgba(9,14,24,0.16)'; ctx.fillRect(0,0,W,H);
+    t+=.008;
+
+    // breathe
+    base.forEach(p=>{
+      const s = Math.sin(t*p.freq+p.phase);
+      p.px = p.bx + Math.cos(p.phase*2)*s*p.amp;
+      p.py = p.by + Math.sin(p.phase*2)*s*p.amp;
+    });
+
+    // global pulse alpha modifier
+    const pulse = .7+.3*Math.sin(t*1.2);
+
+    // edges
+    for(let i=0;i<N;i++){
+      for(let j=i+1;j<N;j++){
+        const dx=base[i].px-base[j].px, dy=base[i].py-base[j].py;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<DIST){
+          const a=(1-d/DIST)*0.20*pulse;
+          ctx.strokeStyle=`rgba(70,155,230,${a})`; ctx.lineWidth=.65;
+          ctx.beginPath(); ctx.moveTo(base[i].px,base[i].py); ctx.lineTo(base[j].px,base[j].py); ctx.stroke();
+        }
+      }
+    }
+    base.forEach(p=>{
+      const alpha = (.35+.2*Math.sin(t*p.freq+p.phase))*pulse;
+      const radius = p.r*(1+.3*Math.sin(t*p.freq*1.3+p.phase));
+      ctx.fillStyle=`rgba(110,180,245,${alpha})`;
+      ctx.beginPath(); ctx.arc(p.px,p.py,radius,0,Math.PI*2); ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#090e18'; ctx.fillRect(0,0,W,H);
+  draw();
+})();
+
+/* ═══════════════════════════════════════
+   05. FLOW FIELD
+   Noise-based vector field, particles follow current
+═══════════════════════════════════════ */
+(function(){
+  const { ctx, W, H } = initCanvas('c5','cv5');
+  const N = 70, SCALE=.003, SPEED=.28, DIST=95;
+  let t = 0;
+
+  const pts = Array.from({length:N}, ()=>({
+    x: rand(0,W), y: rand(0,H),
+    r: rand(1.0,2.0),
+    age: rand(0,300),
+  }));
+
+  function getField(x,y){
+    const n = smoothNoise(x*SCALE+t*.04, y*SCALE)*Math.PI*4;
+    return { vx: Math.cos(n)*SPEED, vy: Math.sin(n)*SPEED };
+  }
+
+  function draw(){
+    ctx.fillStyle='rgba(9,14,24,0.14)'; ctx.fillRect(0,0,W,H);
+    t+=.5;
+
+    pts.forEach(p=>{
+      const {vx,vy} = getField(p.x,p.y);
+      p.x+=vx; p.y+=vy; p.age++;
+      // reset if out of bounds or too old
+      if(p.x<-10||p.x>W+10||p.y<-10||p.y>H+10||p.age>400){
+        p.x=rand(0,W); p.y=rand(0,H); p.age=0;
+      }
+    });
+
+    // edges
+    for(let i=0;i<N;i++){
+      for(let j=i+1;j<N;j++){
+        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<DIST){
+          ctx.strokeStyle=`rgba(60,145,215,${(1-d/DIST)*.18})`; ctx.lineWidth=.6;
+          ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y); ctx.stroke();
+        }
+      }
+    }
+    pts.forEach(p=>{
+      const fadeIn  = Math.min(p.age/40,1);
+      const fadeOut = 1-Math.max((p.age-360)/40,0);
+      ctx.fillStyle=`rgba(100,175,240,${0.5*fadeIn*fadeOut})`;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#090e18'; ctx.fillRect(0,0,W,H);
+  draw();
+})();
+
+/* ═══════════════════════════════════════
+   06. CONSTELLATION WEB
+   Near-static particles, always-on connections,
+   very slow positional drift
+═══════════════════════════════════════ */
+(function(){
+  const { ctx, W, H } = initCanvas('c6','cv6');
+  const N=45, CONNECT_DIST=135, SPEED=.04;
+  let t=0;
+
+  const pts = Array.from({length:N},()=>({
+    x:rand(20,W-20), y:rand(20,H-20),
+    vx:rand(-SPEED,SPEED), vy:rand(-SPEED,SPEED),
+    r:rand(.8,2.0),
+    bright: Math.random()<.12, // bright star
+  }));
+
+  function draw(){
+    ctx.fillStyle='rgba(9,14,24,0.12)'; ctx.fillRect(0,0,W,H);
+    t+=.01;
+
+    pts.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<20||p.x>W-20) p.vx*=-1;
+      if(p.y<20||p.y>H-20) p.vy*=-1;
+    });
+
+    // all edges always visible but very faint
+    for(let i=0;i<N;i++){
+      for(let j=i+1;j<N;j++){
+        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<CONNECT_DIST){
+          const a=(1-d/CONNECT_DIST)*.16;
+          ctx.strokeStyle=`rgba(80,150,220,${a})`; ctx.lineWidth=.5;
+          ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y); ctx.stroke();
+        }
+      }
+    }
+
+    pts.forEach(p=>{
+      if(p.bright){
+        // glow halo
+        const grd=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,7);
+        grd.addColorStop(0,'rgba(180,220,255,.22)'); grd.addColorStop(1,'rgba(180,220,255,0)');
+        ctx.fillStyle=grd; ctx.beginPath(); ctx.arc(p.x,p.y,7,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='rgba(220,240,255,.75)';
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r*1.4,0,Math.PI*2); ctx.fill();
+      } else {
+        ctx.fillStyle='rgba(100,168,230,.45)';
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+      }
+    });
+
+    requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#090e18'; ctx.fillRect(0,0,W,H);
+  draw();
+})();
+
+/* ═══════════════════════════════════════
+   07. GRADIENT DRIFT
+   Two colour groups drift in opposite directions
+   crossing zone shows mixed connections
+═══════════════════════════════════════ */
+(function(){
+  const { ctx, W, H } = initCanvas('c7','cv7');
+  const N=30, SPEED=.10, DIST=105;
+
+  const blueGroup = Array.from({length:N},()=>({
+    x:rand(0,W), y:rand(0,H),
+    vx:rand(.04,SPEED), vy:rand(-SPEED*.4,SPEED*.4),
+    r:rand(1.1,2.0), group:0
+  }));
+  const tealGroup = Array.from({length:N},()=>({
+    x:rand(0,W), y:rand(0,H),
+    vx:rand(-SPEED,-.04), vy:rand(-SPEED*.4,SPEED*.4),
+    r:rand(1.1,2.0), group:1
+  }));
+  const all = [...blueGroup, ...tealGroup];
+
+  function draw(){
+    ctx.fillStyle='rgba(9,14,24,0.18)'; ctx.fillRect(0,0,W,H);
+
+    all.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0) p.x=W; if(p.x>W) p.x=0; // wrap
+      if(p.y<0||p.y>H) p.vy*=-1;
+    });
+
+    for(let i=0;i<all.length;i++){
+      for(let j=i+1;j<all.length;j++){
+        const dx=all[i].x-all[j].x, dy=all[i].y-all[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<DIST){
+          const mixed = all[i].group !== all[j].group;
+          let r,g,b;
+          if(!mixed){
+            r=all[i].group===0?50:30; g=all[i].group===0?140:190; b=all[i].group===0?220:180;
+          } else { r=40; g=165; b=200; }
+          const a=(1-d/DIST)*(mixed?.16:.20);
+          ctx.strokeStyle=`rgba(${r},${g},${b},${a})`; ctx.lineWidth=.65;
+          ctx.beginPath(); ctx.moveTo(all[i].x,all[i].y); ctx.lineTo(all[j].x,all[j].y); ctx.stroke();
+        }
+      }
+    }
+
+    all.forEach(p=>{
+      const col = p.group===0 ? 'rgba(90,155,235,.55)' : 'rgba(60,195,185,.50)';
+      ctx.fillStyle=col;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#090e18'; ctx.fillRect(0,0,W,H);
+  draw();
+})();
+
+/* ═══════════════════════════════════════
+   08. PULSE RIPPLE NETWORK
+   Base network + periodic ripple from random nodes
+   Connections within ripple radius glow temporarily
+═══════════════════════════════════════ */
+(function(){
+  const { ctx, W, H } = initCanvas('c8','cv8');
+  const N=50, DIST=105, SPEED=.12;
+  let t=0;
+
+  const pts = Array.from({length:N},()=>({
+    x:rand(0,W), y:rand(0,H),
+    vx:rand(-SPEED,SPEED), vy:rand(-SPEED,SPEED),
+    r:rand(1.0,2.0),
+  }));
+
+  const ripples = []; // {x,y,radius,maxR,alpha}
+
+  function spawnRipple(){
+    const p = pts[Math.floor(Math.random()*N)];
+    ripples.push({ x:p.x, y:p.y, radius:0, maxR:160, alpha:.5 });
+  }
+  let nextRipple=60;
+
+  function draw(){
+    ctx.fillStyle='rgba(9,14,24,0.18)'; ctx.fillRect(0,0,W,H);
+    t++;
+
+    pts.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>W) p.vx*=-1;
+      if(p.y<0||p.y>H) p.vy*=-1;
+    });
+
+    if(t>=nextRipple){ spawnRipple(); nextRipple=t+80+Math.floor(Math.random()*60); }
+
+    // update ripples
+    ripples.forEach(rp=>{ rp.radius+=0.8; rp.alpha-=.006; });
+    for(let i=ripples.length-1;i>=0;i--) if(ripples[i].alpha<=0) ripples.splice(i,1);
+
+    // draw ripple rings
+    ripples.forEach(rp=>{
+      ctx.strokeStyle=`rgba(90,180,255,${rp.alpha*.35})`;
+      ctx.lineWidth=1;
+      ctx.beginPath(); ctx.arc(rp.x,rp.y,rp.radius,0,Math.PI*2); ctx.stroke();
+    });
+
+    for(let i=0;i<N;i++){
+      for(let j=i+1;j<N;j++){
+        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<DIST){
+          // check if either point is inside any ripple
+          let boost=0;
+          ripples.forEach(rp=>{
+            const di=Math.sqrt((pts[i].x-rp.x)**2+(pts[i].y-rp.y)**2);
+            const dj=Math.sqrt((pts[j].x-rp.x)**2+(pts[j].y-rp.y)**2);
+            if(Math.abs(di-rp.radius)<25||Math.abs(dj-rp.radius)<25) boost+=rp.alpha*.6;
+          });
+          const base=(1-d/DIST)*.16;
+          const a=Math.min(base+boost,.7);
+          ctx.strokeStyle=`rgba(70,155,235,${a})`; ctx.lineWidth=.65+boost*.8;
+          ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y); ctx.stroke();
+        }
+      }
+    }
+
+    pts.forEach(p=>{
+      let glow=0;
+      ripples.forEach(rp=>{
+        const d=Math.sqrt((p.x-rp.x)**2+(p.y-rp.y)**2);
+        if(Math.abs(d-rp.radius)<20) glow+=rp.alpha;
+      });
+      const alpha=Math.min(.45+glow,.95);
+      ctx.fillStyle=`rgba(110,185,248,${alpha})`;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r*(1+glow*.4),0,Math.PI*2); ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#090e18'; ctx.fillRect(0,0,W,H);
+  draw();
+})();
+
+/* ═══════════════════════════════════════
+   09. SPARSE WANDERERS
+   Very few large particles, minimal lines,
+   generous negative space — most refined
+═══════════════════════════════════════ */
+(function(){
+  const { ctx, W, H } = initCanvas('c9','cv9');
+  const N=18, DIST=170, SPEED=.06;
+  let t=0;
+
+  const pts = Array.from({length:N},()=>({
+    x:rand(30,W-30), y:rand(30,H-30),
+    vx:rand(-SPEED,SPEED), vy:rand(-SPEED,SPEED),
+    r:rand(1.8,3.5),
+    phase:rand(0,Math.PI*2),
+  }));
+
+  function draw(){
+    ctx.fillStyle='rgba(9,14,24,0.10)'; ctx.fillRect(0,0,W,H);
+    t+=.008;
+
+    pts.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<30||p.x>W-30) p.vx*=-1;
+      if(p.y<30||p.y>H-30) p.vy*=-1;
+    });
+
+    for(let i=0;i<N;i++){
+      for(let j=i+1;j<N;j++){
+        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<DIST){
+          const a=(1-d/DIST)*.14;
+          ctx.strokeStyle=`rgba(80,155,225,${a})`; ctx.lineWidth=.5;
+          ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y); ctx.stroke();
+        }
+      }
+    }
+
+    pts.forEach(p=>{
+      const pulse=1+.12*Math.sin(t*1.4+p.phase);
+      // outer soft glow
+      const grd=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*4);
+      grd.addColorStop(0,`rgba(100,175,240,.12)`); grd.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=grd; ctx.beginPath(); ctx.arc(p.x,p.y,p.r*4,0,Math.PI*2); ctx.fill();
+      // core
+      ctx.fillStyle=`rgba(130,190,248,${.5*pulse})`;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r*pulse,0,Math.PI*2); ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#090e18'; ctx.fillRect(0,0,W,H);
+  draw();
+})();
+
+/* ═══════════════════════════════════════
+   10. DATA MESH
+   Particles on a loose grid, always connected
+   to their neighbours, grid gently undulates
+═══════════════════════════════════════ */
+(function(){
+  const { ctx, W, H } = initCanvas('c10','cv10');
+  const COLS=11, ROWS=8;
+  let t=0;
+
+  const gw=W/(COLS-1), gh=H/(ROWS-1);
+
+  const pts = [];
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      pts.push({
+        bx:c*gw, by:r*gh,
+        px:0,py:0,
+        phase:Math.random()*Math.PI*2,
+        ampX:rand(4,10), ampY:rand(4,10),
+        freqX:rand(.3,.6), freqY:rand(.3,.6),
+        r:rand(.8,1.6),
+        col:c, row:r,
+      });
+    }
+  }
+
+  function draw(){
+    ctx.fillStyle='rgba(9,14,24,0.16)'; ctx.fillRect(0,0,W,H);
+    t+=.008;
+
+    pts.forEach(p=>{
+      p.px = p.bx + Math.sin(t*p.freqX+p.phase)*p.ampX;
+      p.py = p.by + Math.cos(t*p.freqY+p.phase+1)*p.ampY;
+    });
+
+    const idx=(r,c)=>r*COLS+c;
+
+    // grid edges: right + down neighbours only
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        const p=pts[idx(r,c)];
+        // right
+        if(c<COLS-1){
+          const q=pts[idx(r,c+1)];
+          const dx=p.px-q.px, dy=p.py-q.py;
+          const d=Math.sqrt(dx*dx+dy*dy);
+          const a=(.12-.015*(d/gw));
+          ctx.strokeStyle=`rgba(65,145,215,${Math.max(a,0)})`; ctx.lineWidth=.55;
+          ctx.beginPath(); ctx.moveTo(p.px,p.py); ctx.lineTo(q.px,q.py); ctx.stroke();
+        }
+        // down
+        if(r<ROWS-1){
+          const q=pts[idx(r+1,c)];
+          const dx=p.px-q.px, dy=p.py-q.py;
+          const d=Math.sqrt(dx*dx+dy*dy);
+          const a=(.12-.015*(d/gh));
+          ctx.strokeStyle=`rgba(55,140,210,${Math.max(a,0)})`; ctx.lineWidth=.55;
+          ctx.beginPath(); ctx.moveTo(p.px,p.py); ctx.lineTo(q.px,q.py); ctx.stroke();
+        }
+        // diagonal (sparse, lighter)
+        if(c<COLS-1&&r<ROWS-1&&(r+c)%3===0){
+          const q=pts[idx(r+1,c+1)];
+          ctx.strokeStyle='rgba(60,130,200,.05)'; ctx.lineWidth=.4;
+          ctx.beginPath(); ctx.moveTo(p.px,p.py); ctx.lineTo(q.px,q.py); ctx.stroke();
+        }
+      }
+    }
+
+    // dots — intersection nodes slightly brighter
+    pts.forEach(p=>{
+      const edge = p.col===0||p.col===COLS-1||p.row===0||p.row===ROWS-1;
+      ctx.fillStyle = edge ? 'rgba(80,155,220,.3)' : 'rgba(100,175,238,.48)';
+      ctx.beginPath(); ctx.arc(p.px,p.py,p.r,0,Math.PI*2); ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+  ctx.fillStyle='#090e18'; ctx.fillRect(0,0,W,H);
+  draw();
+})();
+</script>
+</body>
+</html>

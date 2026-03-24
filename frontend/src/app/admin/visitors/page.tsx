@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { VisitorAnalyticsDashboard } from '@/components/admin/VisitorAnalyticsDashboard';
+import { VisitorAnalyticsDashboard } from '@/components/common/admin/VisitorAnalyticsDashboard';
 import { validateAdminPassword } from '@/lib/siteSettings';
 
 // 관리자 방문자 분석 페이지
