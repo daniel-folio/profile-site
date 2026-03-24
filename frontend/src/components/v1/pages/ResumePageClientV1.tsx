@@ -149,55 +149,56 @@ export default function ResumePageClientV1({
   return (
     <>
       {/* 화면용 이력서 */}
-      <main id="resume-content" className="v2-subpage w-full mx-auto" style={{ maxWidth: 'var(--v2-max)', padding: '120px var(--v2-pad) 80px', fontFamily: 'var(--v2-sans)' }}>
-        <div className="rounded-2xl p-6 sm:p-10 flex flex-col gap-8" style={{ background: 'var(--v2-bg-card)', border: '1px solid var(--v2-line)' }}>
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--v2-t-hi)' }}>
-              <span className="hidden sm:inline">이력서 (Resume)</span>
+      <main id="resume-content" className="max-w-6xl mx-auto pt-24 md:pt-32 pb-12 px-4">
+        <div className="bg-white/80 dark:bg-black/80 rounded-xl p-8 flex flex-col gap-8">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold">
+              <span className="hidden sm:inline">이력서(Resume)</span>
               <span className="inline sm:hidden">이력서</span>
             </h1>
             {showDownload && <ResumePdfDownloadButton />}
           </div>
           {/* 프로필 정보: 사진+이름+연락처 등 */}
           {profile && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 8 }}>
-              {/* 출력용 Base64 코드 제외하고 원래 url 사용 (화면용이므로) */}
-              {profile.showProfileImage === true && profile.profileImage?.url && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
+              {/* 출력용: Base64 우선, 없으면 기존 URL */}
+              {profile.showProfileImage === true && (profileImageBase64 || profile.profileImage?.url) && (
                 <img
-                  src={profile.profileImage.url}
+                  src={profileImageBase64 || profile.profileImage?.url}
                   alt={profile.name}
-                  style={{ width: 100, height: 125, objectFit: 'cover', borderRadius: '50%', border: '1px solid var(--v2-line-up)' }}
+                  style={{ width: 96, height: 120, objectFit: 'contain', background: '#fff', border: '1px solid #eee', borderRadius: 8, marginRight: 16 }}
+                  onLoad={() => { /* console.log('출력용 img onLoad:', profileImageBase64); */ }}
                 />
               )}
               <div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--v2-t-hi)', marginBottom: 4 }}>{profile.name}</div>
-                <div style={{ color: 'var(--v2-t-body)', marginBottom: 2 }}>{profile.title}</div>
-                <div style={{ color: 'var(--v2-t-sub)', fontSize: '14px' }}>{profile.email} {profile.showPhone === true && profile.phone && <>| {profile.phone}</>}</div>
-                <div style={{ color: 'var(--v2-t-sub)', fontSize: '14px' }}>{profile.location}</div>
+                <div style={{ fontSize: 20, fontWeight: 700 }}>{profile.name}</div>
+                <div className="text-gray-900 dark:text-gray-100">{profile.title}</div>
+                <div className="text-gray-900 dark:text-gray-100 text-[14px]">{profile.email} {profile.showPhone === true && profile.phone && <>| {profile.phone}</>}</div>
+                <div className="text-gray-900 dark:text-gray-100 text-[14px]">{profile.location}</div>
               </div>
             </div>
           )}
-          {/* 소개 (Introduce) */}
+          {/* 소개 (Introduce) 세션: 구분선 아래, 자기소개만 */}
           {profile?.resumeBio && (
             <>
-              <div style={{ borderTop: '1px solid var(--v2-line)', margin: '16px 0' }} />
-              <section>
-                <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--v2-accent)', marginBottom: 16 }}>소개 (Introduce)</h2>
-                <div className="prose max-w-none" style={{ color: 'var(--v2-t-body)', fontSize: '15px', lineHeight: 1.7 }}>
-                  <RichTextRenderer text={profile.resumeBio} className="prose max-w-none" />
+              <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
+              <section style={{ marginBottom: 32 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>소개(Introduce)</h2>
+                <div style={{ marginLeft: 32, marginTop: 8 }} className="text-gray-900 dark:text-gray-100 prose max-w-none">
+                  <RichTextRenderer text={profile.resumeBio} className="mt-2 prose max-w-none dark:prose-invert" />
                 </div>
               </section>
             </>
           )}
 
           {/* 경력 */}
-          <section>
+          <section className="mb-0">
             {sortedCompanies.length > 0 ? (
               <>
-                <div style={{ borderTop: '1px solid var(--v2-line)', margin: '16px 0 32px' }} />
-                <section>
-                  <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--v2-accent)', marginBottom: 24 }}>경력 (Company)</h2>
-                  <div className="space-y-12">
+                <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
+                <section style={{ marginBottom: 32 }}>
+                  <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>경력(Company)</h2>
+                  <ul className="space-y-4">
                     {sortedCompanies.map((comp, idx) => {
                       const companyProjects = getSortedProjects(comp.id);
                       const start = comp.startDate;
@@ -205,68 +206,73 @@ export default function ResumePageClientV1({
                       const months = getMonthDiff(comp.startDate, comp.endDate || new Date().toISOString().slice(0, 7));
                       const companyDesc = comp.description;
                       return (
-                        <div key={idx} className="relative">
-                          <div className="flex items-center gap-3 mb-2">
+                        <li key={idx} className="pb-4 ml-8">
+                          <div className="flex items-center gap-2 mb-1">
                             {comp.companyLogo?.url && (
-                              <img src={comp.companyLogo.url} alt={comp.company} className="w-10 h-10 rounded-md object-contain border p-1" style={{ borderColor: 'var(--v2-line-up)', background: 'var(--v2-bg-up)' }} />
+                              <img src={comp.companyLogo.url} alt={comp.company + ' 로고'} className="w-8 h-8 rounded bg-white object-contain border" />
                             )}
-                            <div>
-                              <div className="font-bold text-lg" style={{ color: 'var(--v2-t-hi)' }}>
-                                {comp.company}
-                                {comp.position && <span style={{ color: 'var(--v2-t-sub)', fontWeight: 400, marginLeft: 8, fontSize: '15px' }}>{comp.position}</span>}
-                              </div>
-                              <div className="text-sm mt-1" style={{ color: 'var(--v2-t-sub)' }}>
-                                {start} ~ {end} {months && <span>({getPeriodText(months)})</span>}
-                              </div>
-                            </div>
+                            <span className="font-bold text-lg text-gray-900 dark:text-gray-100">{comp.company}</span>
+                            {comp.position && <span className="ml-1 text-base text-gray-700 dark:text-gray-200"> - {comp.position}</span>}
                           </div>
-
-                          {companyDesc && <div className="text-[15px] mt-4 mb-4" style={{ color: 'var(--v2-t-body)' }}>{companyDesc}</div>}
-
+                          <div className="text-xs text-gray-500 dark:text-gray-300 ml-10">
+                            {start} ~ {end}
+                            {months && <span>({getPeriodText(months)})</span>}
+                          </div>
+                          {companyDesc && <div className="text-sm text-gray-700 dark:text-gray-300 ml-10 mb-1">{companyDesc}</div>}
                           {companyProjects.length > 0 && (
-                            <div className="mt-6 flex flex-col gap-6 pl-3 sm:pl-4 border-l-2" style={{ borderColor: 'var(--v2-line)' }}>
+                            <ul style={{ marginLeft: 24, marginTop: 4 }}>
                               {companyProjects.map((proj, idx) => {
                                 const matchedCareerDetails = getSortedCareerDetails(proj.id);
                                 const hasCareerDetail = matchedCareerDetails.length > 0;
                                 const careerHref = hasCareerDetail ? `/career-detail#cd-${matchedCareerDetails[0].id}` : undefined;
                                 return (
-                                  <div key={proj.id} className="relative">
-                                    <div className="absolute w-2 h-2 rounded-full -left-[17px] sm:-left-[21px] top-[6px]" style={{ background: 'var(--v2-line-up)', border: '2px solid var(--v2-bg-card)' }} />
-                                    <div className="flex flex-wrap items-baseline gap-3 mb-1">
-                                      {hasCareerDetail ? (
-                                        <Link href={careerHref!} className="font-bold text-[16px] transition-colors hover:text-[var(--v2-accent)]" style={{ color: 'var(--v2-t-hi)' }}>
-                                          {proj.title} <span className="text-[14px] text-[var(--v2-accent)] ml-1">↗</span>
-                                        </Link>
-                                      ) : (
-                                        <span className="font-bold text-[16px]" style={{ color: 'var(--v2-t-hi)' }}>{proj.title}</span>
+                                  <React.Fragment key={proj.id}>
+                                    <li style={{ marginBottom: 6 }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        <span style={{ fontWeight: 700, fontSize: 7, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
+                                        {hasCareerDetail ? (
+                                          <Link
+                                            href={careerHref!}
+                                            className="font-bold text-[15px] text-gray-900 dark:text-white hover:text-sky-500 dark:hover:text-sky-500 transition-colors cursor-pointer"
+                                            style={{ textDecoration: 'none' }}
+                                          >
+                                            {proj.title}
+                                          </Link>
+                                        ) : (
+                                          <span className="font-bold text-[15px] text-gray-900 dark:text-white">{proj.title}</span>
+                                        )}
+                                        <span className="ml-2 text-[12px] text-gray-600 dark:text-gray-200">{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
+                                      </div>
+                                      {/* 웹용 프로젝트 설명 */}
+                                      {proj.shortDescription && (
+                                        <div className="mt-1 text-gray-700 dark:text-gray-100 text-[14px] ml-6 prose dark:prose-invert">
+                                          <RichTextRenderer text={proj.shortDescription} className="prose-project-desc text-gray-700 dark:text-gray-100" />
+                                        </div>
                                       )}
-                                      <span className="text-[13px]" style={{ color: 'var(--v2-t-sub)' }}>{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
-                                    </div>
-
-                                    {proj.shortDescription && (
-                                      <div className="mt-2 text-[14px] prose max-w-none" style={{ color: 'var(--v2-t-body)' }}>
-                                        <RichTextRenderer text={proj.shortDescription} />
-                                      </div>
-                                    )}
-
-                                    {Array.isArray(proj.skills) && proj.skills.length > 0 && (
-                                      <div className="mt-3 flex flex-wrap gap-2">
-                                        {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number) => (
-                                          <span key={skill.id || skill.name || i} className="text-[11px] px-2 py-1 rounded" style={{ background: 'var(--v2-bg-up)', color: 'var(--v2-t-sub)', border: '1px solid var(--v2-line-up)', fontFamily: 'var(--v2-mono)' }}>
-                                            {skill.name}
-                                          </span>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
+                                      {/* 스킬: 프린트에서는 뱃지 없이 텍스트만 */}
+                                      {Array.isArray(proj.skills) && proj.skills.length > 0 && (
+                                        <div style={{ marginLeft: 24, marginTop: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                                          <span className="font-medium text-gray-900 dark:text-gray-100 mr-2">skill : </span>
+                                          {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number) => (
+                                            <span key={skill.id || skill.name || i} className="resume-skill-badge bg-sky-100 text-sky-700 px-2 py-0.5 rounded text-[13px] font-semibold border border-sky-200">{skill.name}</span>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </li>
+                                    {idx < companyProjects.length - 1 && <hr style={{ margin: '12px 0', border: '0.5px solid #ddd', width: '100%' }} />}
+                                  </React.Fragment>
                                 );
                               })}
-                            </div>
+                            </ul>
                           )}
-                        </div>
+                          {/* 회사와 회사 사이에 얇은 구분선 추가 (마지막 회사 제외) */}
+                          {idx < sortedCompanies.length - 1 && (
+                            <hr style={{ margin: '20px 0', border: '1px solid #ddd', width: '100%' }} />
+                          )}
+                        </li>
                       );
                     })}
-                  </div>
+                  </ul>
                 </section>
               </>
             ) : null}
@@ -275,10 +281,10 @@ export default function ResumePageClientV1({
           {/* 개인 프로젝트 */}
           {projects.filter((proj) => proj.company == null && proj.visible !== false).length > 0 && (
             <>
-              <div style={{ borderTop: '1px solid var(--v2-line)', margin: '16px 0' }} />
-              <section>
-                <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--v2-accent)', marginBottom: 24 }}>개인 프로젝트 (Personal Project)</h2>
-                <div className="flex flex-col gap-8 pl-3 sm:pl-4 border-l-2" style={{ borderColor: 'var(--v2-line)' }}>
+              <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
+              <section style={{ marginBottom: 32 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>개인 프로젝트(Personal Project)</h2>
+                <ul style={{ marginLeft: 32 }}>
                   {projects.filter((proj) => proj.company == null && proj.visible !== false).map((proj, idx) => {
                     const matchedCareerDetail = careerDetails.find(cd => {
                       if (typeof cd.project === 'object' && cd.project !== null && 'id' in (cd.project as any)) {
@@ -289,165 +295,172 @@ export default function ResumePageClientV1({
                     const careerHref = matchedCareerDetail ? `/career-detail#cd-${matchedCareerDetail.id}` : undefined;
 
                     return (
-                      <div key={proj.id} className="relative">
-                        <div className="absolute w-2 h-2 rounded-full -left-[17px] sm:-left-[21px] top-[6px]" style={{ background: 'var(--v2-line-up)', border: '2px solid var(--v2-bg-card)' }} />
-                        <div className="flex flex-wrap items-baseline gap-3 mb-1">
+                      <li key={proj.id} style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: 700, fontSize: 15, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontWeight: 700, fontSize: 7, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
                           {matchedCareerDetail ? (
-                            <Link href={careerHref!} className="font-bold text-[16px] transition-colors hover:text-[var(--v2-accent)]" style={{ color: 'var(--v2-t-hi)' }}>
-                              {proj.title} <span className="text-[14px] text-[var(--v2-accent)] ml-1">↗</span>
+                            <Link
+                              href={careerHref!}
+                              className="font-bold text-[15px] text-gray-900 dark:text-white hover:text-sky-500 dark:hover:text-sky-500 transition-colors cursor-pointer"
+                              style={{ textDecoration: 'none' }}
+                            >
+                              {proj.title}
                             </Link>
                           ) : (
-                            <span className="font-bold text-[16px]" style={{ color: 'var(--v2-t-hi)' }}>{proj.title}</span>
+                            <span className="font-bold text-[15px] text-gray-900 dark:text-white">{proj.title}</span>
                           )}
-                          <span className="text-[13px]" style={{ color: 'var(--v2-t-sub)' }}>{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
+                          <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
                         </div>
-
                         {proj.shortDescription && (
-                          <div className="mt-2 text-[14px] prose max-w-none" style={{ color: 'var(--v2-t-body)' }}>
-                            <RichTextRenderer text={proj.shortDescription} />
+                          <div style={{ color: '#222', fontSize: 14, marginLeft: 24, marginTop: 2 }}>
+                            <RichTextRenderer text={proj.shortDescription} className="mt-1 prose-project-desc dark:prose-invert" />
                           </div>
                         )}
-
+                        {/* 스킬: 뱃지 방식 */}
                         {Array.isArray(proj.skills) && proj.skills.length > 0 && (
-                          <div className="mt-3 flex flex-wrap gap-2">
+                          <div style={{ marginLeft: 24, marginTop: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <span className="font-medium text-gray-900 dark:text-gray-100 mr-2">skill : </span>
                             {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number) => (
-                              <span key={skill.id || skill.name || i} className="text-[11px] px-2 py-1 rounded" style={{ background: 'var(--v2-bg-up)', color: 'var(--v2-t-sub)', border: '1px solid var(--v2-line-up)', fontFamily: 'var(--v2-mono)' }}>
-                                {skill.name}
-                              </span>
+                              <span key={skill.id || skill.name || i} className="resume-skill-badge bg-sky-100 text-sky-700 px-2 py-0.5 rounded text-[13px] font-semibold border border-sky-200">{skill.name}</span>
                             ))}
                           </div>
                         )}
-                      </div>
+                      </li>
                     );
                   })}
-                </div>
+                </ul>
               </section>
             </>
           )}
 
-          {/* Skills */}
+          {/* 기술스택 (Skills) */}
           {publicSkills.length > 0 && (
             <>
-              <div style={{ borderTop: '1px solid var(--v2-line)', margin: '16px 0' }} />
-              <section>
-                <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--v2-accent)', marginBottom: 20 }}>기술스택 (Skills)</h2>
-                <div className="space-y-4">
+              <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
+              <section style={{ marginBottom: 32 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>기술스택(Skills)</h2>
+                <ul style={{ marginLeft: 32 }}>
                   {CATEGORY_ORDER.filter(category => skillsByCategory[category]).map((category) => (
-                    <div key={category} className="flex flex-col sm:flex-row gap-2 sm:gap-6">
-                      <span className="font-bold min-w-[120px]" style={{ color: 'var(--v2-t-hi)' }}>
-                        {category}
-                      </span>
-                      <div className="flex flex-wrap gap-x-2 gap-y-1" style={{ color: 'var(--v2-t-body)' }}>
+                    <li key={category} style={{ marginBottom: 8 }} className="flex flex-col sm:flex-row gap-1 sm:gap-2">
+                      <span style={{ fontWeight: 700 }} className="text-gray-900 dark:text-gray-100">{`${category} : `}</span>
+                      <span className="text-gray-800 dark:text-gray-200">
                         {skillsByCategory[category]
                           .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
                           .map((skill, i, arr) => (
-                            <span key={skill.id}>
-                              {skill.name}{i < arr.length - 1 ? <span style={{ color: 'var(--v2-line-up)' }}>, </span> : ''}
-                            </span>
+                            <span key={skill.id}>{skill.name}{i < arr.length - 1 ? ', ' : ''}</span>
                           ))}
-                      </div>
-                    </div>
+                      </span>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </section>
             </>
           )}
 
-          {/* Education */}
+          {/* 학력 (Education) */}
           {educations.length > 0 && (
             <>
-              <div style={{ borderTop: '1px solid var(--v2-line)', margin: '16px 0' }} />
-              <section>
-                <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--v2-accent)', marginBottom: 20 }}>학력 (Education)</h2>
-                <div className="space-y-8">
+              <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
+              <section style={{ marginBottom: 32 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>학력(Education)</h2>
+                <ul style={{ marginLeft: 32 }}>
                   {educations.map((edu, idx) => (
-                    <div key={idx} className="flex gap-4">
-                      {edu.logo?.url && (
-                        <img src={edu.logo.url} alt={edu.institution} className="w-10 h-10 rounded-md object-contain border p-1" style={{ borderColor: 'var(--v2-line-up)', background: 'var(--v2-bg-up)' }} />
-                      )}
-                      <div>
-                        <div className="font-bold text-[16px]" style={{ color: 'var(--v2-t-hi)' }}>{edu.institution}{edu.field && ` ${edu.field}`}</div>
-                        <div className="text-[14px] mt-1" style={{ color: 'var(--v2-t-sub)' }}>{edu.startDate} ~ {edu.endDate || '현재'}</div>
-                        {edu.description && (
-                          <div className="mt-2 text-[14px] prose max-w-none" style={{ color: 'var(--v2-t-body)' }}>
-                            <RichTextRenderer text={edu.description} />
-                          </div>
+                    <li key={idx} style={{ marginBottom: 12 }}>
+                      {/* 학교 로고 이미지는 옵션 */}
+                      <div className="flex items-center gap-2">
+                        {edu.logo?.url && (
+                          <img src={edu.logo.url} alt={edu.institution} className="w-6 h-6 rounded bg-white object-contain border" />
                         )}
+                        <span style={{ fontWeight: 700, fontSize: 15 }} className="text-gray-900 dark:text-gray-100">{edu.institution}{edu.field && ` ${edu.field}`}</span>
                       </div>
-                    </div>
+                      <div style={{ fontSize: 12, color: '#666', marginLeft: edu.logo?.url ? 32 : 0 }} className="dark:text-gray-300">{edu.startDate} ~ {edu.endDate || '현재'}</div>
+                      {edu.description && (
+                        <div style={{ color: '#222', fontSize: 13, marginTop: 2, marginLeft: edu.logo?.url ? 32 : 0 }} className="text-gray-800 dark:text-gray-100">
+                          <RichTextRenderer text={edu.description} className="mt-1 dark:prose-invert" />
+                        </div>
+                      )}
+                    </li>
                   ))}
-                </div>
+                </ul>
               </section>
             </>
           )}
 
-          {/* Other Experience */}
-          {sortedExperiences.length > 0 && (
+          {/* 기타 경험 (Other Experience) */}
+          {visibleExperiences.length > 0 && (
             <>
-              <div style={{ borderTop: '1px solid var(--v2-line)', margin: '16px 0' }} />
-              <section>
-                <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--v2-accent)', marginBottom: 20 }}>기타 경험 (Other Experience)</h2>
-                <div className="space-y-10">
+              <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
+              <section style={{ marginBottom: 32 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>기타 경험(Other Experience)</h2>
+                <ul style={{ marginLeft: 0 }}>
                   {(() => {
                     const categories = ['Class', 'ETC'];
-                    const categoryExps = categories.map(category => sortedExperiences.filter(exp => exp.category === category));
+                    const categoryExpsArr = categories.map(category => visibleExperiences.filter(exp => exp.category === category));
+                    const bothExist = categoryExpsArr.every(exps => exps.length > 0);
                     return (
                       <>
-                        {categoryExps[0].length > 0 && (
-                          <div>
-                            <div className="font-bold text-[16px] mb-4" style={{ color: 'var(--v2-t-hi)' }}>Class</div>
-                            <div className="flex flex-col gap-6 pl-3 sm:pl-4 border-l-2" style={{ borderColor: 'var(--v2-line)' }}>
-                              {categoryExps[0].map((exp) => (
-                                <div key={exp.id} className="relative">
-                                  <div className="absolute w-2 h-2 rounded-full -left-[17px] sm:-left-[21px] top-[6px]" style={{ background: 'var(--v2-line-up)', border: '2px solid var(--v2-bg-card)' }} />
-                                  <div className="flex flex-wrap items-baseline gap-3">
-                                    <span className="font-bold text-[15px]" style={{ color: 'var(--v2-t-hi)' }}>{exp.title}</span>
-                                    <span className="text-[13px]" style={{ color: 'var(--v2-t-sub)' }}>{exp.startDate} ~ {exp.endDate || '현재'}</span>
-                                  </div>
-                                  {exp.description && (
-                                    <div className="mt-2 text-[14px] prose max-w-none" style={{ color: 'var(--v2-t-body)' }}>
-                                      <RichTextRenderer text={exp.description} />
+                        {categoryExpsArr[0].length > 0 && (
+                          <li style={{ marginBottom: 24, marginLeft: 32 }}>
+                            <div style={{ fontWeight: 700, fontSize: 17, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', marginBottom: 8 }}>Class.</div>
+                            <ul style={{ marginLeft: 16, padding: 0, listStyle: 'none' }}>
+                              {categoryExpsArr[0].map((exp) => (
+                                <li key={exp.id} style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 8, marginLeft: 16 }}>
+                                  <span style={{ fontWeight: 700, fontSize: 7, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', marginRight: 6, marginTop: 8, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
+                                  <div>
+                                    <div className="flex flex-wrap items-baseline gap-2">
+                                      <span style={{ fontWeight: 700, fontSize: 15 }} className="text-gray-900 dark:text-gray-100">{exp.title}</span>
+                                      <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }} className="dark:text-gray-300">{exp.startDate} ~ {exp.endDate || '현재'}</span>
                                     </div>
-                                  )}
-                                </div>
+                                    {exp.description && (
+                                      <div style={{ color: '#222', fontSize: 13, marginTop: 2 }} className="text-gray-800 dark:text-gray-100">
+                                        <RichTextRenderer text={exp.description} className="prose prose-sm dark:prose-invert" />
+                                      </div>
+                                    )}
+                                  </div>
+                                </li>
                               ))}
-                            </div>
-                          </div>
+                            </ul>
+                          </li>
                         )}
-
-                        {categoryExps[1].length > 0 && (
-                          <div>
-                            <div className="font-bold text-[16px] mb-4" style={{ color: 'var(--v2-t-hi)' }}>ETC</div>
-                            <div className="flex flex-col gap-6 pl-3 sm:pl-4 border-l-2" style={{ borderColor: 'var(--v2-line)' }}>
-                              {categoryExps[1].map((exp) => (
-                                <div key={exp.id} className="relative">
-                                  <div className="absolute w-2 h-2 rounded-full -left-[17px] sm:-left-[21px] top-[6px]" style={{ background: 'var(--v2-line-up)', border: '2px solid var(--v2-bg-card)' }} />
-                                  <div className="flex flex-wrap items-baseline gap-3">
-                                    <span className="font-bold text-[15px]" style={{ color: 'var(--v2-t-hi)' }}>{exp.title}</span>
-                                    <span className="text-[13px]" style={{ color: 'var(--v2-t-sub)' }}>{exp.startDate} ~ {exp.endDate || '현재'}</span>
-                                  </div>
-                                  {exp.description && (
-                                    <div className="mt-2 text-[14px] prose max-w-none" style={{ color: 'var(--v2-t-body)' }}>
-                                      <RichTextRenderer text={exp.description} />
+                        {bothExist && (
+                          <hr style={{ margin: '20px 0', border: '1px solid #ddd', width: 'calc(100% - 32px)', marginLeft: 32 }} />
+                        )}
+                        {categoryExpsArr[1].length > 0 && (
+                          <li style={{ marginBottom: 24, marginLeft: 32 }}>
+                            <div style={{ fontWeight: 700, fontSize: 17, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', marginBottom: 8 }}>ETC.</div>
+                            <ul style={{ marginLeft: 16, padding: 0, listStyle: 'none' }}>
+                              {categoryExpsArr[1].map((exp) => (
+                                <li key={exp.id} style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 8, marginLeft: 16 }}>
+                                  <span style={{ fontWeight: 700, fontSize: 7, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', marginRight: 6, marginTop: 8, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
+                                  <div>
+                                    <div className="flex flex-wrap items-baseline gap-2">
+                                      <span style={{ fontWeight: 700, fontSize: 15 }} className="text-gray-900 dark:text-gray-100">{exp.title}</span>
+                                      <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }} className="dark:text-gray-300">{exp.startDate} ~ {exp.endDate || '현재'}</span>
                                     </div>
-                                  )}
-                                </div>
+                                    {exp.description && (
+                                      <div style={{ color: '#222', fontSize: 13, marginTop: 2 }} className="text-gray-800 dark:text-gray-100">
+                                        <RichTextRenderer text={exp.description} className="prose prose-sm dark:prose-invert" />
+                                      </div>
+                                    )}
+                                  </div>
+                                </li>
                               ))}
-                            </div>
-                          </div>
+                            </ul>
+                          </li>
                         )}
                       </>
                     );
                   })()}
-                </div>
+                </ul>
               </section>
             </>
           )}
         </div>
       </main>
+
       {/* 출력 전용 이력서: 화면에는 렌더링하지 않고, PDF/출력용으로만 사용 */}
       <div id="resume-print" style={{ display: 'none', background: '#fff', color: '#111', margin: 20, padding: 20, WebkitFontSmoothing: 'antialiased', MozOsxFontSmoothing: 'grayscale', fontWeight: 500, textRendering: 'optimizeLegibility' }}>
-        <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 24 }}>이력서 (Resume)</h1>
+        <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 24 }}>이력서(Resume)</h1>
         {/* 프로필 정보: 사진+이름+연락처 등 */}
         {profile && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
@@ -473,7 +486,7 @@ export default function ResumePageClientV1({
           <>
             <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
             <section style={{ marginBottom: 32 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>소개 (Introduce)</h2>
+              <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>소개(Introduce)</h2>
               <div style={{ marginLeft: 32, color: '#222', marginTop: 8 }}>
                 <RichTextRenderer text={profile.resumeBio} className="mt-2 text-gray-900 prose max-w-none" />
               </div>
@@ -485,7 +498,7 @@ export default function ResumePageClientV1({
           <>
             <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
             <section style={{ marginBottom: 32 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>경력 (Company)</h2>
+              <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>경력(Company)</h2>
               <ul style={{ marginLeft: 32 }}>
                 {sortedCompanies.map((comp, idx) => {
                   const companyProjects = getSortedProjects(comp.id);
@@ -571,7 +584,7 @@ export default function ResumePageClientV1({
           <>
             <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
             <section style={{ marginBottom: 32 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>개인 프로젝트 (Personal Project)</h2>
+              <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>개인 프로젝트(Personal Project)</h2>
               <ul style={{ marginLeft: 32 }}>
                 {projects.filter((proj) => proj.company == null && proj.visible !== false).map((proj, idx, arr) => {
                   const matchedCareerDetail = careerDetails.find(cd => {
@@ -617,7 +630,7 @@ export default function ResumePageClientV1({
           <>
             <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
             <section style={{ marginBottom: 32 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>기술스택 (Skills)</h2>
+              <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>기술스택(Skills)</h2>
               <ul style={{ marginLeft: 32 }}>
                 {CATEGORY_ORDER.filter(category => skillsByCategory[category]).map((category) => (
                   <li key={category} style={{ marginBottom: 8 }}>
@@ -640,7 +653,7 @@ export default function ResumePageClientV1({
           <>
             <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
             <section style={{ marginBottom: 32 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>학력 (Education)</h2>
+              <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>학력(Education)</h2>
               <ul style={{ marginLeft: 32 }}>
                 {educations.map((edu, idx) => (
                   <li key={idx} style={{ marginBottom: 12 }}>
@@ -663,19 +676,19 @@ export default function ResumePageClientV1({
           <>
             <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
             <section style={{ marginBottom: 32 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>기타 경험 (Other Experience)</h2>
+              <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>기타 경험(Other Experience)</h2>
               <ul style={{ marginLeft: 0 }}>
                 {(() => {
                   const categories = ['Class', 'ETC'];
-                  const categoryExps = categories.map(category => visibleExperiences.filter(exp => exp.category === category));
-                  const bothExist = categoryExps.every(exps => exps.length > 0);
+                  const categoryExpsArr = categories.map(category => visibleExperiences.filter(exp => exp.category === category));
+                  const bothExist = categoryExpsArr.every(exps => exps.length > 0);
                   return (
                     <>
-                      {categoryExps[0].length > 0 && (
+                      {categoryExpsArr[0].length > 0 && (
                         <li style={{ marginBottom: 24, marginLeft: 32 }}>
                           <div style={{ fontWeight: 700, fontSize: 17, color: '#111', marginBottom: 8 }}>Class.</div>
                           <ul style={{ marginLeft: 16, padding: 0, listStyle: 'none' }}>
-                            {categoryExps[0].map((exp, idx) => (
+                            {categoryExpsArr[0].map((exp, idx) => (
                               <li key={exp.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, marginLeft: 16 }}>
                                 <span style={{ fontWeight: 700, fontSize: 7, color: '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
                                 <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{exp.title}</span>
@@ -693,11 +706,11 @@ export default function ResumePageClientV1({
                       {bothExist && (
                         <hr style={{ margin: '20px 0', border: '1px solid #ddd', width: 'calc(100% - 32px)', marginLeft: 32 }} />
                       )}
-                      {categoryExps[1].length > 0 && (
+                      {categoryExpsArr[1].length > 0 && (
                         <li style={{ marginBottom: 24, marginLeft: 32 }}>
                           <div style={{ fontWeight: 700, fontSize: 17, color: '#111', marginBottom: 8 }}>ETC.</div>
                           <ul style={{ marginLeft: 16, padding: 0, listStyle: 'none' }}>
-                            {categoryExps[1].map((exp, idx) => (
+                            {categoryExpsArr[1].map((exp, idx) => (
                               <li key={exp.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, marginLeft: 16 }}>
                                 <span style={{ fontWeight: 700, fontSize: 7, color: '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
                                 <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{exp.title}</span>
