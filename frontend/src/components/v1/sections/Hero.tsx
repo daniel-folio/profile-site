@@ -64,17 +64,17 @@ export function Hero({ profile }: HeroProps) {
       >
         <div className="relative w-40 h-52 md:w-52 md:h-64 lg:w-64 lg:h-[20rem] flex items-center justify-center">
           {/* Gradient Border */}
-          <div className="absolute inset-0 rounded-[40%] p-1 bg-gradient-to-br from-primary-gradient-start via-white/30 to-primary-gradient-end blur-sm z-0" />
+          <div className="absolute inset-0 rounded-full p-1 bg-gradient-to-br from-primary-gradient-start via-white/30 to-primary-gradient-end blur-sm z-0" />
           {/* 완전 불투명 흰색 + subtle pastel gradient */}
-          <div className="relative w-full h-full rounded-[40%] bg-white dark:bg-gray-800 overflow-hidden z-10 flex items-center justify-center">
-            <div className="absolute inset-0 rounded-[40%] bg-gradient-to-br from-white via-pink-100 to-blue-100 opacity-80 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900" />
+          <div className="relative w-full h-full rounded-full bg-white dark:bg-gray-800 overflow-hidden z-10 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white via-pink-100 to-blue-100 opacity-80 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900" />
             {profileImageUrl ? (
               <Image
                 src={profileImageUrl}
                 alt={profileImage?.alternativeText || 'Profile image'}
                 fill
                 sizes="(max-width: 768px) 10rem, (max-width: 1024px) 13rem, 16rem"
-                className="rounded-[40%] object-cover relative z-10"
+                className="rounded-full object-cover relative z-10"
                 priority
               />
             ) : (
@@ -83,7 +83,7 @@ export function Hero({ profile }: HeroProps) {
                 alt="Profile placeholder"
                 fill
                 sizes="(max-width: 768px) 10rem, (max-width: 1024px) 13rem, 16rem"
-                className="rounded-[40%] object-cover relative z-10"
+                className="rounded-full object-cover relative z-10"
                 priority
               />
             )}

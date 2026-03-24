@@ -170,7 +170,7 @@ export default function HeroV2({ profile }: HeroV2Props) {
                         {profileImageUrl && (
                             <div className="hidden md:flex justify-end">
                                 <div
-                                    className="relative w-64 h-64 lg:w-80 lg:h-80 rounded-full overflow-hidden"
+                                    className="relative w-64 h-80 lg:w-80 lg:h-[25rem] rounded-full overflow-hidden"
                                     style={{ border: '1px solid var(--v2-line-up)' }}
                                 >
                                     <Image

@@ -166,7 +166,7 @@ export default function ResumePageClientV2({
                 <img
                   src={profile.profileImage.url}
                   alt={profile.name}
-                  style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: '50%', border: '1px solid var(--v2-line-up)' }}
+                  style={{ width: 100, height: 125, objectFit: 'cover', borderRadius: '50%', border: '1px solid var(--v2-line-up)' }}
                 />
               )}
               <div>
@@ -456,7 +456,7 @@ export default function ResumePageClientV2({
               <img
                 src={profileImageBase64 || profile.profileImage?.url}
                 alt={profile.name}
-                style={{ width: 96, height: 120, objectFit: 'contain', background: '#fff', border: '1px solid #eee', borderRadius: 8, marginRight: 16 }}
+                style={{ width: 96, height: 120, objectFit: 'cover', background: '#fff', border: '1px solid #eee', borderRadius: '50%', marginRight: 16 }}
                 onLoad={() => { /*console.log('출력용 img onLoad:', profileImageBase64);*/ }}
               />
             )}
