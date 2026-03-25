@@ -22,15 +22,58 @@ const VERSION_COMPONENTS = {
 
 export default async function ResumePage() {
   // 캐시 없이 실시간 데이터를 가져오도록 모든 fetch 옵션 수정
-  const [profileRes, companiesRes, educationsRes, skillsRes, projectsRes, careerDetailsResRaw, otherExperiencesRes]: any[] = await Promise.all([
-    getProfile(undefined, { cache: 'no-store' }),
-    getCompanies({ cache: 'no-store' }),
-    getEducations({ cache: 'no-store' }),
-    getSkills({ cache: 'no-store' }),
-    getProjects(undefined, { cache: 'no-store' }),
-    getCareerDetails({ cache: 'no-store' }),
-    getOtherExperiences({ cache: 'no-store' }),
-  ]);
+  let profileRes: any = null;
+  let companiesRes: any = null;
+  let educationsRes: any = null;
+  let skillsRes: any = null;
+  let projectsRes: any = null;
+  let careerDetailsResRaw: any = null;
+  let otherExperiencesRes: any = null;
+  let fetchError = false;
+
+  try {
+    [profileRes, companiesRes, educationsRes, skillsRes, projectsRes, careerDetailsResRaw, otherExperiencesRes] = await Promise.all([
+      getProfile(undefined, { cache: 'no-store' }),
+      getCompanies({ cache: 'no-store' }),
+      getEducations({ cache: 'no-store' }),
+      getSkills({ cache: 'no-store' }),
+      getProjects(undefined, { cache: 'no-store' }),
+      getCareerDetails({ cache: 'no-store' }),
+      getOtherExperiences({ cache: 'no-store' }),
+    ]);
+  } catch (e) {
+    console.error('[ResumePage] Backend fetch failed:', e);
+    fetchError = true;
+  }
+
+  // 백엔드 장애 시 사용자 친화적인 안내 페이지 표시
+  if (fetchError || (!profileRes && !companiesRes)) {
+    return (
+      <div style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        minHeight: '100vh', padding: '40px 20px', textAlign: 'center',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+      }}>
+        <h1 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '16px' }}>
+          ⏳ 서버를 깨우는 중입니다
+        </h1>
+        <p style={{ fontSize: '16px', color: '#666', maxWidth: '480px', lineHeight: 1.6, marginBottom: '24px' }}>
+          무료 서버 환경으로 인해 서버가 휴면 상태에 있을 수 있습니다.<br />
+          잠시 후 새로고침(F5)을 해주시면 정상적으로 표시됩니다.
+        </p>
+        <a
+          href="/resume"
+          style={{
+            padding: '12px 32px', fontSize: '15px', fontWeight: 600,
+            border: '1px solid #ddd', borderRadius: '8px', cursor: 'pointer',
+            background: '#f8f8f8', textDecoration: 'none', color: '#333',
+          }}
+        >
+          🔄 새로고침
+        </a>
+      </div>
+    );
+  }
 
   let profile: Profile | null = null;
   if (profileRes?.data) {
