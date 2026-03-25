@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Skill } from '@/types/skill';
 import { getImageUrl } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { SKILL_CATEGORY_ORDER } from '@/lib/skillCategories';
 
 interface SkillsProps {
   skills: Skill[] | null;
@@ -31,7 +32,6 @@ export function Skills({ skills }: SkillsProps) {
     return acc;
   }, {} as Record<string, Skill[]>);
 
-  const CATEGORY_ORDER = ["Backend", "Frontend", "Database", "Tools", "Server", "Other"];
 
   return (
     <motion.section
@@ -46,7 +46,7 @@ export function Skills({ skills }: SkillsProps) {
           기술 스택
         </h2>
         <div className="space-y-12">
-          {CATEGORY_ORDER.filter(category => skillsByCategory[category]).map(category => (
+          {SKILL_CATEGORY_ORDER.filter(category => skillsByCategory[category]).map(category => (
             <div key={category}>
               <h3 className="text-2xl font-semibold mb-6 capitalize text-gray-800 dark:text-gray-200">{category}</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
