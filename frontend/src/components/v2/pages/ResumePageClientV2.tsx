@@ -208,7 +208,7 @@ export default function ResumePageClientV2({
                         <div key={idx} className="relative">
                           <div className="flex items-center gap-3 mb-2">
                             {comp.companyLogo?.url && (
-                              <img src={comp.companyLogo.url} alt={comp.company} className="w-10 h-10 rounded-md object-contain border p-1" style={{ borderColor: 'var(--v2-line-up)', background: 'var(--v2-bg-up)' }} />
+                              <img src={comp.companyLogo.url} alt={comp.company} className="w-10 h-10 rounded-md object-contain border p-1" style={{ borderColor: '#e5e5e5', background: '#fff' }} />
                             )}
                             <div>
                               <div className="font-bold text-lg" style={{ color: 'var(--v2-t-hi)' }}>
@@ -363,7 +363,7 @@ export default function ResumePageClientV2({
                   {educations.map((edu, idx) => (
                     <div key={idx} className="flex gap-4">
                       {edu.logo?.url && (
-                        <img src={edu.logo.url} alt={edu.institution} className="w-10 h-10 rounded-md object-contain border p-1" style={{ borderColor: 'var(--v2-line-up)', background: 'var(--v2-bg-up)' }} />
+                        <img src={edu.logo.url} alt={edu.institution} className="w-10 h-10 rounded-md object-contain border p-1" style={{ borderColor: '#e5e5e5', background: '#fff' }} />
                       )}
                       <div>
                         <div className="font-bold text-[16px]" style={{ color: 'var(--v2-t-hi)' }}>{edu.institution}{edu.field && ` ${edu.field}`}</div>

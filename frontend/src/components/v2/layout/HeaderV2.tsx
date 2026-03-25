@@ -36,17 +36,26 @@ export default function HeaderV2() {
 
     const isActive = (href: string) => {
         const currentHash = typeof window !== 'undefined' ? (window.location.hash || '') : hash;
+        
+        // 홈('/') 링크인 경우:
+        if (href === '/') {
+            if (pathname !== '/') return false; // 홈페이지가 아니면 무조건 비활성
+            if (activeSection) return activeSection === 'hero'; // 스크롤 감지에 잡히면 해당 여부 반환
+            return !currentHash || currentHash === '#hero'; // 최상단이거나 해시가 hero면 활성
+        }
+
+        // 해시(#)가 포함된 링크인 경우:
         if (href.includes('#')) {
             const [base, section] = href.split('#');
             const sectionHash = `#${section}`;
             if (pathname === (base || '/')) {
                 if (activeSection) return activeSection === section;
-                if (!currentHash) return section === 'hero';
                 return currentHash === sectionHash;
             }
             return false;
         }
-        if (href === '/') return pathname === '/';
+
+        // 그 외 일반 링크 (예: /resume, /career-detail)
         return pathname === href || pathname.startsWith(`${href}/`);
     };
 

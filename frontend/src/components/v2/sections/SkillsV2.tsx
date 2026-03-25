@@ -124,15 +124,15 @@ export default function SkillsV2({ skills }: SkillsV2Props) {
                                                         e.currentTarget.style.color = 'var(--v2-t-hi)';
                                                     }}
                                                 >
-                                                    {/* 아이콘 — 텍스트 크기와 동일 (1em) */}
+                                                    {/* 아이콘 — 텍스트 크기와 동일 (1em), 다크모드 대응을 위해 흰색 배경 추가 */}
                                                     {iconUrl && (
                                                         <Image
                                                             src={getImageUrl(iconUrl)}
                                                             alt={`${skill.name} icon`}
                                                             width={14}
                                                             height={14}
-                                                            className="object-contain"
-                                                            style={{ width: '1em', height: '1em', flexShrink: 0 }}
+                                                            className="object-contain bg-white rounded-[2.5px] p-[1.5px]"
+                                                            style={{ width: '1.15em', height: '1.15em', flexShrink: 0 }}
                                                         />
                                                     )}
                                                     {skill.name}
