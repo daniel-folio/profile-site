@@ -85,41 +85,53 @@ async function fetchAPI<T>(path: string, params?: any, options: RequestInit = {}
     headers['Authorization'] = `Bearer ${STRAPI_API_TOKEN}`;
   }
 
-  const defaultOptions: RequestInit = {
+  const defaultOptions: RequestInit & { next?: any } = {
     headers,
+    next: { revalidate: 3600 },
     ...options,
   };
 
-  // 실제 요청을 수행하는 내부 함수 (타임아웃 및 URL 유효성 포함)
-  const tryFetch = async (apiUrl: string | undefined, timeoutMs = 8000) => {
+  // 실제 요청을 수행하는 내부 함수 (타임아웃, URL 유효성, 재시도 포함)
+  const tryFetch = async (apiUrl: string | undefined, timeoutMs = 15000, maxRetries = 2) => {
     if (!isValidHttpUrl(apiUrl || '')) {
       throw new Error('Invalid API URL.');
     }
 
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    let lastError: any;
 
-    try {
-      // 쿼리 파라미터 생성
-      const queryString = params ? `?${qs.stringify(params)}` : '';
-      const requestUrl = `${apiUrl}/api${path}${queryString}`;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-      const response = await fetch(requestUrl, { ...defaultOptions, signal: controller.signal });
+      try {
+        // 쿼리 파라미터 생성
+        const queryString = params ? `?${qs.stringify(params)}` : '';
+        const requestUrl = `${apiUrl}/api${path}${queryString}`;
 
-      if (!response.ok) {
-        // 본문은 디버깅 시 별도로 확인 가능. 로그는 간결하게 유지.
-        throw new Error(`API ${response.status} ${response.statusText}`);
+        const response = await fetch(requestUrl, { ...defaultOptions, signal: controller.signal } as any);
+
+        if (!response.ok) {
+          throw new Error(`API ${response.status} ${response.statusText}`);
+        }
+        return await response.json();
+      } catch (err: any) {
+        lastError = err;
+        // 타임아웃 또는 일반 에러 시 재시도 진행
+        if (attempt < maxRetries) {
+          console.warn(`[fetchAPI] Attempt ${attempt + 1} failed for ${path}, retrying...`, err?.message || err);
+          // 0.5초 짧은 대기 후 재시도
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      } finally {
+        clearTimeout(timer);
       }
-      return response.json();
-    } catch (err: any) {
-      // AbortError 또는 네트워크 에러를 간결히 래핑
-      if (err?.name === 'AbortError') {
-        throw new Error('API request timeout');
-      }
-      throw err;
-    } finally {
-      clearTimeout(timer);
     }
+
+    // 최종 실패 시 에러 던지기
+    if (lastError?.name === 'AbortError') {
+      throw new Error('API request timeout after multiple retries');
+    }
+    throw lastError;
   };
 
   // --- 로직 실행 ---
