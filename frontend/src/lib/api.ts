@@ -92,7 +92,8 @@ async function fetchAPI<T>(path: string, params?: any, options: RequestInit = {}
   };
 
   // 실제 요청을 수행하는 내부 함수 (타임아웃, URL 유효성, 재시도 포함)
-  const tryFetch = async (apiUrl: string | undefined, timeoutMs = 15000, maxRetries = 2) => {
+  // Render 무료 플랜의 콜드 스타트(부팅) 시간이 최대 50초까지 걸릴 수 있으므로 60초로 넉넉히 잡습니다.
+  const tryFetch = async (apiUrl: string | undefined, timeoutMs = 60000, maxRetries = 2) => {
     if (!isValidHttpUrl(apiUrl || '')) {
       throw new Error('Invalid API URL.');
     }
@@ -111,7 +112,8 @@ async function fetchAPI<T>(path: string, params?: any, options: RequestInit = {}
         const response = await fetch(requestUrl, { ...defaultOptions, signal: controller.signal } as any);
 
         if (!response.ok) {
-          throw new Error(`API ${response.status} ${response.statusText}`);
+          const errorText = await response.text().catch(() => '');
+          throw new Error(`[fetchAPI] HTTP ${response.status} on ${requestUrl} - Response: ${errorText}`);
         }
         return await response.json();
       } catch (err: any) {
