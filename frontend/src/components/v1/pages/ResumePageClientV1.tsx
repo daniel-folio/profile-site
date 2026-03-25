@@ -15,6 +15,7 @@ import React from 'react';
 import '../../../app/resume/resume-print.css';
 import '../../../app/resume/resume-badge.css';
 import { useTheme } from 'next-themes';
+import { SKILL_CATEGORY_ORDER } from '@/lib/skillCategories';
 
 function getMonthDiff(start: string, end: string): number {
   if (!start || !end) return 0;
@@ -108,7 +109,7 @@ export default function ResumePageClientV1({
       return (b.id || 0) - (a.id || 0);
     });
   };
-  const CATEGORY_ORDER = ["Backend", "Frontend", "Database", "Tools", "Server", "Other"];
+  // CATEGORY_ORDER is imported from @/lib/skillCategories
   // isPublic이 false가 아닌 스킬만 필터링하여 이력서에 노출합니다.
   const publicSkills = skills.filter(skill => skill.isPublic !== false);
   const skillsByCategory = publicSkills.reduce((acc, skill) => {
@@ -340,7 +341,7 @@ export default function ResumePageClientV1({
               <section style={{ marginBottom: 32 }}>
                 <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>기술스택(Skills)</h2>
                 <ul style={{ marginLeft: 32 }}>
-                  {CATEGORY_ORDER.filter(category => skillsByCategory[category]).map((category) => (
+                  {SKILL_CATEGORY_ORDER.filter(category => skillsByCategory[category]).map((category) => (
                     <li key={category} style={{ marginBottom: 8 }} className="flex flex-col sm:flex-row gap-1 sm:gap-2">
                       <span style={{ fontWeight: 700 }} className="text-gray-900 dark:text-gray-100">{`${category} : `}</span>
                       <span className="text-gray-800 dark:text-gray-200">
@@ -632,7 +633,7 @@ export default function ResumePageClientV1({
             <section style={{ marginBottom: 32 }}>
               <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>기술스택(Skills)</h2>
               <ul style={{ marginLeft: 32 }}>
-                {CATEGORY_ORDER.filter(category => skillsByCategory[category]).map((category) => (
+                {SKILL_CATEGORY_ORDER.filter(category => skillsByCategory[category]).map((category) => (
                   <li key={category} style={{ marginBottom: 8 }}>
                     <span style={{ fontWeight: 700 }}>{`${category} : `}</span>
                     <span>

@@ -31,7 +31,7 @@ function useScrollReveal() {
     return ref;
 }
 
-const CATEGORY_ORDER = ['Backend', 'Frontend', 'Database', 'Tools', 'Server', 'Other'];
+import { SKILL_CATEGORY_ORDER } from '@/lib/skillCategories';
 
 export default function SkillsV2({ skills }: SkillsV2Props) {
     const sectionRef = useScrollReveal();
@@ -66,7 +66,7 @@ export default function SkillsV2({ skills }: SkillsV2Props) {
                     <span className="v2-sec-lbl">Skills & Tools</span>
                 </div>
                 <ul className="list-none v2-rise" style={{ margin: 0, padding: 0 }}>
-                    {CATEGORY_ORDER.filter(category => skillsByCategory[category]).map((category, ci) => (
+                    {SKILL_CATEGORY_ORDER.filter(category => skillsByCategory[category]).map((category, ci) => (
                         <li key={category}>
                                 {/* 스킬 매핑 영역 레퍼 */}
                                 <div
@@ -74,7 +74,7 @@ export default function SkillsV2({ skills }: SkillsV2Props) {
                                     style={{
                                         padding: '26px 0',
                                         borderTop: '1px solid var(--v2-line)',
-                                        borderBottom: ci === CATEGORY_ORDER.filter(c => skillsByCategory[c]).length - 1
+                                        borderBottom: ci === SKILL_CATEGORY_ORDER.filter(c => skillsByCategory[c]).length - 1
                                             ? '1px solid var(--v2-line)'
                                             : 'none',
                                     }}
