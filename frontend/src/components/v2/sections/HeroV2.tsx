@@ -101,8 +101,8 @@ export default function HeroV2({ profile }: HeroV2Props) {
                                 style={{ background: '#2db864', animation: 'v2LivePulse 2.2s ease-in-out infinite' }}
                             />
                             <span
-                                className="text-[13px] sm:text-[14px] tracking-[0.2em] uppercase"
-                                style={{ fontFamily: 'var(--v2-mono)', color: 'var(--v2-t-sub)', fontWeight: 500 }}
+                                className="text-[14px] sm:text-[15px] tracking-[0.2em] uppercase"
+                                style={{ fontFamily: 'var(--v2-mono)', color: 'var(--v2-t-sub)', fontWeight: 700 }}
                             >
                                 {headline}
                             </span>
@@ -268,14 +268,14 @@ function MetaCell({ label, value, isLast, isMobileLast, isMobileRow1 }: { label:
             }}
         >
             <p
-                className="text-[12px] font-medium uppercase tracking-[0.18em] mb-[6px]"
+                className="text-[13px] font-bold uppercase tracking-[0.2em] mb-[6px]"
                 style={{ fontFamily: 'var(--v2-mono)', color: 'var(--v2-accent)' }}
             >
                 {label}
             </p>
             <p
-                className="text-[13px] leading-[1.55]"
-                style={{ color: 'var(--v2-t-body)', fontWeight: 400 }}
+                className="text-[15px] leading-[1.55]"
+                style={{ color: 'var(--v2-t-body)', fontWeight: 500 }}
             >
                 {value}
             </p>

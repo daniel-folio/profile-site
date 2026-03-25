@@ -98,8 +98,8 @@ export default async function ProjectPage(props: any) {
           <p
             style={{
               fontFamily: 'var(--v2-mono)',
-              fontSize: 10,
-              fontWeight: 500,
+              fontSize: 13,
+              fontWeight: 700,
               letterSpacing: '0.2em',
               textTransform: 'uppercase' as const,
               color: 'var(--v2-accent)',
@@ -172,8 +172,8 @@ export default async function ProjectPage(props: any) {
             <h2
               style={{
                 fontFamily: 'var(--v2-mono)',
-                fontSize: 10,
-                fontWeight: 500,
+                fontSize: 13,
+                fontWeight: 700,
                 letterSpacing: '0.2em',
                 textTransform: 'uppercase' as const,
                 color: 'var(--v2-accent)',
@@ -193,8 +193,8 @@ export default async function ProjectPage(props: any) {
                 <h3
                   style={{
                     fontFamily: 'var(--v2-mono)',
-                    fontSize: 10,
-                    fontWeight: 500,
+                    fontSize: 13,
+                    fontWeight: 700,
                     letterSpacing: '0.2em',
                     textTransform: 'uppercase' as const,
                     color: 'var(--v2-accent)',
@@ -243,8 +243,8 @@ export default async function ProjectPage(props: any) {
                   <h3
                     style={{
                       fontFamily: 'var(--v2-mono)',
-                      fontSize: 10,
-                      fontWeight: 500,
+                      fontSize: 13,
+                      fontWeight: 700,
                       letterSpacing: '0.2em',
                       textTransform: 'uppercase' as const,
                       color: 'var(--v2-accent)',
@@ -259,11 +259,11 @@ export default async function ProjectPage(props: any) {
                         key={skill.id}
                         style={{
                           fontFamily: 'var(--v2-mono)',
-                          fontSize: 10,
-                          fontWeight: 400,
+                          fontSize: 13,
+                          fontWeight: 600,
                           letterSpacing: '0.07em',
                           textTransform: 'uppercase' as const,
-                          padding: '5px 10px',
+                          padding: '6px 14px',
                           border: '1px solid var(--v2-line-up)',
                           color: 'var(--v2-t-sub)',
                           transition: 'all .2s',
@@ -282,8 +282,8 @@ export default async function ProjectPage(props: any) {
                   <h3
                     style={{
                       fontFamily: 'var(--v2-mono)',
-                      fontSize: 10,
-                      fontWeight: 500,
+                      fontSize: 13,
+                      fontWeight: 700,
                       letterSpacing: '0.2em',
                       textTransform: 'uppercase' as const,
                       color: 'var(--v2-accent)',
@@ -337,8 +337,8 @@ function MetaCell({ label, value, isLast }: { label: string; value: string; isLa
       <p
         style={{
           fontFamily: 'var(--v2-mono)',
-          fontSize: 10,
-          fontWeight: 500,
+          fontSize: 13,
+          fontWeight: 700,
           letterSpacing: '0.15em',
           textTransform: 'uppercase' as const,
           color: 'var(--v2-accent)',
@@ -349,10 +349,10 @@ function MetaCell({ label, value, isLast }: { label: string; value: string; isLa
       </p>
       <p
         style={{
-          fontSize: 13,
+          fontSize: 15,
           lineHeight: 1.55,
           color: 'var(--v2-t-body)',
-          fontWeight: 400,
+          fontWeight: 500,
         }}
       >
         {value}

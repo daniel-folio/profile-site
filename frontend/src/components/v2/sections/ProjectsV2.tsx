@@ -78,7 +78,7 @@ export default function ProjectsV2({ projects }: ProjectsV2Props) {
                         style={{
                             fontFamily: 'var(--v2-mono)',
                             color: 'var(--v2-t-sub)',
-                            fontSize: '11px',
+                            fontSize: '13px',
                             letterSpacing: '0.08em',
                             textTransform: 'uppercase'
                         }}
@@ -90,7 +90,7 @@ export default function ProjectsV2({ projects }: ProjectsV2Props) {
                                 className="relative py-1 transition-colors whitespace-nowrap"
                                 style={{
                                     color: filter === f ? 'var(--v2-accent)' : 'inherit',
-                                    fontWeight: filter === f ? 500 : 400
+                                    fontWeight: filter === f ? 700 : 600
                                 }}
                                 onMouseEnter={(e) => {
                                     if (filter !== f) e.currentTarget.style.color = 'var(--v2-t-hi)';
@@ -146,8 +146,8 @@ export default function ProjectsV2({ projects }: ProjectsV2Props) {
                                         {/* 번호 및 화살표 래퍼 (모바일 화면) */}
                                         <div className="flex md:hidden w-full justify-between items-center mb-2">
                                             <span
-                                                className="text-[11px] tracking-[0.06em] pt-[3px] transition-colors group-hover:text-[var(--v2-accent)]"
-                                                style={{ fontFamily: 'var(--v2-mono)', color: 'var(--v2-line-up)', fontWeight: 400 }}
+                                                className="text-[14px] tracking-[0.06em] pt-[3px] transition-colors group-hover:text-[var(--v2-accent)]"
+                                                style={{ fontFamily: 'var(--v2-mono)', color: 'var(--v2-line-up)', fontWeight: 600 }}
                                             >
                                                 {String(idx + 1).padStart(2, '0')}
                                             </span>
@@ -161,8 +161,8 @@ export default function ProjectsV2({ projects }: ProjectsV2Props) {
 
                                         {/* 데스크톱 번호 */}
                                         <span
-                                            className="hidden md:block text-[11px] tracking-[0.06em] pt-[3px] transition-colors group-hover:!text-[var(--v2-accent)]"
-                                            style={{ fontFamily: 'var(--v2-mono)', color: 'var(--v2-line-up)', fontWeight: 400 }}
+                                            className="hidden md:block text-[14px] tracking-[0.06em] pt-[3px] transition-colors group-hover:!text-[var(--v2-accent)]"
+                                            style={{ fontFamily: 'var(--v2-mono)', color: 'var(--v2-line-up)', fontWeight: 600 }}
                                         >
                                             {String(idx + 1).padStart(2, '0')}
                                         </span>
@@ -170,7 +170,7 @@ export default function ProjectsV2({ projects }: ProjectsV2Props) {
                                         {/* 정보 */}
                                         <div>
                                             <p
-                                                className="text-[10px] font-medium uppercase tracking-[0.18em] mb-[9px]"
+                                                className="text-[13px] font-bold uppercase tracking-[0.2em] mb-[9px]"
                                                 style={{ fontFamily: 'var(--v2-mono)', color: 'var(--v2-accent)' }}
                                             >
                                                 {project.category?.data?.attributes?.name || project.projectType || 'Project'}
@@ -199,10 +199,10 @@ export default function ProjectsV2({ projects }: ProjectsV2Props) {
                                             {skillTags.slice(0, 4).map(tag => (
                                                 <span
                                                     key={tag}
-                                                    className="text-[10px] uppercase tracking-[0.07em] px-[10px] py-[5px] transition-all group-hover:!border-[var(--v2-accent-bdr)] group-hover:!text-[var(--v2-accent)] group-hover:!bg-[var(--v2-accent-sub)]"
+                                                    className="text-[12px] uppercase tracking-[0.07em] px-[12px] py-[6px] transition-all group-hover:!border-[var(--v2-accent-bdr)] group-hover:!text-[var(--v2-accent)] group-hover:!bg-[var(--v2-accent-sub)]"
                                                     style={{
                                                         fontFamily: 'var(--v2-mono)',
-                                                        fontWeight: 400,
+                                                        fontWeight: 600,
                                                         border: '1px solid var(--v2-line-up)',
                                                         color: 'var(--v2-t-sub)',
                                                     }}

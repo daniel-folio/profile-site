@@ -81,7 +81,7 @@ export default function SkillsV2({ skills }: SkillsV2Props) {
                                 >
                                     {/* 카테고리 라벨 */}
                                     <span
-                                        className="text-[12px] md:text-[10px] font-semibold md:font-medium uppercase tracking-[0.16em] md:pt-[3px]"
+                                        className="text-[14px] font-bold uppercase tracking-[0.2em] md:pt-[2px]"
                                         style={{ fontFamily: 'var(--v2-mono)', color: 'var(--v2-accent)' }}
                                     >
                                     {category}
