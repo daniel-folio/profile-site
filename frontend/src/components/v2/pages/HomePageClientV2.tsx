@@ -26,10 +26,8 @@ export default function HomePageClientV2({ profile, skills, projects }: PageV2Pr
 
             {/* 중간 영역 — 파티클 #7 Gradient Drift 배경 */}
             <section id="v2-zone-mid" style={{ scrollMarginTop: '62px' }}>
-                <div id="skills" className="v2-sec" style={{ scrollMarginTop: '62px' }}>
-                    <div className="v2-W">
-                        <SkillsV2 skills={skills} />
-                    </div>
+                <div id="skills" style={{ scrollMarginTop: '62px' }}>
+                    <SkillsV2 skills={skills} />
                 </div>
                 <div id="projects" style={{ scrollMarginTop: '62px' }}>
                     <ProjectsV2 projects={projects} />

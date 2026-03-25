@@ -60,10 +60,9 @@ export default async function ProjectPage(props: any) {
     githubUrl = '',
     liveUrl = '',
     thumbnailImage = null,
-    category = null,
   } = project;
 
-  const displayCategory = category?.data?.attributes?.name || projectType || 'Project';
+  const displayCategory = projectType || 'Project';
 
   // 이미지 추출 로직
   let mainImage: any = null;

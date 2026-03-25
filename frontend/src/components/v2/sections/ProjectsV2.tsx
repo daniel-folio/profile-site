@@ -50,15 +50,14 @@ export default function ProjectsV2({ projects }: ProjectsV2Props) {
     
     // 프로젝트들로부터 유효한 카테고리 목록 추출
     const categoryNames = Array.from(new Set(
-        projects.map(p => p.category?.data?.attributes?.name || p.projectType).filter(Boolean)
+        projects.map(p => p.projectType).filter(Boolean)
     )) as string[];
     
     const filters = ['All', ...categoryNames.sort()];
 
     const filteredProjects = projects.filter(p => {
         if (filter === 'All') return true;
-        const pCategory = p.category?.data?.attributes?.name || p.projectType;
-        return pCategory === filter;
+        return p.projectType === filter;
     });
 
     return (
@@ -173,7 +172,7 @@ export default function ProjectsV2({ projects }: ProjectsV2Props) {
                                                 className="text-[13px] font-bold uppercase tracking-[0.2em] mb-[9px]"
                                                 style={{ fontFamily: 'var(--v2-mono)', color: 'var(--v2-accent)' }}
                                             >
-                                                {project.category?.data?.attributes?.name || project.projectType || 'Project'}
+                                                {project.projectType || 'Project'}
                                             </p>
                                             <h3
                                                 className="font-semibold mb-3 transition-colors group-hover:!text-[var(--v2-accent)]"

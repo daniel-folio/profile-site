@@ -82,7 +82,7 @@ export function Projects({ projects, featured = false }: ProjectsProps) {
                 <div className="flex flex-col space-y-1.5 p-6">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-2xl text-gray-700 dark:text-gray-300">
-                      {getProjectTypeIcon(project.category?.data?.attributes?.name || project.projectType || '')}
+                      {getProjectTypeIcon(project.projectType || '')}
                     </span>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.projectStatus)}`}>
                       {project.projectStatus}

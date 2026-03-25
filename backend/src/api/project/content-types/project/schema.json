@@ -107,13 +107,6 @@
       "relation": "manyToMany",
       "target": "api::skill.skill",
       "displayName": "Technologies(기술스택)"
-    },
-    "category": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::project-category.project-category",
-      "displayName": "Category(유형)",
-      "inversedBy": "projects"
     }
   }
 }
