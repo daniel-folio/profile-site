@@ -27,6 +27,14 @@
       "type": "string",
       "required": false
     },
+    "expertise": {
+      "type": "string",
+      "required": false
+    },
+    "background": {
+      "type": "string",
+      "required": false
+    },
     "email": {
       "type": "email",
       "required": true

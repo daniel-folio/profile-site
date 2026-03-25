@@ -48,7 +48,7 @@ export default function HeroV2({ profile }: HeroV2Props) {
         );
     }
 
-    const { name, title, mainBio, socialLinks, profileImage, email, location, headline } = profile;
+    const { name, title, mainBio, socialLinks, profileImage, email, location, headline, expertise, background } = profile;
     const profileImageUrl = profileImage?.url ? getStrapiMedia(profileImage.url) : null;
 
     // 타이틀에서 역할과 직급 분리 (예: "Full-Stack Developer" → ["Full-Stack", "Developer"])
@@ -239,9 +239,9 @@ export default function HeroV2({ profile }: HeroV2Props) {
                         padding: '0 var(--v2-pad)',
                     }}
                 >
-                    <MetaCell label="Status" value={headline || '적극 구직 중'} isMobileRow1 />
-                    <MetaCell label="Current" value={title || 'Developer'} isMobileRow1 isMobileLast />
-                    <MetaCell label="Background" value={profile.bio || '웹 풀스택 개발 / 데이터 엔지니어링'} />
+                    <MetaCell label="Role" value={headline || 'Developer'} isMobileRow1 />
+                    <MetaCell label="Expertise" value={expertise || 'Data Modeling'} isMobileRow1 isMobileLast />
+                    <MetaCell label="Background" value={background || '백엔드 개발'} />
                     <MetaCell label="Location" value={location || 'Seoul · 원격 가능'} isLast isMobileLast />
                 </div>
             </div>
@@ -262,7 +262,7 @@ function MetaCell({ label, value, isLast, isMobileLast, isMobileRow1 }: { label:
     return (
         <div
             className={`py-[16px] md:py-[22px] px-3 md:px-6 first:pl-0 transition-colors ${borderClass}`}
-            style={{ 
+            style={{
                 borderColor: 'var(--v2-line)',
             }}
         >

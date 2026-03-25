@@ -19,6 +19,8 @@ export interface Profile {
   mainBio?: string;
   resumeBio?: string;
   headline?: string;
+  expertise?: string;
+  background?: string;
   showProfileImage?: boolean;
   showPhone?: boolean;
   resumeDownloadEnabled?: boolean;
