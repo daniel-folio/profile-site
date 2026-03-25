@@ -20,13 +20,13 @@ jobs:
       # 2. PAT를 사용하여 A 저장소(대상)로 Push (커밋 히스토리 보존)
       - name: Push to A Repo (daniel-works0001)
         run: |
-          git remote add repoA https://${{ secrets.A_REPO_PAT }}@github.com/daniel-works0001/portfolio.git
+          git remote add repoA https://x-access-token:${{ secrets.A_REPO_PAT }}@github.com/daniel-works0001/portfolio.git
           git push -f repoA HEAD:refs/heads/main
 
       # 3. 추가된 daniel-dataflow 저장소로 Push 배포 (커밋 히스토리 보존)
       - name: Push to B Repo (daniel-dataflow)
         run: |
-          git remote add repoB https://${{ secrets.DATAFLOW_REPO_PAT }}@github.com/daniel-dataflow/portfolio-website.git
+          git remote add repoB https://x-access-token:${{ secrets.DATAFLOW_REPO_PAT }}@github.com/daniel-dataflow/portfolio-website.git
           git push -f repoB HEAD:refs/heads/main
 
       
