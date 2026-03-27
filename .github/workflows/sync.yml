@@ -33,7 +33,12 @@ jobs:
         run: |
           git config --global user.name "daniel-dataflow"
           git config --global user.email "daniel.dataflow@gmail.com"
-          git commit --amend --reset-author --no-edit
+          git filter-branch --env-filter '
+            export GIT_AUTHOR_NAME="daniel-dataflow"
+            export GIT_AUTHOR_EMAIL="daniel.dataflow@gmail.com"
+            export GIT_COMMITTER_NAME="daniel-dataflow"
+            export GIT_COMMITTER_EMAIL="daniel.dataflow@gmail.com"
+          ' --tag-name-filter cat -- --all
           git remote add repoB https://${{ secrets.DATAFLOW_REPO_PAT }}@github.com/daniel-dataflow/portfolio-website.git
           git push -f repoB HEAD:refs/heads/main
 
