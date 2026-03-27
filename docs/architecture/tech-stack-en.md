@@ -1,29 +1,117 @@
 # 🛠️ Technical Architecture
 
-### 🛠️ **Technical Architecture & Stack**
+### 🛠️ Technical Architecture & Stack
 
 #### **Frontend Technology Stack**
-- **Framework**: Next.js 15 with App Router architecture and React Server Components
-- **Language**: TypeScript with strict type checking and advanced type inference
-- **Styling**: Tailwind CSS with custom design system and CSS-in-JS integration
-- **Animation**: Framer Motion with performance-optimized animations and gesture handling
-- **3D Graphics**: Three.js with Vanta.js for interactive backgrounds and WebGL rendering
-- **State Management**: React hooks with custom context providers and optimistic updates
-- **Code Quality**: ESLint, Prettier, Husky, and lint-staged for consistent code standards
-- **Testing**: Jest and React Testing Library for comprehensive test coverage
+- **Framework**: Next.js 15 (App Router Architecture)
+- **Language**: TypeScript (Type safety and developer experience)
+- **Styling**: Tailwind CSS (Custom design system)
+- **Animation**: Framer Motion (Smooth transitions)
+- **3D Graphics**: Three.js and Vanta.js (Interactive backgrounds)
+- **State Management**: React hooks (Custom context providers)
+- **Code Quality**: ESLint, Prettier, Husky (Consistent code standards)
 
 #### **Backend Technology Stack**
-- **CMS**: Strapi 5.16 headless CMS with custom controllers and middleware
-- **Database**: PostgreSQL (production) with connection pooling / SQLite (development)
-- **Image Storage**: Cloudinary with automatic optimization, transformation, and CDN delivery
-- **API Architecture**: RESTful endpoints with custom visitor analytics API and GraphQL support
-- **Authentication**: JWT-based admin authentication with refresh token rotation
-- **Deployment**: Render with automated CI/CD pipeline and environment management
-- **Monitoring**: Comprehensive logging, error tracking, and performance monitoring
+- **CMS**: Strapi 5.16 (Headless CMS with custom controllers)
+- **Database**: PostgreSQL (Production) / SQLite (Development)
+- **Image Storage**: Cloudinary (Automatic optimization)
+- **API**: RESTful endpoints (Custom visitor analytics API)
+- **Authentication**: JWT-based admin authentication
+- **Deployment**: Render (Automated CI/CD pipeline)
 
-#### **Analytics & Monitoring Infrastructure**
-- **Custom Analytics Engine**: Built-in visitor tracking system with real-time processing
-- **Live Data Streaming**: Real-time visitor monitoring and session analysis with WebSocket connections
-- **Performance Metrics**: Core Web Vitals tracking, lighthouse scores, and custom performance indicators
-- **Error Monitoring**: Comprehensive error logging, reporting, and alerting system
-- **Security Monitoring**: Intrusion detection, rate limiting, and suspicious activity alerts
+#### **Analytics & Monitoring**
+- **Custom Analytics**: Built-in visitor tracking system
+- **Real-time Data**: Real-time visitor monitoring and session analysis
+- **Performance Metrics**: Core Web Vitals tracking
+- **Error Monitoring**: Comprehensive error logging and reporting
+
+### 🌟 **Project Highlights**
+
+This portfolio demonstrates expertise in:
+- **Full-stack Development** - Modern JavaScript ecosystem expertise
+- **System Architecture** - Scalable and maintainable code structure
+- **UI/UX Design** - Meticulous attention to user experience
+- **Performance Optimization** - Knowledge through real-world implementation
+- **Security Best Practices** - Proper data handling and protection
+- **Documentation Skills** - Comprehensive technical documentation
+
+### 🚀 **Live Demo & Deployment**
+- **Frontend**: Automated deployment on Vercel
+- **Backend**: Hosted on Render with PostgreSQL database
+- **CDN**: Cloudinary for optimized image delivery
+
+### 📁 **Project Structure**
+
+```
+portfolio/
+├── frontend/                    # Next.js Frontend Application
+│   ├── src/
+│   │   ├── app/                # Next.js App Router Pages
+│   │   │   ├── career-detail/  # Career Details Page
+│   │   │   ├── portfolio/      # Project Detail Pages
+│   │   │   ├── resume/         # Resume Page
+│   │   │   └── admin/          # Admin Dashboard
+│   │   │       └── visitors/   # Visitor Analytics Dashboard
+│   │   ├── components/         # React Components
+│   │   │   ├── layout/         # Layout Components
+│   │   │   ├── sections/       # Page Section Components
+│   │   │   ├── ui/             # Reusable UI Components
+│   │   │   └── admin/          # Admin-specific Components
+│   │   ├── lib/                # Utility Functions & APIs
+│   │   │   ├── api.ts          # API Client
+│   │   │   ├── visitor.ts      # Visitor Tracking Logic
+│   │   │   └── siteSettings.ts # Site Settings Management
+│   │   ├── hooks/              # Custom React Hooks
+│   │   └── types/              # TypeScript Type Definitions
+│   ├── public/                 # Static Assets
+│   └── package.json
+├── backend/                    # Strapi Backend CMS
+│   ├── src/
+│   │   └── api/               # Content Types & APIs
+│   │       ├── profile/       # User Profile Data
+│   │       ├── skill/         # Technical Skills
+│   │       ├── project/       # Portfolio Projects
+│   │       ├── company/       # Work Experience
+│   │       ├── education/     # Educational Background
+│   │       ├── career-detail/ # Detailed Career Information
+│   │       ├── visitor/       # Visitor Analytics Data
+│   │       └── site-setting/  # Global Site Configuration
+│   ├── config/                # Strapi Configuration
+│   └── package.json
+├── DEPLOYMENT.md              # Deployment Guide
+├── VISITOR_TRACKING.md        # Analytics Documentation
+└── README.md                  # This File
+```
+
+### 🎯 **Implemented Features & Capabilities**
+
+#### **✅ Core Pages & Navigation**
+- **Homepage** (`/`) - Profile showcase, skills display, and project portfolio
+- **Resume Page** (`/resume`) - Comprehensive resume with PDF download functionality
+- **Career Details** (`/career-detail`) - Detailed career information with PDF export
+- **Project Details** (`/portfolio/[slug]`) - Individual project case studies and technical details
+- **Admin Dashboard** (`/admin/visitors`) - Comprehensive visitor analytics and site management
+
+#### **✅ Advanced UI/UX Features**
+- **Adaptive Theme System** - Complete dark/light mode with system preference detection and manual toggle
+- **Responsive Design** - Mobile-first approach with perfect tablet and desktop optimization
+- **Smooth Animations** - Framer Motion-powered micro-interactions and page transitions
+- **Interactive Backgrounds** - Three.js and Vanta.js powered dynamic visual effects
+- **Typography Animations** - Dynamic typing effects and text reveal animations
+- **Accessibility Compliance** - WCAG 2.1 AA standards with screen reader support
+
+#### **✅ Content Management System**
+- **Strapi Admin Panel** - Complete headless CMS with custom controllers and middleware
+- **Image Management** - Cloudinary integration with automatic optimization and transformation
+- **Rich Content Support** - Markdown, HTML rendering with syntax highlighting
+- **SEO Optimization** - Meta tags, Open Graph, Twitter Cards, and structured data
+- **API Generation** - Automatic REST API endpoints with custom analytics extensions
+- **Content Versioning** - Built-in content history and revision management
+
+#### **✅ Performance & Security**
+- **PDF Generation** - Client-side PDF creation for resumes and career documents
+- **Code Highlighting** - Syntax highlighting for technical content with highlight.js
+- **XSS Protection** - DOMPurify sanitization for all user-generated content
+- **Performance Optimization** - Next.js Image optimization, caching strategies, and code splitting
+- **Visitor Analytics** - Real-time visitor tracking with comprehensive dashboard ([Documentation](./VISITOR_TRACKING.md))
+- **Security Headers** - CORS, CSP, and other security best practices implementation

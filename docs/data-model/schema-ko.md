@@ -68,7 +68,25 @@
    - 서버 재시작 없이 즉시 적용
    - 다음 페이지 로드 시 프론트엔드에 반영
 
+### 주요 콘텐츠 타입 (Core Content Types)
+
+사이트 설정 외에 본 포트폴리오의 핵심 데이터를 구성하는 주요 모델들입니다. 상세 필드는 [Strapi 어드민 가이드](./guide/strapi-admin-guide-ko.md)를 참고하세요.
+
+#### **📂 Project (프로젝트)**
+- **주요 필드**: `isBasicShow`(기본 노출 여부), `teamType`(팀/개인 분류), `order`(정렬 순서) 등
+- **특징**: `Company` 모델과 N:1 관계를 가지며, 소속 기반 및 성격 기반 자동 분류 로직이 적용됨
+
+#### **📂 Company (경력)**
+- **주요 필드**: `companyName`(회사명), `isBasicShow`(기본 노출 여부), `order`(정렬 순서) 등
+- **특징**: 이력서 상단 경력 섹션을 구성하며 하위에 관련 프로젝트를 포함할 수 있음
+
+#### **📂 Skill (기술 스택)**
+- **주요 필드**: `isPublic`(이력서 노출), `visible`(홈 노출), `category`(분류) 등
+
+---
+
 ### 주의사항
+
 - **adminPassword**: 평문으로 저장되므로 Strapi Admin 접근 권한 관리 중요
 - **siteUsed**: `false` 설정 시 관리자도 접근 불가하므로 주의
 - **enableVisitorTracking**: 개인정보 보호 정책에 따라 설정

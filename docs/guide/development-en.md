@@ -132,6 +132,9 @@ portfolio/
 - **Performance Optimization** - Next.js Image optimization, caching strategies, and code splitting
 - **Visitor Analytics** - Real-time visitor tracking with comprehensive dashboard ([Documentation](./VISITOR_TRACKING.md))
 - **Security Headers** - CORS, CSP, and other security best practices implementation
+- **Selective Exposure (Show More)** - Items can be folded using `isBasicShow` with smooth animations
+- **Intelligent Categorization** - Automatic grouping of Team/Personal projects using `teamType`
+
 
 ### 🎛️ **Site Settings Configuration**
 
@@ -206,6 +209,9 @@ The site settings system provides centralized configuration management through S
 - **adminPassword**: Stored as plain text but masked in admin UI
 - **siteUsed**: When `false`, blocks all access including admin
 - **enableVisitorTracking**: Consider privacy policies when configuring
+- **isBasicShow**: Controls default visibility on Resume for projects and companies
+- **teamType**: Determines Team vs Personal section for projects on Resume
+
 
 ### 🚀 **Getting Started**
 
@@ -299,7 +305,27 @@ This project features a dual-architecture setup (Main A and Development/Backup B
 - **A-Backend (Main):** Operates only `Production` environment
 - **B-Backend (Development/Backup):** Operates both `Production` and `Preview(dev)` environments
 
-### 🔧 **Development Guide**
+### 📊 Data Visibility & Management Tips
+
+#### Skill
+- **`isPublic`**: Whether to show the skill on the **Resume and Resume PDF** (`true`/`false`).
+  - If `false`, it's hidden from the resume but still visible on the Home screen.
+- **`visible`**: Whether to show the skill on the **Home screen** (`true`/`false`).
+  - If `false`, it's hidden from the Home screen but still visible on the Resume.
+- **`order`**: Display order within its category (lower = first).
+
+#### Project
+- **`visible`**: Global toggle to hide the project **everywhere** (temporary disabling).
+- **`isBasicShow`**: Default visibility on **Resume** (`false` folds it into 'Show More').
+- **`teamType`**: Categorizes the project into **Team** vs **Personal** section on Resume (applied when not linked to a Company).
+- **`featured`**: Whether to show as a large card in the **Featured section** on Home.
+- **`order`**: Display order on the **Resume** project lists.
+- **`featuredOrder`**: Display order in the **Featured section** on Home.
+
+#### Company (Career)
+- **`order`**: Display order on the **Resume** career list.
+- **`isBasicShow`**: Default visibility on **Resume** (`false` folds it into 'Show More').
+
 
 #### **Adding New Features**
 1. Backend: Create Content Type in Strapi Admin Panel

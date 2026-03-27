@@ -71,7 +71,25 @@ The site settings system provides centralized configuration management through S
    - Frontend reflects new settings on next page load or API call
    - No deployment required for configuration changes
 
+### Core Content Types
+
+Beyond site settings, the following models define the core portfolio data. For detailed field descriptions, refer to the [Strapi Admin Guide](../guide/strapi-admin-guide-en.md).
+
+#### **📂 Project**
+- **Key Fields**: `isBasicShow` (Default visibility), `teamType` (Team/Personal category), `order` (Display order)
+- **Logic**: N:1 relationship with `Company`. Features automatic categorization based on affiliation or project nature.
+
+#### **📂 Company (Career)**
+- **Key Fields**: `companyName`, `isBasicShow` (Default visibility), `order` (Display order)
+- **Logic**: Defines the main career section on the resume and can contain nested projects.
+
+#### **📂 Skill**
+- **Key Fields**: `isPublic` (Resume visibility), `visible` (Home visibility), `category`
+
+---
+
 ### Advanced Configuration
+
 
 #### **Environment-Specific Settings**
 - **Development**: Use test values for safe development

@@ -27,8 +27,9 @@
 - **Intelligent Image Optimization** via Cloudinary with automatic format selection and lazy loading
 - **Comprehensive SEO Optimization** with meta tags, Open Graph, Twitter Cards, and structured data
 - **Content Versioning & History** through Strapi's headless CMS architecture
-- **Multi-language Content Support** with internationalization capabilities
-- **Content Scheduling** for timed publication and updates
+- **Selective Exposure (Show More)** - Folding items based on importance (`isBasicShow`) with smooth Framer Motion transitions
+- **Intelligent Project Categorization** - Automatic sectioning (Career/Team/Personal) based on company links and project types (`teamType`)
+
 
 #### 🎨 **Modern UI/UX Design System**
 - **Adaptive Dark/Light Mode** with system preference detection and manual toggle
