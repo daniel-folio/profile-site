@@ -1,5 +1,6 @@
 import { StrapiMediaResponse, StrapiMultipleMediaResponse } from './media';
 import { Skill } from './skill';
+import { ProjectCategory } from '@/lib/projectCategories';
 
 export interface Project {
   id: number;
@@ -9,7 +10,7 @@ export interface Project {
   fullDescription?: string;
   thumbnailImage?: StrapiMediaResponse;
   images?: StrapiMultipleMediaResponse;
-  projectType?: 'Web' | 'Mobile' | 'Desktop' | 'API' | 'Library' | 'Other';
+  projectType?: ProjectCategory;
   projectStatus: 'Completed' | 'In Progress' | 'Planned' | 'On Hold';
   startDate?: string;
   endDate?: string;

@@ -1,53 +1,80 @@
 const fs = require('fs');
 const path = require('path');
 
-// 경로 설정: frontend의 원본(SSOT)과 backend의 스키마 파일 위치
-const tsFilePath = path.join(__dirname, '../../frontend/src/lib/skillCategories.ts');
-const schemaPath = path.join(__dirname, '../src/api/skill/content-types/skill/schema.json');
-
-try {
-  if (!fs.existsSync(tsFilePath)) {
-    console.warn(`⚠️ [Sync] Frontend categories file not found at ${tsFilePath}`);
-    process.exit(0);
+// --- 공통 유틸: TS 파일에서 배열 추출 ---
+function extractArrayFromTsFile(filePath, constName) {
+  if (!fs.existsSync(filePath)) {
+    console.warn(`⚠️ [Sync] File not found: ${filePath}`);
+    return null;
   }
-
-  const tsContent = fs.readFileSync(tsFilePath, 'utf8');
-  // 배열 내부 값 추출을 위한 정규식
-  const match = tsContent.match(/export const SKILL_CATEGORY_ORDER = \[\s*([\s\S]*?)\s*\];/);
-  
+  const content = fs.readFileSync(filePath, 'utf8');
+  const regex = new RegExp(`export const ${constName} = \\[\\s*([\\s\\S]*?)\\s*\\]`);
+  const match = content.match(regex);
   if (!match) {
-    console.error('⚠️ [Sync] Could not find SKILL_CATEGORY_ORDER array in skillCategories.ts');
-    process.exit(0); // 빌드를 막지 않기 위해 non-fatal 처리
+    console.warn(`⚠️ [Sync] Could not find '${constName}' in ${filePath}`);
+    return null;
   }
-
-  // 문자열 추출 및 정제
-  const categories = match[1]
+  return match[1]
     .split(',')
     .map(s => s.trim().replace(/^['"](.*)['"]$/, '$1'))
     .filter(s => s.length > 0 && !s.startsWith('//'));
+}
 
+// --- 공통 유틸: 스키마 Enum 업데이트 ---
+function syncEnumToSchema(schemaPath, attributeName, newValues, label) {
   if (!fs.existsSync(schemaPath)) {
-    console.warn(`⚠️ [Sync] Backend schema file not found at ${schemaPath}`);
-    process.exit(0);
+    console.warn(`⚠️ [Sync] Backend schema not found: ${schemaPath}`);
+    return;
   }
-
   const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
-
-  // Enum 업데이트 로직
-  if (schema.attributes.category && schema.attributes.category.type === 'enumeration') {
-    const currentEnum = JSON.stringify(schema.attributes.category.enum);
-    const newEnum = JSON.stringify(categories);
-    
-    if (currentEnum !== newEnum) {
-      schema.attributes.category.enum = categories;
-      fs.writeFileSync(schemaPath, JSON.stringify(schema, null, 2) + '\n');
-      console.log('✅ [Sync] Successfully synced skill categories from frontend to Strapi schema.json');
-    } else {
-      console.log('✅ [Sync] Skill categories are already up to date.');
-    }
-  } else {
-    console.warn('⚠️ [Sync] Category attribute is missing or not an enumeration in schema.json');
+  const attr = schema.attributes[attributeName];
+  if (!attr || attr.type !== 'enumeration') {
+    console.warn(`⚠️ [Sync] '${attributeName}' is not an enumeration in ${schemaPath}`);
+    return;
   }
-} catch (error) {
-  console.error('⚠️ [Sync] Failed to sync skill categories:', error.message);
+  const current = JSON.stringify(attr.enum);
+  const next = JSON.stringify(newValues);
+  if (current !== next) {
+    schema.attributes[attributeName].enum = newValues;
+    fs.writeFileSync(schemaPath, JSON.stringify(schema, null, 2) + '\n');
+    console.log(`✅ [Sync] ${label} → schema.json enum updated.`);
+  } else {
+    console.log(`✅ [Sync] ${label} → already up to date.`);
+  }
+}
+
+// ------- 1. 스킬 카테고리 동기화 -------
+try {
+  const skillCategories = extractArrayFromTsFile(
+    path.join(__dirname, '../../frontend/src/lib/skillCategories.ts'),
+    'SKILL_CATEGORY_ORDER'
+  );
+  if (skillCategories) {
+    syncEnumToSchema(
+      path.join(__dirname, '../src/api/skill/content-types/skill/schema.json'),
+      'category',
+      skillCategories,
+      'Skill categories'
+    );
+  }
+} catch (e) {
+  console.error('⚠️ [Sync] Skill categories sync failed:', e.message);
+}
+
+// ------- 2. 프로젝트 카테고리 동기화 -------
+try {
+  const projectCategories = extractArrayFromTsFile(
+    path.join(__dirname, '../../frontend/src/lib/projectCategories.ts'),
+    'PROJECT_CATEGORY_ORDER'
+  );
+  if (projectCategories) {
+    syncEnumToSchema(
+      path.join(__dirname, '../src/api/project/content-types/project/schema.json'),
+      'projectType',
+      projectCategories,
+      'Project categories'
+    );
+  }
+} catch (e) {
+  console.error('⚠️ [Sync] Project categories sync failed:', e.message);
 }

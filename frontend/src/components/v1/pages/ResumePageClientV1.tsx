@@ -118,6 +118,9 @@ export default function ResumePageClientV1({
     return acc;
   }, {} as Record<string, Skill[]>);
   const showDownload = !!profile?.resumeDownloadEnabled;
+  // Strapi 5에서 회사 없음은 null/undefined/{} 등 다양하게 올 수 있어 방어 처리
+  const isPersonalProject = (proj: any) =>
+    !proj.company || (typeof proj.company === 'object' && !('id' in proj.company));
 
   // 출력용 프로필 사진 Base64 변환
   const [profileImageBase64, setProfileImageBase64] = useState<string | null>(null);

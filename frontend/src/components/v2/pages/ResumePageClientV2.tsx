@@ -147,6 +147,10 @@ export default function ResumePageClientV2({
     fetchAndConvertProfileImage();
   }, [profile?.showProfileImage, profile?.profileImage?.url]);
 
+  // Strapi 5에서 회사 없음은 null/undefined/{} 등 다양하게 올 수 있어 방어 처리
+  const isPersonalProject = (proj: any) =>
+    !proj.company || (typeof proj.company === 'object' && !('id' in proj.company));
+
   return (
     <>
       {/* 화면용 이력서 */}
@@ -274,13 +278,13 @@ export default function ResumePageClientV2({
           </section>
 
           {/* 개인 프로젝트 */}
-          {projects.filter((proj) => proj.company == null && proj.visible !== false).length > 0 && (
+          {projects.filter((proj) => isPersonalProject(proj) && proj.visible !== false).length > 0 && (
             <>
               <div style={{ borderTop: '1px solid var(--v2-line)', margin: '16px 0' }} />
               <section>
                 <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--v2-accent)', marginBottom: 24 }}>개인 프로젝트 (Personal Project)</h2>
                 <div className="flex flex-col gap-8 pl-3 sm:pl-4 border-l-2" style={{ borderColor: 'var(--v2-line)' }}>
-                  {projects.filter((proj) => proj.company == null && proj.visible !== false).map((proj, idx) => {
+                  {projects.filter((proj) => isPersonalProject(proj) && proj.visible !== false).map((proj, idx) => {
                     const matchedCareerDetail = careerDetails.find(cd => {
                       if (typeof cd.project === 'object' && cd.project !== null && 'id' in (cd.project as any)) {
                         return (cd.project as any).id === proj.id;

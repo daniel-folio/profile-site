@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Project } from '@/types/project';
+import { PROJECT_CATEGORY_ORDER } from '@/lib/projectCategories';
 
 interface ProjectsV2Props {
     projects: Project[] | null;
@@ -48,12 +49,9 @@ export default function ProjectsV2({ projects }: ProjectsV2Props) {
 
     const [filter, setFilter] = useState('All');
     
-    // 프로젝트들로부터 유효한 카테고리 목록 추출
-    const categoryNames = Array.from(new Set(
-        projects.map(p => p.projectType).filter(Boolean)
-    )) as string[];
-    
-    const filters = ['All', ...categoryNames.sort()];
+    // 실제 데이터에 존재하는 카테고리만 표시하되, projectCategories.ts 순서를 따름
+    const existingTypes = new Set(projects.map(p => p.projectType).filter(Boolean));
+    const filters = ['All', ...PROJECT_CATEGORY_ORDER.filter(t => existingTypes.has(t))];
 
     const filteredProjects = projects.filter(p => {
         if (filter === 'All') return true;

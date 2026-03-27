@@ -28,9 +28,9 @@
       "enum": [
         "Web",
         "Ai",
+        "API",
         "Mobile",
         "Desktop",
-        "API",
         "Library",
         "Other"
       ]
