@@ -14,11 +14,13 @@
   "attributes": {
     "name": {
       "type": "string",
-      "required": true
+      "required": true,
+      "description": "🏷️ 기술 이름 (예: Python, React, PostgreSQL)"
     },
     "category": {
       "type": "enumeration",
       "required": true,
+      "description": "📂 홈/이력서 스킬 섹션의 그룹 분류 (skillCategories.ts 에서 중앙 관리, 순서도 동일 파일에서 제어)",
       "enum": [
         "Data Engineering",
         "Database",
@@ -34,11 +36,13 @@
       "type": "integer",
       "required": true,
       "min": 1,
-      "max": 5
+      "max": 5,
+      "description": "📊 숙련도 (1~5단계). 현재 화면에 표시되지 않지만 향후 필터 등에 활용 가능"
     },
     "order": {
       "type": "integer",
-      "default": 0
+      "default": 0,
+      "description": "🔢 같은 카테고리 안에서의 표시 순서 (낮을수록 앞에 표시)"
     },
     "icon": {
       "type": "media",
@@ -46,19 +50,23 @@
       "required": false,
       "allowedTypes": [
         "images"
-      ]
+      ],
+      "description": "🖼️ 홈화면 기술 카드에 표시되는 로고 이미지"
     },
     "description": {
-      "type": "text"
+      "type": "text",
+      "description": "📝 기술에 대한 간단한 메모 (현재 화면에 표시되지 않음, 내부 관리용)"
     },
     "visible": {
       "type": "boolean",
-      "default": true
+      "default": true,
+      "description": "👁️ FALSE = 홈/이력서 스킬 목록에 표시되지 않음 (임시 숨김용)"
     },
     "isPublic": {
       "type": "boolean",
       "default": true,
-      "required": true
+      "required": true,
+      "description": "📄 FALSE = 이력서(Resume) 에서만 숨김. visible과 별개로 이력서 전용 노출 제어"
     }
   }
 }

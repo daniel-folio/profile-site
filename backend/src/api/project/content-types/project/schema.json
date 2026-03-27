@@ -25,6 +25,7 @@
       "type": "enumeration",
       "required": true,
       "default": "Web",
+      "description": "📂 홈/이력서 화면의 프로젝트 분류 태그 및 필터 탭 (projectCategories.ts 에서 중앙 관리)",
       "enum": [
         "Web",
         "Ai",
@@ -39,6 +40,7 @@
       "type": "enumeration",
       "required": true,
       "default": "Completed",
+      "description": "🔖 프로젝트의 현재 진행 상태. 이력서/상세 페이지에 표시됩니다.",
       "enum": [
         "Completed",
         "In Progress",
@@ -52,7 +54,8 @@
       "required": false,
       "allowedTypes": [
         "images"
-      ]
+      ],
+      "description": "🖼️ 프로젝트 상세 페이지(/portfolio/slug)의 스크린샷 갤러리"
     },
     "thumbnailImage": {
       "type": "media",
@@ -60,53 +63,66 @@
       "required": false,
       "allowedTypes": [
         "images"
-      ]
+      ],
+      "description": "🖼️ 홈화면 프로젝트 카드에 표시되는 대표 썸네일 이미지"
     },
     "startDate": {
-      "type": "string"
+      "type": "string",
+      "description": "📅 시작 날짜 (YYYY-MM 형식 권장, 예: 2024-03)"
     },
     "endDate": {
-      "type": "string"
+      "type": "string",
+      "description": "📅 종료 날짜 (YYYY-MM 형식. 진행 중이면 비워두세요 → '현재'로 표시됩니다)"
     },
     "order": {
       "type": "integer",
-      "default": 0
+      "default": 0,
+      "description": "🔢 홈/이력서 개인 프로젝트 목록에서의 표시 순서 (숫자 낮을수록 위에 표시)"
     },
     "visible": {
       "type": "boolean",
-      "default": true
+      "default": true,
+      "description": "👁️ FALSE = 홈화면·이력서 어디에도 표시되지 않음 (임시 숨김용)"
     },
     "featured": {
       "type": "boolean",
-      "default": false
+      "default": false,
+      "description": "⭐ TRUE = 홈화면 상단 'Featured Projects' 섹션에 별도 노출"
     },
     "featuredOrder": {
       "type": "integer",
-      "default": 0
+      "default": 0,
+      "description": "🔢 Featured 섹션 내 표시 순서 (featured=TRUE일 때만 유효. 낮을수록 앞에 표시)"
     },
     "liveUrl": {
-      "type": "string"
+      "type": "string",
+      "description": "🔗 프로젝트 상세 페이지의 'Live Demo' 버튼 링크 (없으면 버튼 미표시)"
     },
     "githubUrl": {
-      "type": "string"
+      "type": "string",
+      "description": "🔗 프로젝트 상세 페이지의 'GitHub Repository' 버튼 링크 (없으면 버튼 미표시)"
     },
     "shortDescription": {
-      "type": "richtext"
+      "type": "richtext",
+      "description": "📝 홈화면 카드·이력서에 표시되는 짧은 요약 설명 (1~3줄 권장)"
     },
     "fullDescription": {
-      "type": "richtext"
+      "type": "richtext",
+      "description": "📄 프로젝트 상세 페이지(/portfolio/slug)의 본문 전체 설명"
     },
     "company": {
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::company.company",
-      "displayName": "Company(회사)"
+      "displayName": "Company(회사)",
+      "description": "🏢 회사 프로젝트면 연결. 비워두면 이력서의 '개인 프로젝트' 섹션에 자동 분류"
     },
     "skills": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::skill.skill",
-      "displayName": "Technologies(기술스택)"
+      "displayName": "Technologies(기술스택)",
+      "description": "🛠️ 이 프로젝트에 사용된 기술 스택. 이력서·상세 페이지 기술 태그로 표시됩니다"
     }
   }
 }
