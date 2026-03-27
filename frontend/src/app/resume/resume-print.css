@@ -11,6 +11,24 @@
   .resume-only-print { display: none !important; }
   .resume-only-screen { display: inline !important; }
 }
+
+/* 
+ * 공통 프린트/다운로드 텍스트 색상 강제 지정
+ * - html2pdf.js는 @media print를 무시하므로 .pdf-export-mode 클래스를 추가로 사용
+ * - Tailwind의 다크모드 반전 클래스(dark:prose-invert)로 인해 회색으로 나오는 현상 방지
+ */
+@media print {
+  #resume-print .prose,
+  #resume-print .prose * {
+    color: #222 !important;
+  }
+}
+
+#resume-print.pdf-export-mode .prose,
+#resume-print.pdf-export-mode .prose * {
+  color: #222 !important;
+}
+
 .prose-project-desc {
   font-size: 14px !important;
 }

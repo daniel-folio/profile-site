@@ -7,11 +7,12 @@ export default function ResumePdfDownloadButton() {
   const handleDownloadPDF = useCallback(async () => {
     const element = document.getElementById("resume-print");
     if (element) {
-      // 1. 일시적으로 보이게
+      // 1. 일시적으로 보이게 하고, PDF 전용 CSS 클래스 부여
       const prevDisplay = element.style.display;
       element.style.display = "block";
+      element.classList.add("pdf-export-mode");
 
-      await new Promise(resolve => setTimeout(resolve, 100)); // 렌더링 보장
+      await new Promise(resolve => setTimeout(resolve, 100)); // 렌더링 및 CSS 적용 보장
       const html2pdf = (await import("html2pdf.js")).default;
       await html2pdf()
         .set({
@@ -23,7 +24,8 @@ export default function ResumePdfDownloadButton() {
         .from(element)
         .save();
 
-      // 2. 다시 숨김
+      // 2. 클래스 제거 및 다시 숨김
+      element.classList.remove("pdf-export-mode");
       element.style.display = prevDisplay;
     }
   }, []);
