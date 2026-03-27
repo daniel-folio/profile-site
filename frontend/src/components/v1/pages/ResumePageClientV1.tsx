@@ -215,7 +215,7 @@ export default function ResumePageClientV1({
                   <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>경력(Company)</h2>
                   <ul className="space-y-4">
                     {sortedCompanies.map((comp, idx) => {
-                      const companyProjects = getSortedProjects(comp.id);
+                      const companyProjects = getSortedProjects(comp.id).filter(p => showAllCompanies || p.isBasicShow !== false);
                       const start = comp.startDate;
                       const end = comp.endDate || '현재';
                       const months = getMonthDiff(comp.startDate, comp.endDate || new Date().toISOString().slice(0, 7));
@@ -310,7 +310,7 @@ export default function ResumePageClientV1({
                       }
                     })}
                   </ul>
-                  {sortedCompanies.filter(c => c.isBasicShow === false).length > 0 && (
+                  {sortedCompanies.some(c => c.isBasicShow === false || getSortedProjects(c.id).some(p => p.isBasicShow === false)) && (
                     <div className="mt-8 flex justify-center">
                       <button
                         onClick={() => setShowAllCompanies(!showAllCompanies)}
@@ -665,7 +665,7 @@ export default function ResumePageClientV1({
               <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>경력(Company)</h2>
               <ul style={{ marginLeft: 32 }}>
                 {sortedCompanies.map((comp, idx) => {
-                  const companyProjects = getSortedProjects(comp.id);
+                  const companyProjects = getSortedProjects(comp.id).filter(p => showAllCompanies || p.isBasicShow !== false);
                   const start = comp.startDate;
                   const end = comp.endDate || '현재';
                   const months = getMonthDiff(comp.startDate, comp.endDate || new Date().toISOString().slice(0, 7));
