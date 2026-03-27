@@ -215,7 +215,8 @@ export default function ResumePageClientV1({
                   <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>경력(Company)</h2>
                   <ul className="space-y-4">
                     {sortedCompanies.map((comp, idx) => {
-                      const companyProjects = getSortedProjects(comp.id).filter(p => showAllCompanies || p.isBasicShow !== false);
+                      const companyProjects = getSortedProjects(comp.id);
+                      const lastVisibleIdx = companyProjects.reduce((last, p, i) => (showAllCompanies || p.isBasicShow !== false) ? i : last, -1);
                       const start = comp.startDate;
                       const end = comp.endDate || '현재';
                       const months = getMonthDiff(comp.startDate, comp.endDate || new Date().toISOString().slice(0, 7));
@@ -236,51 +237,79 @@ export default function ResumePageClientV1({
                             {months && <span>({getPeriodText(months)})</span>}
                           </div>
                           {companyDesc && <div className="text-sm text-gray-700 dark:text-gray-300 ml-10 mb-1">{companyDesc}</div>}
-                          {companyProjects.length > 0 && (
-                            <ul style={{ marginLeft: 24, marginTop: 4 }}>
-                              {companyProjects.map((proj, idx) => {
-                                const matchedCareerDetails = getSortedCareerDetails(proj.id);
-                                const hasCareerDetail = matchedCareerDetails.length > 0;
-                                const careerHref = hasCareerDetail ? `/career-detail#cd-${matchedCareerDetails[0].id}` : undefined;
-                                return (
-                                  <React.Fragment key={proj.id}>
-                                    <li style={{ marginBottom: 6 }}>
-                                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                        <span style={{ fontWeight: 700, fontSize: 7, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
-                                        {hasCareerDetail ? (
-                                          <Link
-                                            href={careerHref!}
-                                            className="font-bold text-[15px] text-gray-900 dark:text-white hover:text-sky-500 dark:hover:text-sky-500 transition-colors cursor-pointer"
-                                            style={{ textDecoration: 'none' }}
+                          { (companyProjects.some(p => p.isBasicShow !== false) || (showAllCompanies && companyProjects.length > 0)) && (
+                            <AnimatePresence>
+                              <motion.div
+                                initial={{ height: 0, opacity: 0, y: -15 }}
+                                animate={{ height: 'auto', opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }}
+                                exit={{ height: 0, opacity: 0, y: -10, transition: { duration: 0.3, ease: 'easeInOut' } }}
+                                className="overflow-hidden mt-2"
+                              >
+                                <ul style={{ marginLeft: 24, marginTop: 2 }}>
+                                  {companyProjects.map((proj, idx) => {
+                                    const matchedCareerDetails = getSortedCareerDetails(proj.id);
+                                    const hasCareerDetail = matchedCareerDetails.length > 0;
+                                    const careerHref = hasCareerDetail ? `/career-detail#cd-${matchedCareerDetails[0].id}` : undefined;
+                                    const isPinnedProject = !isPinned || proj.isBasicShow !== false;
+
+                                    const projContent = (
+                                      <React.Fragment>
+                                        <li style={{ marginBottom: 6 }}>
+                                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <span style={{ fontWeight: 700, fontSize: 7, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
+                                            {hasCareerDetail ? (
+                                              <Link
+                                                href={careerHref!}
+                                                className="font-bold text-[15px] text-gray-900 dark:text-white hover:text-sky-500 dark:hover:text-sky-500 transition-colors cursor-pointer"
+                                                style={{ textDecoration: 'none' }}
+                                              >
+                                                {proj.title}
+                                              </Link>
+                                            ) : (
+                                              <span className="font-bold text-[15px] text-gray-900 dark:text-white">{proj.title}</span>
+                                            )}
+                                            <span className="ml-2 text-[12px] text-gray-600 dark:text-gray-200">{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
+                                          </div>
+                                          {/* 웹용 프로젝트 설명 */}
+                                          {proj.shortDescription && (
+                                            <div className="mt-1 text-gray-700 dark:text-gray-100 text-[14px] ml-6 prose dark:prose-invert">
+                                              <RichTextRenderer text={proj.shortDescription} className="prose-project-desc text-gray-700 dark:text-gray-100" />
+                                            </div>
+                                          )}
+                                          {/* 스킬: 뱃지 방식 */}
+                                          {Array.isArray(proj.skills) && proj.skills.length > 0 && (
+                                            <div style={{ marginLeft: 24, marginTop: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                                              <span className="font-medium text-gray-900 dark:text-gray-100 mr-2">skill : </span>
+                                              {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number) => (
+                                                <span key={skill.id || skill.name || i} className="resume-skill-badge bg-sky-100 text-sky-700 px-2 py-0.5 rounded text-[13px] font-semibold border border-sky-200">{skill.name}</span>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </li>
+                                        {idx < lastVisibleIdx && <hr style={{ margin: '12px 0', border: '0.5px solid #ddd', width: '100%' }} />}
+                                      </React.Fragment>
+                                    );
+
+                                    if (isPinnedProject) return <React.Fragment key={proj.id}>{projContent}</React.Fragment>;
+
+                                    return (
+                                      <AnimatePresence key={`company-proj-anim-${proj.id}`}>
+                                        {showAllCompanies && (
+                                          <motion.div
+                                            initial={{ height: 0, opacity: 0, y: -15 }}
+                                            animate={{ height: 'auto', opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: (idx % 10) * 0.05 } }}
+                                            exit={{ height: 0, opacity: 0, y: -10, transition: { duration: 0.3, ease: 'easeInOut' } }}
+                                            className="overflow-hidden"
                                           >
-                                            {proj.title}
-                                          </Link>
-                                        ) : (
-                                          <span className="font-bold text-[15px] text-gray-900 dark:text-white">{proj.title}</span>
+                                            {projContent}
+                                          </motion.div>
                                         )}
-                                        <span className="ml-2 text-[12px] text-gray-600 dark:text-gray-200">{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
-                                      </div>
-                                      {/* 웹용 프로젝트 설명 */}
-                                      {proj.shortDescription && (
-                                        <div className="mt-1 text-gray-700 dark:text-gray-100 text-[14px] ml-6 prose dark:prose-invert">
-                                          <RichTextRenderer text={proj.shortDescription} className="prose-project-desc text-gray-700 dark:text-gray-100" />
-                                        </div>
-                                      )}
-                                      {/* 스킬: 프린트에서는 뱃지 없이 텍스트만 */}
-                                      {Array.isArray(proj.skills) && proj.skills.length > 0 && (
-                                        <div style={{ marginLeft: 24, marginTop: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-                                          <span className="font-medium text-gray-900 dark:text-gray-100 mr-2">skill : </span>
-                                          {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number) => (
-                                            <span key={skill.id || skill.name || i} className="resume-skill-badge bg-sky-100 text-sky-700 px-2 py-0.5 rounded text-[13px] font-semibold border border-sky-200">{skill.name}</span>
-                                          ))}
-                                        </div>
-                                      )}
-                                    </li>
-                                    {idx < companyProjects.length - 1 && <hr style={{ margin: '12px 0', border: '0.5px solid #ddd', width: '100%' }} />}
-                                  </React.Fragment>
-                                );
-                              })}
-                            </ul>
+                                      </AnimatePresence>
+                                    );
+                                  })}
+                                </ul>
+                              </motion.div>
+                            </AnimatePresence>
                           )}
                           {/* 회사와 회사 사이에 얇은 구분선 추가 (마지막 회사 제외) */}
                           {idx < sortedCompanies.length - 1 && (
@@ -296,10 +325,9 @@ export default function ResumePageClientV1({
                           <AnimatePresence key={`company-${comp.id}`}>
                             {showAllCompanies && (
                               <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.3 }}
+                                initial={{ height: 0, opacity: 0, y: -20 }}
+                                animate={{ height: 'auto', opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }}
+                                exit={{ height: 0, opacity: 0, y: -10, transition: { duration: 0.3, ease: 'easeInOut' } }}
                                 className="overflow-hidden"
                               >
                                 {content}
@@ -332,7 +360,7 @@ export default function ResumePageClientV1({
               <section style={{ marginBottom: 32 }}>
                 <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>팀 프로젝트(Team Project)</h2>
                 <ul style={{ marginLeft: 32 }}>
-                  {teamProjects.map((proj) => {
+                  {teamProjects.map((proj, idx) => {
                     const matchedCareerDetail = careerDetails.find(cd => {
                       if (typeof cd.project === 'object' && cd.project !== null && 'id' in (cd.project as any)) {
                         return (cd.project as any).id === proj.id;
@@ -383,10 +411,9 @@ export default function ResumePageClientV1({
                         <AnimatePresence key={`team-${proj.id}`}>
                           {showAllTeamProjects && (
                             <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.3 }}
+                              initial={{ height: 0, opacity: 0, y: -15 }}
+                              animate={{ height: 'auto', opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: (idx % 10) * 0.05 } }}
+                              exit={{ height: 0, opacity: 0, y: -10, transition: { duration: 0.3, ease: 'easeInOut' } }}
                               className="overflow-hidden"
                             >
                               {content}
@@ -418,7 +445,7 @@ export default function ResumePageClientV1({
               <section style={{ marginBottom: 32 }}>
                 <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>개인 프로젝트(Personal Project)</h2>
                 <ul style={{ marginLeft: 32 }}>
-                  {personalProjects.map((proj) => {
+                  {personalProjects.map((proj, idx) => {
                     const matchedCareerDetail = careerDetails.find(cd => {
                       if (typeof cd.project === 'object' && cd.project !== null && 'id' in (cd.project as any)) {
                         return (cd.project as any).id === proj.id;
@@ -469,10 +496,9 @@ export default function ResumePageClientV1({
                         <AnimatePresence key={`personal-${proj.id}`}>
                           {showAllPersonalProjects && (
                             <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.3 }}
+                              initial={{ height: 0, opacity: 0, y: -15 }}
+                              animate={{ height: 'auto', opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: (idx % 10) * 0.05 } }}
+                              exit={{ height: 0, opacity: 0, y: -10, transition: { duration: 0.3, ease: 'easeInOut' } }}
                               className="overflow-hidden"
                             >
                               {content}
@@ -665,7 +691,7 @@ export default function ResumePageClientV1({
               <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>경력(Company)</h2>
               <ul style={{ marginLeft: 32 }}>
                 {sortedCompanies.map((comp, idx) => {
-                  const companyProjects = getSortedProjects(comp.id).filter(p => showAllCompanies || p.isBasicShow !== false);
+                  const companyProjects = getSortedProjects(comp.id);
                   const start = comp.startDate;
                   const end = comp.endDate || '현재';
                   const months = getMonthDiff(comp.startDate, comp.endDate || new Date().toISOString().slice(0, 7));

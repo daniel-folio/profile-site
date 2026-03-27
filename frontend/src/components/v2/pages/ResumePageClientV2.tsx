@@ -214,7 +214,7 @@ export default function ResumePageClientV2({
                   <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--v2-accent)', marginBottom: 24 }}>경력 (Company)</h2>
                   <div className="space-y-12">
                     {sortedCompanies.map((comp, idx) => {
-                      const companyProjects = getSortedProjects(comp.id).filter(p => showAllCompanies || p.isBasicShow !== false);
+                      const companyProjects = getSortedProjects(comp.id);
                       const start = comp.startDate;
                       const end = comp.endDate || '현재';
                       const months = getMonthDiff(comp.startDate, comp.endDate || new Date().toISOString().slice(0, 7));
@@ -239,45 +239,73 @@ export default function ResumePageClientV2({
 
                           {companyDesc && <div className="text-[15px] mt-4 mb-4" style={{ color: 'var(--v2-t-body)' }}>{companyDesc}</div>}
 
-                          {companyProjects.length > 0 && (
-                            <div className="mt-6 flex flex-col gap-6 pl-3 sm:pl-4 border-l-2" style={{ borderColor: 'var(--v2-line)' }}>
-                              {companyProjects.map((proj, idx) => {
-                                const matchedCareerDetails = getSortedCareerDetails(proj.id);
-                                const hasCareerDetail = matchedCareerDetails.length > 0;
-                                const careerHref = hasCareerDetail ? `/career-detail#cd-${matchedCareerDetails[0].id}` : undefined;
-                                return (
-                                  <div key={proj.id} className="relative">
-                                    <div className="absolute w-2 h-2 rounded-full -left-[17px] sm:-left-[21px] top-[6px]" style={{ background: 'var(--v2-line-up)', border: '2px solid var(--v2-bg-card)' }} />
-                                    <div className="flex flex-wrap items-baseline gap-3 mb-1">
-                                      {hasCareerDetail ? (
-                                        <Link href={careerHref!} className="font-bold text-[16px] transition-colors hover:text-[var(--v2-accent)]" style={{ color: 'var(--v2-t-hi)' }}>
-                                          {proj.title} <span className="text-[14px] text-[var(--v2-accent)] ml-1">↗</span>
-                                        </Link>
-                                      ) : (
-                                        <span className="font-bold text-[16px]" style={{ color: 'var(--v2-t-hi)' }}>{proj.title}</span>
-                                      )}
-                                      <span className="text-[13px]" style={{ color: 'var(--v2-t-sub)' }}>{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
-                                    </div>
+                          { (companyProjects.some(p => p.isBasicShow !== false) || (showAllCompanies && companyProjects.length > 0)) && (
+                            <AnimatePresence>
+                              <motion.div
+                                initial={{ height: 0, opacity: 0, y: -15 }}
+                                animate={{ height: 'auto', opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }}
+                                exit={{ height: 0, opacity: 0, y: -10, transition: { duration: 0.3, ease: 'easeInOut' } }}
+                                className="overflow-hidden mt-6"
+                              >
+                                <div className="flex flex-col gap-6 pl-3 sm:pl-4 border-l-2" style={{ borderColor: 'var(--v2-line)' }}>
+                                  {companyProjects.map((proj, idx) => {
+                                    const matchedCareerDetails = getSortedCareerDetails(proj.id);
+                                    const hasCareerDetail = matchedCareerDetails.length > 0;
+                                    const careerHref = hasCareerDetail ? `/career-detail#cd-${matchedCareerDetails[0].id}` : undefined;
+                                    const isPinnedProject = !isPinned || proj.isBasicShow !== false;
 
-                                    {proj.shortDescription && (
-                                      <div className="mt-2 text-[14px]" style={{ color: 'var(--v2-t-body)' }}>
-                                        <RichTextRenderer text={proj.shortDescription} />
-                                      </div>
-                                    )}
+                                    const projContent = (
+                                      <div key={proj.id} className="relative">
+                                        <div className="absolute w-2 h-2 rounded-full -left-[17px] sm:-left-[21px] top-[6px]" style={{ background: 'var(--v2-line-up)', border: '2px solid var(--v2-bg-card)' }} />
+                                        <div className="flex flex-wrap items-baseline gap-3 mb-1">
+                                          {hasCareerDetail ? (
+                                            <Link href={careerHref!} className="font-bold text-[16px] transition-colors hover:text-[var(--v2-accent)]" style={{ color: 'var(--v2-t-hi)' }}>
+                                              {proj.title} <span className="text-[14px] text-[var(--v2-accent)] ml-1">↗</span>
+                                            </Link>
+                                          ) : (
+                                            <span className="font-bold text-[16px]" style={{ color: 'var(--v2-t-hi)' }}>{proj.title}</span>
+                                          )}
+                                          <span className="text-[13px]" style={{ color: 'var(--v2-t-sub)' }}>{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
+                                        </div>
 
-                                    {Array.isArray(proj.skills) && proj.skills.length > 0 && (
-                                      <div className="mt-3 flex flex-wrap gap-2">
-                                        {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number) => (
-                                          <span key={skill.id || skill.name || i} className="text-[11px] px-2 py-1 rounded" style={{ background: 'var(--v2-bg-up)', color: 'var(--v2-t-sub)', border: '1px solid var(--v2-line-up)', fontFamily: 'var(--v2-mono)' }}>
-                                            {skill.name}
-                                          </span>
-                                        ))}
+                                        {proj.shortDescription && (
+                                          <div className="mt-2 text-[14px]" style={{ color: 'var(--v2-t-body)' }}>
+                                            <RichTextRenderer text={proj.shortDescription} />
+                                          </div>
+                                        )}
+
+                                        {Array.isArray(proj.skills) && proj.skills.length > 0 && (
+                                          <div className="mt-3 flex flex-wrap gap-2">
+                                            {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number) => (
+                                              <span key={skill.id || skill.name || i} className="text-[11px] px-2 py-1 rounded" style={{ background: 'var(--v2-bg-up)', color: 'var(--v2-t-sub)', border: '1px solid var(--v2-line-up)', fontFamily: 'var(--v2-mono)' }}>
+                                                {skill.name}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        )}
                                       </div>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
+                                    );
+
+                                    if (isPinnedProject) return <React.Fragment key={proj.id}>{projContent}</React.Fragment>;
+
+                                    return (
+                                      <AnimatePresence key={`company-proj-anim-${proj.id}`}>
+                                        {showAllCompanies && (
+                                          <motion.div
+                                            initial={{ height: 0, opacity: 0, y: -15 }}
+                                            animate={{ height: 'auto', opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: (idx % 10) * 0.05 } }}
+                                            exit={{ height: 0, opacity: 0, y: -10, transition: { duration: 0.3, ease: 'easeInOut' } }}
+                                            className="overflow-hidden"
+                                          >
+                                            {projContent}
+                                          </motion.div>
+                                        )}
+                                      </AnimatePresence>
+                                    );
+                                  })}
+                                </div>
+                              </motion.div>
+                            </AnimatePresence>
                           )}
                         </div>
                       );
@@ -289,10 +317,9 @@ export default function ResumePageClientV2({
                           <AnimatePresence key={`company-${comp.id}`}>
                             {showAllCompanies && (
                               <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.3 }}
+                                initial={{ height: 0, opacity: 0, y: -20 }}
+                                animate={{ height: 'auto', opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }}
+                                exit={{ height: 0, opacity: 0, y: -10, transition: { duration: 0.3, ease: 'easeInOut' } }}
                                 className="overflow-hidden"
                               >
                                 {content}
@@ -326,7 +353,7 @@ export default function ResumePageClientV2({
               <section>
                 <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--v2-accent)', marginBottom: 24 }}>팀 프로젝트 (Team Project)</h2>
                 <div className="flex flex-col gap-8 pl-3 sm:pl-4 border-l-2" style={{ borderColor: 'var(--v2-line)' }}>
-                  {teamProjects.map((proj) => {
+                  {teamProjects.map((proj, idx) => {
                     const matchedCareerDetail = careerDetails.find(cd => {
                       if (typeof cd.project === 'object' && cd.project !== null && 'id' in (cd.project as any)) {
                         return (cd.project as any).id === proj.id;
@@ -375,10 +402,9 @@ export default function ResumePageClientV2({
                         <AnimatePresence key={`team-${proj.id}`}>
                           {showAllTeamProjects && (
                             <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.3 }}
+                              initial={{ height: 0, opacity: 0, y: -15 }}
+                              animate={{ height: 'auto', opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: (idx % 10) * 0.05 } }}
+                              exit={{ height: 0, opacity: 0, y: -10, transition: { duration: 0.3, ease: 'easeInOut' } }}
                               className="overflow-hidden"
                             >
                               {content}
@@ -411,7 +437,7 @@ export default function ResumePageClientV2({
               <section>
                 <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--v2-accent)', marginBottom: 24 }}>개인 프로젝트 (Personal Project)</h2>
                 <div className="flex flex-col gap-8 pl-3 sm:pl-4 border-l-2" style={{ borderColor: 'var(--v2-line)' }}>
-                  {personalProjects.map((proj) => {
+                  {personalProjects.map((proj, idx) => {
                     const matchedCareerDetail = careerDetails.find(cd => {
                       if (typeof cd.project === 'object' && cd.project !== null && 'id' in (cd.project as any)) {
                         return (cd.project as any).id === proj.id;
@@ -460,10 +486,9 @@ export default function ResumePageClientV2({
                         <AnimatePresence key={`personal-${proj.id}`}>
                           {showAllPersonalProjects && (
                             <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.3 }}
+                              initial={{ height: 0, opacity: 0, y: -15 }}
+                              animate={{ height: 'auto', opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: (idx % 10) * 0.05 } }}
+                              exit={{ height: 0, opacity: 0, y: -10, transition: { duration: 0.3, ease: 'easeInOut' } }}
                               className="overflow-hidden"
                             >
                               {content}
@@ -645,14 +670,14 @@ export default function ResumePageClientV2({
           </>
         )}
         {/* 경력 (Company) */}
-        {sortedCompanies.filter(c => showAllCompanies || c.isBasicShow !== false).length > 0 && (
+        {sortedCompanies.length > 0 && (
           <>
             <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
             <section style={{ marginBottom: 32 }}>
               <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>경력 (Company)</h2>
               <ul style={{ marginLeft: 32 }}>
-                {sortedCompanies.filter(c => showAllCompanies || c.isBasicShow !== false).map((comp, idx, arr) => {
-                  const companyProjects = getSortedProjects(comp.id).filter(p => showAllCompanies || p.isBasicShow !== false);
+                {sortedCompanies.map((comp, idx, arr) => {
+                  const companyProjects = getSortedProjects(comp.id);
                   const start = comp.startDate;
                   const end = comp.endDate || '현재';
                   const months = getMonthDiff(comp.startDate, comp.endDate || new Date().toISOString().slice(0, 7));
@@ -731,13 +756,13 @@ export default function ResumePageClientV2({
           </>
         )}
         {/* 팀 프로젝트 (Team Project) */}
-        {teamProjects.filter(p => showAllTeamProjects || p.isBasicShow !== false).length > 0 && (
+        {teamProjects.length > 0 && (
           <>
             <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
             <section style={{ marginBottom: 32 }}>
               <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>팀 프로젝트 (Team Project)</h2>
               <ul style={{ marginLeft: 32 }}>
-                {teamProjects.filter(p => showAllTeamProjects || p.isBasicShow !== false).map((proj, idx, arr) => {
+                {teamProjects.map((proj, idx, arr) => {
                   const matchedCareerDetail = careerDetails.find(cd => {
                     if (typeof cd.project === 'object' && cd.project !== null && 'id' in (cd.project as any)) {
                       return (cd.project as any).id === proj.id;
@@ -778,13 +803,13 @@ export default function ResumePageClientV2({
         )}
         
         {/* 개인 프로젝트 (Personal Project) */}
-        {personalProjects.filter(p => showAllPersonalProjects || p.isBasicShow !== false).length > 0 && (
+        {personalProjects.length > 0 && (
           <>
             <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
             <section style={{ marginBottom: 32 }}>
               <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>개인 프로젝트 (Personal Project)</h2>
               <ul style={{ marginLeft: 32 }}>
-                {personalProjects.filter(p => showAllPersonalProjects || p.isBasicShow !== false).map((proj, idx, arr) => {
+                {personalProjects.map((proj, idx, arr) => {
                   const matchedCareerDetail = careerDetails.find(cd => {
                     if (typeof cd.project === 'object' && cd.project !== null && 'id' in (cd.project as any)) {
                       return (cd.project as any).id === proj.id;
