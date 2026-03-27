@@ -23,14 +23,17 @@ jobs:
       - name: Push to A Repo (daniel-works0001)
         run: |
           git config --global user.name "daniel-works0001"
-          git config --global user.email "daniel-works0001@users.noreply.github.com"
+          git config --global user.email "daniel.han.works0001@gmail.com"
           git commit --amend --reset-author --no-edit
           git remote add repoA https://${{ secrets.A_REPO_PAT }}@github.com/daniel-works0001/portfolio.git
           git push -f repoA HEAD:refs/heads/main
 
-      # 3. 추가된 daniel-dataflow 저장소로 Push 배포 (커밋 히스토리 보존)
+      # 3. 추가된 daniel-dataflow 저장소로 Push 배포 (커밋 히스토리 보존 및 작성자 수정)
       - name: Push to B Repo (daniel-dataflow)
         run: |
+          git config --global user.name "daniel-dataflow"
+          git config --global user.email "daniel.dataflow@gmail.com"
+          git commit --amend --reset-author --no-edit
           git remote add repoB https://${{ secrets.DATAFLOW_REPO_PAT }}@github.com/daniel-dataflow/portfolio-website.git
           git push -f repoB HEAD:refs/heads/main
 
