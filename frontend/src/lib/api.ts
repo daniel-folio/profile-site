@@ -85,9 +85,8 @@ async function fetchAPI<T>(path: string, params?: any, options: RequestInit = {}
     headers['Authorization'] = `Bearer ${STRAPI_API_TOKEN}`;
   }
 
-  const defaultOptions: RequestInit & { next?: any } = {
+  const defaultOptions: RequestInit = {
     headers,
-    next: { revalidate: 3600 },
     ...options,
   };
 
