@@ -11,6 +11,7 @@ export interface Company {
   description?: string;
   achievements?: string[];
   order?: number;
+  isBasicShow?: boolean;
 }
 
 export interface CompanyResponse {

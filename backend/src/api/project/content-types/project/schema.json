@@ -48,6 +48,66 @@
         "On Hold"
       ]
     },
+    "startDate": {
+      "type": "string",
+      "description": "📅 시작 날짜 (YYYY-MM 형식 권장, 예: 2024-03)"
+    },
+    "endDate": {
+      "type": "string",
+      "description": "📅 종료 날짜 (YYYY-MM 형식. 진행 중이면 비워두세요 → '현재'로 표시됩니다)"
+    },
+    "company": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::company.company",
+      "displayName": "Company(회사)",
+      "description": "🏢 회사 프로젝트면 연결. 비워두면 이력서의 '개인 프로젝트' 섹션에 자동 분류"
+    },
+    "teamType": {
+      "type": "enumeration",
+      "enum": [
+        "Team",
+        "Personal"
+      ],
+      "default": "Team",
+      "description": "👥 이력서 팀/개인 프로젝트 분류용 (단, 회사(Company)가 선택된 상태면 이 값은 무시됩니다)"
+    },
+    "skills": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::skill.skill",
+      "displayName": "Technologies(기술스택)",
+      "description": "🛠️ 이 프로젝트에 사용된 기술 스택. 이력서·상세 페이지 기술 태그로 표시됩니다"
+    },
+    "shortDescription": {
+      "type": "richtext",
+      "description": "📝 홈화면 카드·이력서에 표시되는 짧은 요약 설명 (1~3줄 권장)"
+    },
+    "visible": {
+      "type": "boolean",
+      "default": true,
+      "description": "👁️ FALSE = 홈화면·이력서 어디에도 표시되지 않음 (임시 숨김용)"
+    },
+    "isBasicShow": {
+      "type": "boolean",
+      "default": true,
+      "description": "📌 이력서 화면에서 기본으로 노출할 항목이면 체크 (해제 시 '더보기' 안에 숨겨짐)"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "⭐ TRUE = 홈화면 상단 'Featured Projects' 섹션에 별도 노출"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0,
+      "description": "🔢 홈/이력서 개인 프로젝트 목록에서의 표시 순서 (숫자 낮을수록 위에 표시)"
+    },
+    "featuredOrder": {
+      "type": "integer",
+      "default": 0,
+      "description": "🔢 Featured 섹션 내 표시 순서 (featured=TRUE일 때만 유효. 낮을수록 앞에 표시)"
+    },
     "images": {
       "type": "media",
       "multiple": true,
@@ -66,33 +126,9 @@
       ],
       "description": "🖼️ 홈화면 프로젝트 카드에 표시되는 대표 썸네일 이미지"
     },
-    "startDate": {
-      "type": "string",
-      "description": "📅 시작 날짜 (YYYY-MM 형식 권장, 예: 2024-03)"
-    },
-    "endDate": {
-      "type": "string",
-      "description": "📅 종료 날짜 (YYYY-MM 형식. 진행 중이면 비워두세요 → '현재'로 표시됩니다)"
-    },
-    "order": {
-      "type": "integer",
-      "default": 0,
-      "description": "🔢 홈/이력서 개인 프로젝트 목록에서의 표시 순서 (숫자 낮을수록 위에 표시)"
-    },
-    "visible": {
-      "type": "boolean",
-      "default": true,
-      "description": "👁️ FALSE = 홈화면·이력서 어디에도 표시되지 않음 (임시 숨김용)"
-    },
-    "featured": {
-      "type": "boolean",
-      "default": false,
-      "description": "⭐ TRUE = 홈화면 상단 'Featured Projects' 섹션에 별도 노출"
-    },
-    "featuredOrder": {
-      "type": "integer",
-      "default": 0,
-      "description": "🔢 Featured 섹션 내 표시 순서 (featured=TRUE일 때만 유효. 낮을수록 앞에 표시)"
+    "fullDescription": {
+      "type": "richtext",
+      "description": "📄 프로젝트 상세 페이지(/portfolio/slug)의 본문 전체 설명"
     },
     "liveUrl": {
       "type": "string",
@@ -101,28 +137,6 @@
     "githubUrl": {
       "type": "string",
       "description": "🔗 프로젝트 상세 페이지의 'GitHub Repository' 버튼 링크 (없으면 버튼 미표시)"
-    },
-    "shortDescription": {
-      "type": "richtext",
-      "description": "📝 홈화면 카드·이력서에 표시되는 짧은 요약 설명 (1~3줄 권장)"
-    },
-    "fullDescription": {
-      "type": "richtext",
-      "description": "📄 프로젝트 상세 페이지(/portfolio/slug)의 본문 전체 설명"
-    },
-    "company": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::company.company",
-      "displayName": "Company(회사)",
-      "description": "🏢 회사 프로젝트면 연결. 비워두면 이력서의 '개인 프로젝트' 섹션에 자동 분류"
-    },
-    "skills": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::skill.skill",
-      "displayName": "Technologies(기술스택)",
-      "description": "🛠️ 이 프로젝트에 사용된 기술 스택. 이력서·상세 페이지 기술 태그로 표시됩니다"
     }
   }
 }

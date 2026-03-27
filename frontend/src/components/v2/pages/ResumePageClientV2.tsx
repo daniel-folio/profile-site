@@ -12,6 +12,8 @@ import { CareerDetail } from "@/types/career-detail";
 import { OtherExperience } from "@/types/other-experience";
 import { useEffect, useState } from 'react';
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaChevronDown } from 'react-icons/fa';
 import '../../../app/resume/resume-print.css';
 import '../../../app/resume/resume-badge.css';
 import { useTheme } from 'next-themes';
@@ -119,6 +121,10 @@ export default function ResumePageClientV2({
   }, {} as Record<string, Skill[]>);
   const showDownload = !!profile?.resumeDownloadEnabled;
 
+  const [showAllCompanies, setShowAllCompanies] = useState(false);
+  const [showAllTeamProjects, setShowAllTeamProjects] = useState(false);
+  const [showAllPersonalProjects, setShowAllPersonalProjects] = useState(false);
+
   // 출력용 프로필 사진 Base64 변환
   const [profileImageBase64, setProfileImageBase64] = useState<string | null>(null);
   const [profileImageReady, setProfileImageReady] = useState(false);
@@ -150,6 +156,10 @@ export default function ResumePageClientV2({
   // Strapi 5에서 회사 없음은 null/undefined/{} 등 다양하게 올 수 있어 방어 처리
   const isPersonalProject = (proj: any) =>
     !proj.company || (typeof proj.company === 'object' && !('id' in proj.company));
+
+  const nonCompanyProjects = projects.filter((proj) => isPersonalProject(proj) && proj.visible !== false);
+  const teamProjects = nonCompanyProjects.filter(p => p.teamType !== 'Personal');
+  const personalProjects = nonCompanyProjects.filter(p => p.teamType === 'Personal');
 
   return (
     <>
@@ -209,7 +219,8 @@ export default function ResumePageClientV2({
                       const end = comp.endDate || '현재';
                       const months = getMonthDiff(comp.startDate, comp.endDate || new Date().toISOString().slice(0, 7));
                       const companyDesc = comp.description;
-                      return (
+                      const isPinned = comp.isBasicShow !== false;
+                      const content = (
                         <div key={idx} className="relative">
                           <div className="flex items-center gap-3 mb-2">
                             {comp.companyLogo?.url && (
@@ -270,21 +281,52 @@ export default function ResumePageClientV2({
                           )}
                         </div>
                       );
+
+                      if (isPinned) {
+                        return content;
+                      } else {
+                        return (
+                          <AnimatePresence key={`company-${comp.id}`}>
+                            {showAllCompanies && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="overflow-hidden"
+                              >
+                                {content}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        );
+                      }
                     })}
                   </div>
+                  {sortedCompanies.filter(c => c.isBasicShow === false).length > 0 && (
+                    <div className="mt-8 flex justify-center">
+                      <button
+                        onClick={() => setShowAllCompanies(!showAllCompanies)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors rounded-full"
+                        style={{ background: 'var(--v2-bg-up)', color: 'var(--v2-t-sub)', border: '1px solid var(--v2-line)' }}
+                      >
+                        {showAllCompanies ? '접기' : '더보기'} <FaChevronDown className={`transition-transform duration-300 ${showAllCompanies ? 'rotate-180' : ''}`} />
+                      </button>
+                    </div>
+                  )}
                 </section>
               </>
             ) : null}
           </section>
 
-          {/* 개인 프로젝트 */}
-          {projects.filter((proj) => isPersonalProject(proj) && proj.visible !== false).length > 0 && (
+          {/* 팀 프로젝트 */}
+          {teamProjects.length > 0 && (
             <>
               <div style={{ borderTop: '1px solid var(--v2-line)', margin: '16px 0' }} />
               <section>
-                <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--v2-accent)', marginBottom: 24 }}>개인 프로젝트 (Personal Project)</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--v2-accent)', marginBottom: 24 }}>팀 프로젝트 (Team Project)</h2>
                 <div className="flex flex-col gap-8 pl-3 sm:pl-4 border-l-2" style={{ borderColor: 'var(--v2-line)' }}>
-                  {projects.filter((proj) => isPersonalProject(proj) && proj.visible !== false).map((proj, idx) => {
+                  {teamProjects.map((proj) => {
                     const matchedCareerDetail = careerDetails.find(cd => {
                       if (typeof cd.project === 'object' && cd.project !== null && 'id' in (cd.project as any)) {
                         return (cd.project as any).id === proj.id;
@@ -292,8 +334,9 @@ export default function ResumePageClientV2({
                       return cd.project === proj.id;
                     });
                     const careerHref = matchedCareerDetail ? `/career-detail#cd-${matchedCareerDetail.id}` : undefined;
+                    const isPinned = proj.isBasicShow !== false;
 
-                    return (
+                    const content = (
                       <div key={proj.id} className="relative">
                         <div className="absolute w-2 h-2 rounded-full -left-[17px] sm:-left-[21px] top-[6px]" style={{ background: 'var(--v2-line-up)', border: '2px solid var(--v2-bg-card)' }} />
                         <div className="flex flex-wrap items-baseline gap-3 mb-1">
@@ -324,8 +367,124 @@ export default function ResumePageClientV2({
                         )}
                       </div>
                     );
+
+                    if (isPinned) {
+                      return content;
+                    } else {
+                      return (
+                        <AnimatePresence key={`team-${proj.id}`}>
+                          {showAllTeamProjects && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="overflow-hidden"
+                            >
+                              {content}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      );
+                    }
                   })}
                 </div>
+                {teamProjects.filter(p => p.isBasicShow === false).length > 0 && (
+                  <div className="mt-8 flex justify-center">
+                    <button
+                      onClick={() => setShowAllTeamProjects(!showAllTeamProjects)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors rounded-full"
+                      style={{ background: 'var(--v2-bg-up)', color: 'var(--v2-t-sub)', border: '1px solid var(--v2-line)' }}
+                    >
+                      {showAllTeamProjects ? '접기' : '더보기'} <FaChevronDown className={`transition-transform duration-300 ${showAllTeamProjects ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
+                )}
+              </section>
+            </>
+          )}
+
+          {/* 개인 프로젝트 */}
+          {personalProjects.length > 0 && (
+            <>
+              <div style={{ borderTop: '1px solid var(--v2-line)', margin: '16px 0' }} />
+              <section>
+                <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--v2-accent)', marginBottom: 24 }}>개인 프로젝트 (Personal Project)</h2>
+                <div className="flex flex-col gap-8 pl-3 sm:pl-4 border-l-2" style={{ borderColor: 'var(--v2-line)' }}>
+                  {personalProjects.map((proj) => {
+                    const matchedCareerDetail = careerDetails.find(cd => {
+                      if (typeof cd.project === 'object' && cd.project !== null && 'id' in (cd.project as any)) {
+                        return (cd.project as any).id === proj.id;
+                      }
+                      return cd.project === proj.id;
+                    });
+                    const careerHref = matchedCareerDetail ? `/career-detail#cd-${matchedCareerDetail.id}` : undefined;
+                    const isPinned = proj.isBasicShow !== false;
+
+                    const content = (
+                      <div key={proj.id} className="relative">
+                        <div className="absolute w-2 h-2 rounded-full -left-[17px] sm:-left-[21px] top-[6px]" style={{ background: 'var(--v2-line-up)', border: '2px solid var(--v2-bg-card)' }} />
+                        <div className="flex flex-wrap items-baseline gap-3 mb-1">
+                          {matchedCareerDetail ? (
+                            <Link href={careerHref!} className="font-bold text-[16px] transition-colors hover:text-[var(--v2-accent)]" style={{ color: 'var(--v2-t-hi)' }}>
+                              {proj.title} <span className="text-[14px] text-[var(--v2-accent)] ml-1">↗</span>
+                            </Link>
+                          ) : (
+                            <span className="font-bold text-[16px]" style={{ color: 'var(--v2-t-hi)' }}>{proj.title}</span>
+                          )}
+                          <span className="text-[13px]" style={{ color: 'var(--v2-t-sub)' }}>{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
+                        </div>
+
+                        {proj.shortDescription && (
+                          <div className="mt-2 text-[14px]" style={{ color: 'var(--v2-t-body)' }}>
+                            <RichTextRenderer text={proj.shortDescription} />
+                          </div>
+                        )}
+
+                        {Array.isArray(proj.skills) && proj.skills.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number) => (
+                              <span key={skill.id || skill.name || i} className="text-[11px] px-2 py-1 rounded" style={{ background: 'var(--v2-bg-up)', color: 'var(--v2-t-sub)', border: '1px solid var(--v2-line-up)', fontFamily: 'var(--v2-mono)' }}>
+                                {skill.name}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+
+                    if (isPinned) {
+                      return content;
+                    } else {
+                      return (
+                        <AnimatePresence key={`personal-${proj.id}`}>
+                          {showAllPersonalProjects && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="overflow-hidden"
+                            >
+                              {content}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      );
+                    }
+                  })}
+                </div>
+                {personalProjects.filter(p => p.isBasicShow === false).length > 0 && (
+                  <div className="mt-8 flex justify-center">
+                    <button
+                      onClick={() => setShowAllPersonalProjects(!showAllPersonalProjects)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors rounded-full"
+                      style={{ background: 'var(--v2-bg-up)', color: 'var(--v2-t-sub)', border: '1px solid var(--v2-line)' }}
+                    >
+                      {showAllPersonalProjects ? '접기' : '더보기'} <FaChevronDown className={`transition-transform duration-300 ${showAllPersonalProjects ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
+                )}
               </section>
             </>
           )}
@@ -486,13 +645,13 @@ export default function ResumePageClientV2({
           </>
         )}
         {/* 경력 (Company) */}
-        {sortedCompanies.length > 0 && (
+        {sortedCompanies.filter(c => showAllCompanies || c.isBasicShow !== false).length > 0 && (
           <>
             <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
             <section style={{ marginBottom: 32 }}>
               <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>경력 (Company)</h2>
               <ul style={{ marginLeft: 32 }}>
-                {sortedCompanies.map((comp, idx) => {
+                {sortedCompanies.filter(c => showAllCompanies || c.isBasicShow !== false).map((comp, idx, arr) => {
                   const companyProjects = getSortedProjects(comp.id);
                   const start = comp.startDate;
                   const end = comp.endDate || '현재';
@@ -554,7 +713,7 @@ export default function ResumePageClientV2({
                         </ul>
                       )}
                       {/* 회사와 회사 사이에 얇은 구분선 추가 (마지막 회사 제외) */}
-                      {idx < sortedCompanies.length - 1 && (
+                      {idx < arr.length - 1 && (
                         <hr
                           style={{
                             marginTop: 24,
@@ -571,14 +730,61 @@ export default function ResumePageClientV2({
             </section>
           </>
         )}
+        {/* 팀 프로젝트 (Team Project) */}
+        {teamProjects.filter(p => showAllTeamProjects || p.isBasicShow !== false).length > 0 && (
+          <>
+            <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
+            <section style={{ marginBottom: 32 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>팀 프로젝트 (Team Project)</h2>
+              <ul style={{ marginLeft: 32 }}>
+                {teamProjects.filter(p => showAllTeamProjects || p.isBasicShow !== false).map((proj, idx, arr) => {
+                  const matchedCareerDetail = careerDetails.find(cd => {
+                    if (typeof cd.project === 'object' && cd.project !== null && 'id' in (cd.project as any)) {
+                      return (cd.project as any).id === proj.id;
+                    }
+                    return cd.project === proj.id;
+                  });
+                  return (
+                    <li key={proj.id} style={{ marginBottom: 12 }}>
+                      <div style={{ fontWeight: 700, fontSize: 15, color: '#111', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontWeight: 700, fontSize: 7, color: '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span> <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{proj.title}</span>
+                        <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
+                      </div>
+                      {proj.shortDescription && (
+                        <div style={{ color: '#222', fontSize: 14, marginLeft: 24, marginTop: 2 }}>
+                          <RichTextRenderer text={proj.shortDescription} className="mt-1 prose-project-desc" />
+                        </div>
+                      )}
+                      {/* 스킬: 프린트에서는 뱃지 없이 텍스트만 */}
+                      {Array.isArray(proj.skills) && proj.skills.length > 0 && (
+                        <div style={{ marginLeft: 24, marginTop: 4 }}>
+                          <span style={{ fontWeight: 500, color: '#111', marginLeft: 0 }}>skill : </span>
+                          <span style={{ color: '#111', fontSize: 12 }}>
+                            {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number, arr: any[]) => `${skill.name}${i < arr.length - 1 ? ', ' : ''}`)}
+                          </span>
+                        </div>
+                      )}
+                      {matchedCareerDetail && (
+                        <div style={{ marginLeft: 24, marginTop: 8, borderLeft: '2px solid #eee', paddingLeft: 12 }}>
+                          <span style={{ fontWeight: 600, color: '#111' }}>경력기술서 있음</span>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          </>
+        )}
+        
         {/* 개인 프로젝트 (Personal Project) */}
-        {projects.filter((proj) => proj.company == null && proj.visible !== false).length > 0 && (
+        {personalProjects.filter(p => showAllPersonalProjects || p.isBasicShow !== false).length > 0 && (
           <>
             <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
             <section style={{ marginBottom: 32 }}>
               <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>개인 프로젝트 (Personal Project)</h2>
               <ul style={{ marginLeft: 32 }}>
-                {projects.filter((proj) => proj.company == null && proj.visible !== false).map((proj, idx, arr) => {
+                {personalProjects.filter(p => showAllPersonalProjects || p.isBasicShow !== false).map((proj, idx, arr) => {
                   const matchedCareerDetail = careerDetails.find(cd => {
                     if (typeof cd.project === 'object' && cd.project !== null && 'id' in (cd.project as any)) {
                       return (cd.project as any).id === proj.id;

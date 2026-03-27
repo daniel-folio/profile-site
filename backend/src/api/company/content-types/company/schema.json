@@ -64,6 +64,11 @@
       "type": "richtext",
       "displayName": "Description(설명)"
     },
+    "isBasicShow": {
+      "type": "boolean",
+      "default": true,
+      "description": "📌 이력서 화면에서 기본으로 노출할 항목이면 체크 (해제 시 '더보기' 안에 숨겨짐)"
+    },
     "achievements": {
       "type": "text",
       "displayName": "Achievements(성과)"

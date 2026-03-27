@@ -20,6 +20,8 @@ export interface Project {
   order?: number;
   company?: number | null;
   visible?: boolean;
+  teamType?: 'Team' | 'Personal';
+  isBasicShow?: boolean;
   skills?: { data: any[] };
 }
 

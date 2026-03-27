@@ -12,6 +12,8 @@ import { CareerDetail } from "@/types/career-detail";
 import { OtherExperience } from "@/types/other-experience";
 import { useEffect, useState } from 'react';
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaChevronDown } from 'react-icons/fa';
 import '../../../app/resume/resume-print.css';
 import '../../../app/resume/resume-badge.css';
 import { useTheme } from 'next-themes';
@@ -118,9 +120,18 @@ export default function ResumePageClientV1({
     return acc;
   }, {} as Record<string, Skill[]>);
   const showDownload = !!profile?.resumeDownloadEnabled;
+
+  const [showAllCompanies, setShowAllCompanies] = useState(false);
+  const [showAllTeamProjects, setShowAllTeamProjects] = useState(false);
+  const [showAllPersonalProjects, setShowAllPersonalProjects] = useState(false);
+
   // Strapi 5에서 회사 없음은 null/undefined/{} 등 다양하게 올 수 있어 방어 처리
   const isPersonalProject = (proj: any) =>
     !proj.company || (typeof proj.company === 'object' && !('id' in proj.company));
+
+  const nonCompanyProjects = projects.filter((proj) => isPersonalProject(proj) && proj.visible !== false);
+  const teamProjects = nonCompanyProjects.filter(p => p.teamType !== 'Personal');
+  const personalProjects = nonCompanyProjects.filter(p => p.teamType === 'Personal');
 
   // 출력용 프로필 사진 Base64 변환
   const [profileImageBase64, setProfileImageBase64] = useState<string | null>(null);
@@ -209,7 +220,9 @@ export default function ResumePageClientV1({
                       const end = comp.endDate || '현재';
                       const months = getMonthDiff(comp.startDate, comp.endDate || new Date().toISOString().slice(0, 7));
                       const companyDesc = comp.description;
-                      return (
+                      const isPinned = comp.isBasicShow !== false;
+
+                      const content = (
                         <li key={idx} className="pb-4 ml-8">
                           <div className="flex items-center gap-2 mb-1">
                             {comp.companyLogo?.url && (
@@ -275,21 +288,51 @@ export default function ResumePageClientV1({
                           )}
                         </li>
                       );
+
+                      if (isPinned) {
+                        return content;
+                      } else {
+                        return (
+                          <AnimatePresence key={`company-${comp.id}`}>
+                            {showAllCompanies && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="overflow-hidden"
+                              >
+                                {content}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        );
+                      }
                     })}
                   </ul>
+                  {sortedCompanies.filter(c => c.isBasicShow === false).length > 0 && (
+                    <div className="mt-8 flex justify-center">
+                      <button
+                        onClick={() => setShowAllCompanies(!showAllCompanies)}
+                        className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold transition-colors rounded-full text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 dark:text-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700 shadow-sm"
+                      >
+                        {showAllCompanies ? '접기' : '더보기'} <FaChevronDown className={`transition-transform duration-300 ${showAllCompanies ? 'rotate-180' : ''}`} />
+                      </button>
+                    </div>
+                  )}
                 </section>
               </>
             ) : null}
           </section>
 
-          {/* 개인 프로젝트 */}
-          {projects.filter((proj) => proj.company == null && proj.visible !== false).length > 0 && (
+          {/* 팀 프로젝트 */}
+          {teamProjects.length > 0 && (
             <>
               <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
               <section style={{ marginBottom: 32 }}>
-                <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>개인 프로젝트(Personal Project)</h2>
+                <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>팀 프로젝트(Team Project)</h2>
                 <ul style={{ marginLeft: 32 }}>
-                  {projects.filter((proj) => proj.company == null && proj.visible !== false).map((proj, idx) => {
+                  {teamProjects.map((proj) => {
                     const matchedCareerDetail = careerDetails.find(cd => {
                       if (typeof cd.project === 'object' && cd.project !== null && 'id' in (cd.project as any)) {
                         return (cd.project as any).id === proj.id;
@@ -297,8 +340,9 @@ export default function ResumePageClientV1({
                       return cd.project === proj.id;
                     });
                     const careerHref = matchedCareerDetail ? `/career-detail#cd-${matchedCareerDetail.id}` : undefined;
+                    const isPinned = proj.isBasicShow !== false;
 
-                    return (
+                    const content = (
                       <li key={proj.id} style={{ marginBottom: 12 }}>
                         <div style={{ fontWeight: 700, fontSize: 15, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', display: 'flex', alignItems: 'center', gap: 8 }}>
                           <span style={{ fontWeight: 700, fontSize: 7, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
@@ -331,8 +375,124 @@ export default function ResumePageClientV1({
                         )}
                       </li>
                     );
+
+                    if (isPinned) {
+                      return content;
+                    } else {
+                      return (
+                        <AnimatePresence key={`team-${proj.id}`}>
+                          {showAllTeamProjects && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="overflow-hidden"
+                            >
+                              {content}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      );
+                    }
                   })}
                 </ul>
+                {teamProjects.filter(p => p.isBasicShow === false).length > 0 && (
+                  <div className="mt-8 flex justify-center">
+                    <button
+                      onClick={() => setShowAllTeamProjects(!showAllTeamProjects)}
+                      className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold transition-colors rounded-full text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 dark:text-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700 shadow-sm"
+                    >
+                      {showAllTeamProjects ? '접기' : '더보기'} <FaChevronDown className={`transition-transform duration-300 ${showAllTeamProjects ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
+                )}
+              </section>
+            </>
+          )}
+
+          {/* 개인 프로젝트 */}
+          {personalProjects.length > 0 && (
+            <>
+              <hr style={{ margin: '32px 0', border: '1px solid #aaa', width: '100%' }} />
+              <section style={{ marginBottom: 32 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 600, color: '#FF8000', marginBottom: 12 }}>개인 프로젝트(Personal Project)</h2>
+                <ul style={{ marginLeft: 32 }}>
+                  {personalProjects.map((proj) => {
+                    const matchedCareerDetail = careerDetails.find(cd => {
+                      if (typeof cd.project === 'object' && cd.project !== null && 'id' in (cd.project as any)) {
+                        return (cd.project as any).id === proj.id;
+                      }
+                      return cd.project === proj.id;
+                    });
+                    const careerHref = matchedCareerDetail ? `/career-detail#cd-${matchedCareerDetail.id}` : undefined;
+                    const isPinned = proj.isBasicShow !== false;
+
+                    const content = (
+                      <li key={proj.id} style={{ marginBottom: 12 }}>
+                        <div style={{ fontWeight: 700, fontSize: 15, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontWeight: 700, fontSize: 7, color: isMounted && resolvedTheme === 'dark' ? '#fff' : '#111', marginRight: 6, verticalAlign: 'middle', lineHeight: 1 }}>●</span>
+                          {matchedCareerDetail ? (
+                            <Link
+                              href={careerHref!}
+                              className="font-bold text-[15px] text-gray-900 dark:text-white hover:text-sky-500 dark:hover:text-sky-500 transition-colors cursor-pointer"
+                              style={{ textDecoration: 'none' }}
+                            >
+                              {proj.title}
+                            </Link>
+                          ) : (
+                            <span className="font-bold text-[15px] text-gray-900 dark:text-white">{proj.title}</span>
+                          )}
+                          <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>{proj.startDate}{proj.endDate ? ` ~ ${proj.endDate}` : proj.startDate ? ' ~ 현재' : ''}</span>
+                        </div>
+                        {proj.shortDescription && (
+                          <div style={{ color: '#222', fontSize: 14, marginLeft: 24, marginTop: 2 }}>
+                            <RichTextRenderer text={proj.shortDescription} className="mt-1 prose-project-desc dark:prose-invert" />
+                          </div>
+                        )}
+                        {/* 스킬: 뱃지 방식 */}
+                        {Array.isArray(proj.skills) && proj.skills.length > 0 && (
+                          <div style={{ marginLeft: 24, marginTop: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <span className="font-medium text-gray-900 dark:text-gray-100 mr-2">skill : </span>
+                            {(Array.isArray(proj.skills) ? proj.skills : []).map((skill: any, i: number) => (
+                              <span key={skill.id || skill.name || i} className="resume-skill-badge bg-sky-100 text-sky-700 px-2 py-0.5 rounded text-[13px] font-semibold border border-sky-200">{skill.name}</span>
+                            ))}
+                          </div>
+                        )}
+                      </li>
+                    );
+
+                    if (isPinned) {
+                      return content;
+                    } else {
+                      return (
+                        <AnimatePresence key={`personal-${proj.id}`}>
+                          {showAllPersonalProjects && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="overflow-hidden"
+                            >
+                              {content}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      );
+                    }
+                  })}
+                </ul>
+                {personalProjects.filter(p => p.isBasicShow === false).length > 0 && (
+                  <div className="mt-8 flex justify-center">
+                    <button
+                      onClick={() => setShowAllPersonalProjects(!showAllPersonalProjects)}
+                      className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold transition-colors rounded-full text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 dark:text-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700 shadow-sm"
+                    >
+                      {showAllPersonalProjects ? '접기' : '더보기'} <FaChevronDown className={`transition-transform duration-300 ${showAllPersonalProjects ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
+                )}
               </section>
             </>
           )}
