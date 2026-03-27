@@ -9,6 +9,7 @@ on:
 
 jobs:
   sync-and-deploy:
+    if: github.repository_owner == 'daniel-folio'
     runs-on: ubuntu-latest
     steps:
       # 1. B 저장소(소스) 코드를 가져옴
