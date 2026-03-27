@@ -77,7 +77,10 @@ Beyond site settings, the following models define the core portfolio data. For d
 
 #### **📂 Project**
 - **Key Fields**: `isBasicShow` (Default visibility), `teamType` (Team/Personal category), `order` (Display order)
-- **Logic**: N:1 relationship with `Company`. Features automatic categorization based on affiliation or project nature.
+- **Automated Data Logic (Lifecycle Hooks)**:
+  - **`isBasicShow`**: Automatically set to `true` when a project is newly created or updated without a specified value.
+  - **`teamType`**: Defaults to `Team` if not specified and no company is attached. If a company is selected, this field is overwritten as `null` during save to maintain data integrity, regardless of the admin UI selection.
+- **Logic**: N:1 relationship with `Company`. Features automatic categorization based on affiliation or project nature through the lifecycle hooks mentioned above.
 
 #### **📂 Company (Career)**
 - **Key Fields**: `companyName`, `isBasicShow` (Default visibility), `order` (Display order)
