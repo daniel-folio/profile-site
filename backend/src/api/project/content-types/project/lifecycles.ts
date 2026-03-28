@@ -7,16 +7,12 @@ export default {
       data.isBasicShow = true;
     }
 
-    // 2. 회사 선택 여부에 따른 teamType 설정 로직
-    if (!data.company) {
-      // 회사가 선택되지 않은 상태에서 teamType이 비어있으면 기본값 'Team'
-      if (!data.teamType) {
-        data.teamType = 'Team';
-      }
-    } else {
-      // 회사가 선택된 상태라면 teamType은 무의미하므로 null 초기화
-      // (Admin UI에서 값을 선택하더라도 저장 시 지워지도록 강제)
-      data.teamType = null;
+    // 2. teamType 기본값 설정
+    // (Strapi는 Relation 필드가 빈 상태로 저장될 때 빈 객체 {connect:[], ...} 를 보내므로 
+    // 단순 if(!data.company) 검사로 teamType을 null로 강제화하면 사용자가 선택한 값이 날아가는 버그가 생깁니다.
+    // 회사가 선택되더라도 teamType 값을 보존하도록 수정했습니다.)
+    if (!data.teamType) {
+      data.teamType = 'Team';
     }
   },
 
@@ -28,18 +24,9 @@ export default {
       data.isBasicShow = true;
     }
 
-    // 2. 회사 연결/해제에 따른 teamType 업데이트
-    // 업데이트 페이로드에 company 정보가 올 경우만 처리
-    if ('company' in data) {
-      if (!data.company) {
-        // 회사를 해제했을 때 teamType이 없다면 기본값 'Team'
-        if (!data.teamType) {
-          data.teamType = 'Team';
-        }
-      } else {
-        // 회사를 선택했을 때는 teamType 무효화
-        data.teamType = null;
-      }
+    // 2. 명시적으로 teamType이 빈 값으로 오면 기본값 'Team' 강제
+    if (data.teamType === null || data.teamType === '') {
+      data.teamType = 'Team';
     }
   },
 };
