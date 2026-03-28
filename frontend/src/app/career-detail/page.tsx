@@ -1,11 +1,11 @@
-import { getCompanies, getProjects, getCareerDetails, getProfile } from '@/lib/api';
-import { Company } from '@/types/company';
-import { Project } from '@/types/project';
-import { Profile } from '@/types/profile';
-import { CareerDetail } from '@/types/career-detail';
-import CareerDetailClientV1 from '@/components/v1/pages/CareerDetailClientV1';
-import CareerDetailClientV2 from '@/components/v2/pages/CareerDetailClientV2';
-import { getSiteSettings } from '@/lib/siteSettings';
+import { getCompanies, getProjects, getCareerDetails, getProfile } from '@/features/common/api/api';
+import { Company } from '@/features/common/types/company';
+import { Project } from '@/features/common/types/project';
+import { Profile } from '@/features/common/types/profile';
+import { CareerDetail } from '@/features/common/types/career-detail';
+import CareerDetailClientV1 from '@/features/public/components/v1/pages/CareerDetailClientV1';
+import CareerDetailClientV2 from '@/features/public/components/v2/pages/CareerDetailClientV2';
+import { getSiteSettings } from '@/features/common/api/siteSettings';
 
 // 이 페이지를 항상 동적으로 렌더링하여 캐시를 사용하지 않도록 강제합니다.
 export const dynamic = 'force-dynamic';

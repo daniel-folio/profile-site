@@ -1,7 +1,7 @@
-import { getProfile, getSkills, getProjects } from "@/lib/api";
-import { getSiteSettings } from '@/lib/siteSettings';
-import HomePageClientV1 from '@/components/v1/pages/HomePageClientV1';
-import HomePageClientV2 from '@/components/v2/pages/HomePageClientV2';
+import { getProfile, getSkills, getProjects } from "@/features/common/api/api";
+import { getSiteSettings } from '@/features/common/api/siteSettings';
+import HomePageClientV1 from '@/features/public/components/v1/pages/HomePageClientV1';
+import HomePageClientV2 from '@/features/public/components/v2/pages/HomePageClientV2';
 
 export const revalidate = 0;
 

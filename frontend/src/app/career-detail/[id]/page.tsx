@@ -1,8 +1,8 @@
-import { getCareerDetails } from '@/lib/api';
-import { CareerDetail } from '@/types/career-detail';
+import { getCareerDetails } from '@/features/common/api/api';
+import { CareerDetail } from '@/features/common/types/career-detail';
 import { notFound } from 'next/navigation';
 import { marked } from 'marked';
-import { RichTextRenderer } from '@/components/common/ui/RichTextRenderer';
+import { RichTextRenderer } from '@/features/common/ui/RichTextRenderer';
 
 interface CareerDetailPageProps {
   params: { id: string };

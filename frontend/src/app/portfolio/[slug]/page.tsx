@@ -1,11 +1,11 @@
-import { getProjectBySlug, getAllProjectSlugs } from '@/lib/api';
+import { getProjectBySlug, getAllProjectSlugs } from '@/features/common/api/api';
 import { notFound } from 'next/navigation';
-import { formatDateRange, getImageUrl } from '@/lib/utils';
+import { formatDateRange, getImageUrl } from '@/features/common/utils/utils';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Skill } from '@/types/skill';
-import { StrapiMedia } from '@/types/media';
-import { RichTextRenderer } from '@/components/common/ui/RichTextRenderer';
+import { Skill } from '@/features/common/types/skill';
+import { StrapiMedia } from '@/features/common/types/media';
+import { RichTextRenderer } from '@/features/common/ui/RichTextRenderer';
 
 // --- 타입 정의 ---
 

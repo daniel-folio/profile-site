@@ -42,6 +42,8 @@ This portfolio demonstrates expertise in:
 
 ### 📁 **Project Structure**
 
+> See [folder-structure-ko.md](./folder-structure-ko.md) for the detailed frontend structure guide.
+
 ```
 portfolio/
 ├── frontend/                    # Next.js Frontend Application
@@ -52,17 +54,10 @@ portfolio/
 │   │   │   ├── resume/         # Resume Page
 │   │   │   └── admin/          # Admin Dashboard
 │   │   │       └── visitors/   # Visitor Analytics Dashboard
-│   │   ├── components/         # React Components
-│   │   │   ├── layout/         # Layout Components
-│   │   │   ├── sections/       # Page Section Components
-│   │   │   ├── ui/             # Reusable UI Components
-│   │   │   └── admin/          # Admin-specific Components
-│   │   ├── lib/                # Utility Functions & APIs
-│   │   │   ├── api.ts          # API Client
-│   │   │   ├── visitor.ts      # Visitor Tracking Logic
-│   │   │   └── siteSettings.ts # Site Settings Management
-│   │   ├── hooks/              # Custom React Hooks
-│   │   └── types/              # TypeScript Type Definitions
+│   │   └── features/           # Feature-Driven Domain Layer
+│   │       ├── admin/          # Admin-only (API, Components, Types)
+│   │       ├── public/         # Public user-facing (v1/v2/v3 themes, PDF)
+│   │       └── common/         # Shared (API helpers, UI, Utils, Types)
 │   ├── public/                 # Static Assets
 │   └── package.json
 ├── backend/                    # Strapi Backend CMS
@@ -78,9 +73,12 @@ portfolio/
 │   │       └── site-setting/  # Global Site Configuration
 │   ├── config/                # Strapi Configuration
 │   └── package.json
-├── DEPLOYMENT.md              # Deployment Guide
-├── VISITOR_TRACKING.md        # Analytics Documentation
-└── README.md                  # This File
+├── docs/                      # Project Documentation
+│   ├── architecture/          # Tech Architecture & Folder Structure Guide
+│   ├── data-model/            # Data Model Schemas
+│   ├── features/              # Feature Documentation
+│   └── guide/                 # Development Guides
+└── README.md                  # Project README
 ```
 
 ### 🎯 **Implemented Features & Capabilities**
