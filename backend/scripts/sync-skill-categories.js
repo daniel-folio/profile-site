@@ -46,7 +46,7 @@ function syncEnumToSchema(schemaPath, attributeName, newValues, label) {
 // ------- 1. 스킬 카테고리 동기화 -------
 try {
   const skillCategories = extractArrayFromTsFile(
-    path.join(__dirname, '../../frontend/src/lib/skillCategories.ts'),
+    path.join(__dirname, '../../frontend/src/features/common/utils/skillCategories.ts'),
     'SKILL_CATEGORY_ORDER'
   );
   if (skillCategories) {
@@ -64,7 +64,7 @@ try {
 // ------- 2. 프로젝트 카테고리 동기화 -------
 try {
   const projectCategories = extractArrayFromTsFile(
-    path.join(__dirname, '../../frontend/src/lib/projectCategories.ts'),
+    path.join(__dirname, '../../frontend/src/features/common/utils/projectCategories.ts'),
     'PROJECT_CATEGORY_ORDER'
   );
   if (projectCategories) {

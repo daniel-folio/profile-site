@@ -42,6 +42,8 @@
 
 ### 📁 **프로젝트 구조**
 
+> 상세 구조는 [folder-structure-ko.md](./folder-structure-ko.md) 문서를 참고하세요.
+
 ```
 portfolio/
 ├── frontend/                    # Next.js 프론트엔드 애플리케이션
@@ -52,17 +54,10 @@ portfolio/
 │   │   │   ├── resume/         # 이력서 페이지
 │   │   │   └── admin/          # 관리자 대시보드
 │   │   │       └── visitors/   # 방문자 분석 대시보드
-│   │   ├── components/         # React 컴포넌트
-│   │   │   ├── layout/         # 레이아웃 컴포넌트
-│   │   │   ├── sections/       # 페이지 섹션 컴포넌트
-│   │   │   ├── ui/             # 재사용 가능한 UI 컴포넌트
-│   │   │   └── admin/          # 관리자 전용 컴포넌트
-│   │   ├── lib/                # 유틸리티 함수 및 API
-│   │   │   ├── api.ts          # API 클라이언트
-│   │   │   ├── visitor.ts      # 방문자 추적 로직
-│   │   │   └── siteSettings.ts # 사이트 설정 관리
-│   │   ├── hooks/              # 커스텀 React 훅
-│   │   └── types/              # TypeScript 타입 정의
+│   │   └── features/           # 기능 기반 도메인 계층
+│   │       ├── admin/          # 관리자 전용 (API, 컴포넌트, 타입)
+│   │       ├── public/         # 일반 사용자 전용 (v1/v2/v3 테마, PDF)
+│   │       └── common/         # 공통 (API 헬퍼, UI, 유틸, 타입)
 │   ├── public/                 # 정적 자산
 │   └── package.json
 ├── backend/                    # Strapi 백엔드 CMS
@@ -78,9 +73,12 @@ portfolio/
 │   │       └── site-setting/  # 글로벌 사이트 구성
 │   ├── config/                # Strapi 구성
 │   └── package.json
-├── DEPLOYMENT.md              # 배포 가이드
-├── VISITOR_TRACKING.md        # 분석 문서
-└── README.md                  # 이 파일
+├── docs/                      # 프로젝트 문서
+│   ├── architecture/          # 기술 아키텍처 및 폴더 구조 가이드
+│   ├── data-model/            # 데이터 모델 스키마
+│   ├── features/              # 기능 문서
+│   └── guide/                 # 개발 가이드
+└── README.md                  # 프로젝트 README
 ```
 
 ### 🎯 **구현된 기능 및 역량**

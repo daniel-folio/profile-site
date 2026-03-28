@@ -199,6 +199,7 @@ export default factories.createCoreController('api::site-setting.site-setting', 
     merged.reverse();
     // 1) 기본 레코드 업데이트
     await strapi.entityService.update('api::site-setting.site-setting', primary.id, {
+      // @ts-ignore
       data: { ownerIpAllowlist: merged }
     });
     // 2) 나머지 삭제

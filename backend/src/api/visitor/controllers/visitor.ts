@@ -373,6 +373,7 @@ export default factories.createCoreController('api::visitor.visitor', ({ strapi 
             const targetId = (settings && settings.id) ? settings.id : (await getSiteSettingSingleton(strapi)).id;
             try { strapi.log.info(`[visitor.create] updating site-setting id=${targetId} push=${JSON.stringify(toPush)}`); } catch {}
             await strapi.entityService.update('api::site-setting.site-setting', targetId, {
+              // @ts-ignore
               data: { ownerIpAllowlist: newRaw },
             });
             // 메모리 상 목록도 갱신

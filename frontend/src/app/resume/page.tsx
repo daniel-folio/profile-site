@@ -1,14 +1,14 @@
-import { getProfile, getCompanies, getEducations, getSkills, getProjects, getCareerDetails, getOtherExperiences } from '@/lib/api';
-import { Company } from '@/types/company';
-import { Education } from '@/types/education';
-import { Skill } from '@/types/skill';
-import { Project } from '@/types/project';
-import { Profile } from '@/types/profile';
-import { CareerDetail } from '@/types/career-detail';
-import { OtherExperience } from '@/types/other-experience';
-import ResumePageClientV1 from '@/components/v1/pages/ResumePageClientV1';
-import ResumePageClientV2 from '@/components/v2/pages/ResumePageClientV2';
-import { getSiteSettings } from '@/lib/siteSettings';
+import { getProfile, getCompanies, getEducations, getSkills, getProjects, getCareerDetails, getOtherExperiences } from '@/features/common/api/api';
+import { Company } from '@/features/common/types/company';
+import { Education } from '@/features/common/types/education';
+import { Skill } from '@/features/common/types/skill';
+import { Project } from '@/features/common/types/project';
+import { Profile } from '@/features/common/types/profile';
+import { CareerDetail } from '@/features/common/types/career-detail';
+import { OtherExperience } from '@/features/common/types/other-experience';
+import ResumePageClientV1 from '@/features/public/components/v1/pages/ResumePageClientV1';
+import ResumePageClientV2 from '@/features/public/components/v2/pages/ResumePageClientV2';
+import { getSiteSettings } from '@/features/common/api/siteSettings';
 
 // 실시간 반영을 위해 동적 렌더링 강제
 export const dynamic = 'force-dynamic';

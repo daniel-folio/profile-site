@@ -1,12 +1,12 @@
 import './globals.css'
 import { GeistSans } from 'geist/font/sans'
-import { ThemeProvider } from "@/components/common/ThemeProvider";
-import { VisitorTracker } from "@/components/common/VisitorTracker";
-import { MaintenanceMode } from "@/components/common/MaintenanceMode";
+import { ThemeProvider } from "@/features/common/ui/ThemeProvider";
+import { VisitorTracker } from "@/features/common/ui/VisitorTracker";
+import { MaintenanceMode } from "@/features/common/ui/MaintenanceMode";
 import type { Metadata } from "next";
-import LayoutV1 from '@/components/v1/layout/LayoutV1';
-import LayoutV2 from '@/components/v2/layout/LayoutV2';
-import { getSiteSettings } from '@/lib/siteSettings';
+import LayoutV1 from '@/features/public/components/v1/layout/LayoutV1';
+import LayoutV2 from '@/features/public/components/v2/layout/LayoutV2';
+import { getSiteSettings } from '@/features/common/api/siteSettings';
 
 // 이 설정을 추가하면 앱 전체가 동적으로 렌더링됩니다.
 export const dynamic = 'force-dynamic';
