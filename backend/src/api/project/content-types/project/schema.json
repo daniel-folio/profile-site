@@ -27,8 +27,8 @@
       "default": "Web",
       "description": "📂 홈/이력서 화면의 프로젝트 분류 태그 및 필터 탭 (projectCategories.ts 에서 중앙 관리)",
       "enum": [
-        "Web",
         "Ai",
+        "Web",
         "API",
         "Mobile",
         "Desktop",

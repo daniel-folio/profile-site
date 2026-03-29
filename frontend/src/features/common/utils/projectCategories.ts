@@ -9,8 +9,8 @@
  * 항목 추가/삭제/순서 변경 모두 이 배열에서만 하면 됩니다.
  */
 export const PROJECT_CATEGORY_ORDER = [
-  'Web',
   'Ai',
+  'Web',
   'API',
   'Mobile',
   'Desktop',
