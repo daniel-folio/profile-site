@@ -4,6 +4,7 @@ import { formatDateRange, getImageUrl } from '@/features/common/utils/utils';
 import Image from 'next/image';
 import Link from 'next/link';
 import LightboxImage from './LightboxImage';
+import LightboxModal from './LightboxModal';
 import { Skill } from '@/features/common/types/skill';
 import { StrapiMedia } from '@/features/common/types/media';
 import { RichTextRenderer } from '@/features/common/ui/RichTextRenderer';
@@ -76,6 +77,11 @@ export default async function ProjectPage(props: any) {
     otherImages = images.data.slice(1).map((img: any) => img.attributes);
   }
 
+  const allGalleryImages = [
+    ...(mainImage ? [{ src: getImageUrl(mainImage.url), alt: mainImage.alternativeText || title }] : []),
+    ...otherImages.map((img: any) => ({ src: getImageUrl(img.url), alt: img.alternativeText || `${title} 스크린샷` }))
+  ];
+
   return (
     <div style={{ background: 'var(--v2-bg)', minHeight: '100vh' }}>
       <div
@@ -145,6 +151,8 @@ export default async function ProjectPage(props: any) {
             height={mainImage.height || 675}
             priority={true}
             containerClassName="w-full mb-14 rounded-lg border border-[var(--v2-line)] block bg-[var(--v2-bg-up)]"
+            galleryImages={allGalleryImages}
+            indexInGallery={0}
           />
         )}
 
@@ -194,7 +202,7 @@ export default async function ProjectPage(props: any) {
                   ─── Screenshots
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 w-full">
-                  {otherImages.map((image: any) => (
+                  {otherImages.map((image: any, i: number) => (
                     <LightboxImage
                       key={image.url}
                       src={getImageUrl(image.url)}
@@ -203,6 +211,8 @@ export default async function ProjectPage(props: any) {
                       height={image.height || 600}
                       className="w-full h-24 sm:h-32 object-cover"
                       containerClassName="rounded-lg border border-[var(--v2-line)] bg-[var(--v2-bg-up)] overflow-hidden flex items-center justify-center cursor-zoom-in group w-full"
+                      galleryImages={allGalleryImages}
+                      indexInGallery={mainImage ? i + 1 : i}
                     />
                   ))}
                 </div>
@@ -298,6 +308,7 @@ export default async function ProjectPage(props: any) {
           </aside>
         </div>
       </div>
+      <LightboxModal />
     </div>
   );
 }
