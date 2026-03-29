@@ -70,9 +70,9 @@ export default function SkillsV2({ skills }: SkillsV2Props) {
                         <li key={category}>
                                 {/* 스킬 매핑 영역 레퍼 */}
                                 <div
-                                    className="flex flex-col md:grid items-baseline gap-4 md:gap-7 md:grid-cols-[168px_1fr]"
+                                    className="flex flex-col md:grid items-baseline gap-4 md:gap-10 md:grid-cols-[180px_1fr]"
                                     style={{
-                                        padding: '26px 0',
+                                        padding: '36px 0',
                                         borderTop: '1px solid var(--v2-line)',
                                         borderBottom: ci === SKILL_CATEGORY_ORDER.filter(c => skillsByCategory[c]).length - 1
                                             ? '1px solid var(--v2-line)'
@@ -81,14 +81,14 @@ export default function SkillsV2({ skills }: SkillsV2Props) {
                                 >
                                     {/* 카테고리 라벨 */}
                                     <span
-                                        className="text-[14px] font-bold uppercase tracking-[0.2em] md:pt-[2px]"
+                                        className="text-[13px] font-bold uppercase tracking-[0.25em] md:pt-[4px]"
                                         style={{ fontFamily: 'var(--v2-mono)', color: 'var(--v2-accent)' }}
                                     >
                                     {category}
                                 </span>
 
                                 {/* 스킬 필 태그들 */}
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex flex-wrap gap-2.5">
                                     {skillsByCategory[category]
                                         .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
                                         .map((skill, idx) => {
@@ -104,24 +104,27 @@ export default function SkillsV2({ skills }: SkillsV2Props) {
                                             return (
                                                 <span
                                                     key={skill.id}
-                                                    className="inline-flex items-center gap-[6px] transition-all cursor-default"
+                                                    className="inline-flex items-center gap-[8px] transition-all duration-300 cursor-default hover:-translate-y-[1px]"
                                                     style={{
                                                         fontFamily: 'var(--v2-sans)',
-                                                        fontSize: '13px',
+                                                        fontSize: '13.5px',
                                                         fontWeight: 500,
                                                         letterSpacing: '-0.01em',
                                                         color: 'var(--v2-t-hi)',
-                                                        padding: '6px 14px',
+                                                        padding: '7px 16px',
+                                                        borderRadius: '4px',
                                                         border: '1px solid var(--v2-line-up)',
                                                         background: 'var(--v2-bg-card)',
                                                     }}
                                                     onMouseEnter={e => {
                                                         e.currentTarget.style.borderColor = 'var(--v2-accent-bdr)';
                                                         e.currentTarget.style.color = 'var(--v2-accent)';
+                                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.03)';
                                                     }}
                                                     onMouseLeave={e => {
                                                         e.currentTarget.style.borderColor = 'var(--v2-line-up)';
                                                         e.currentTarget.style.color = 'var(--v2-t-hi)';
+                                                        e.currentTarget.style.boxShadow = 'none';
                                                     }}
                                                 >
                                                     {/* 아이콘 — 텍스트 크기와 동일 (1em), 다크모드 대응을 위해 흰색 배경 추가 */}

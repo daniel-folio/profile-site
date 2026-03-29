@@ -82,7 +82,7 @@ export default function HeroV2({ profile }: HeroV2Props) {
                 style={{ paddingTop: 62, borderColor: 'var(--v2-line)' }}
             >
                 <div
-                    className="flex-1 flex flex-col justify-center w-full py-20 md:py-0"
+                    className="flex-1 flex flex-col justify-center w-full py-20 md:py-24"
                     style={{
                         maxWidth: 'var(--v2-max)',
                         margin: '0 auto',
@@ -147,8 +147,8 @@ export default function HeroV2({ profile }: HeroV2Props) {
                             animation: 'v2FadeUp .7s .32s ease forwards',
                         }}
                     >
-                        {/* 설명 및 CTA 영역 */}
-                        <div>
+                        {/* 설명 및 CTA + 소셜링크 통합 영역 */}
+                        <div className="flex flex-col gap-10 pb-10 md:pb-20">
                             {mainBio && (
                                 <div
                                     className="text-base leading-[1.75]"
@@ -157,13 +157,51 @@ export default function HeroV2({ profile }: HeroV2Props) {
                                     <RichTextRenderer text={mainBio} className="" />
                                 </div>
                             )}
-                            <div className="flex gap-4 mt-8">
-                                <Link href="/#projects" className="v2-btn v2-btn-fill">
-                                    View Work
-                                </Link>
-                                <Link href="/resume" className="v2-btn v2-btn-outline">
-                                    Resume
-                                </Link>
+                            <div className="flex flex-col gap-8">
+                                <div className="flex gap-4">
+                                    <Link href="/#projects" className="v2-btn v2-btn-fill">
+                                        View Work
+                                    </Link>
+                                    <Link href="/resume" className="v2-btn v2-btn-outline">
+                                        Resume
+                                    </Link>
+                                </div>
+
+                                {/* 소셜 링크 - CTA 바로 아래로 이동 */}
+                                {socialLinks && (
+                                    <div className="flex gap-5">
+                                        {Object.entries(socialLinks || {}).map(([key, url]) => {
+                                            if (!url || !socialIconMap[key]) return null;
+                                            return (
+                                                <a
+                                                    key={key}
+                                                    href={url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    aria-label={socialIconMap[key].label}
+                                                    className="transition-colors"
+                                                    style={{ color: 'var(--v2-t-sub)' }}
+                                                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--v2-accent)')}
+                                                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--v2-t-sub)')}
+                                                >
+                                                    {socialIconMap[key].icon}
+                                                </a>
+                                            );
+                                        })}
+                                        {email && (
+                                            <a
+                                                href={`mailto:${email}`}
+                                                aria-label="Email"
+                                                className="transition-colors"
+                                                style={{ color: 'var(--v2-t-sub)' }}
+                                                onMouseEnter={e => (e.currentTarget.style.color = 'var(--v2-accent)')}
+                                                onMouseLeave={e => (e.currentTarget.style.color = 'var(--v2-t-sub)')}
+                                            >
+                                                <FaEnvelope size={24} />
+                                            </a>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -185,45 +223,6 @@ export default function HeroV2({ profile }: HeroV2Props) {
                             </div>
                         )}
                     </div>
-
-                    {/* 소셜 링크 */}
-                    {socialLinks && (
-                        <div
-                            className="flex gap-5 mt-8"
-                            style={{ opacity: 0, animation: 'v2FadeUp .7s .45s ease forwards' }}
-                        >
-                            {Object.entries(socialLinks).map(([key, url]) => {
-                                if (!url || !socialIconMap[key]) return null;
-                                return (
-                                    <a
-                                        key={key}
-                                        href={url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        aria-label={socialIconMap[key].label}
-                                        className="transition-colors"
-                                        style={{ color: 'var(--v2-t-sub)' }}
-                                        onMouseEnter={e => (e.currentTarget.style.color = 'var(--v2-accent)')}
-                                        onMouseLeave={e => (e.currentTarget.style.color = 'var(--v2-t-sub)')}
-                                    >
-                                        {socialIconMap[key].icon}
-                                    </a>
-                                );
-                            })}
-                            {email && (
-                                <a
-                                    href={`mailto:${email}`}
-                                    aria-label="Email"
-                                    className="transition-colors"
-                                    style={{ color: 'var(--v2-t-sub)' }}
-                                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--v2-accent)')}
-                                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--v2-t-sub)')}
-                                >
-                                    <FaEnvelope size={24} />
-                                </a>
-                            )}
-                        </div>
-                    )}
                 </div>
             </section>
 
