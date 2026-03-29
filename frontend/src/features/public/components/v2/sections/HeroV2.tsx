@@ -82,7 +82,7 @@ export default function HeroV2({ profile }: HeroV2Props) {
                 style={{ paddingTop: 62, borderColor: 'var(--v2-line)' }}
             >
                 <div
-                    className="flex-1 flex flex-col justify-center w-full py-20 md:py-24"
+                    className="flex-1 flex flex-col justify-center w-full py-20 md:pt-12 md:pb-0"
                     style={{
                         maxWidth: 'var(--v2-max)',
                         margin: '0 auto',
@@ -141,14 +141,14 @@ export default function HeroV2({ profile }: HeroV2Props) {
 
                     {/* 하단 행: 설명 + 이미지 */}
                     <div
-                        className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start"
+                        className="grid grid-cols-1 md:grid-cols-10 gap-12 items-start"
                         style={{
                             opacity: 0,
                             animation: 'v2FadeUp .7s .32s ease forwards',
                         }}
                     >
                         {/* 설명 및 CTA + 소셜링크 통합 영역 */}
-                        <div className="flex flex-col gap-10 pb-10 md:pb-20">
+                        <div className="flex flex-col gap-10 pb-10 md:pb-20 md:col-span-7">
                             {mainBio && (
                                 <div
                                     className="text-base leading-[1.75]"
@@ -207,7 +207,7 @@ export default function HeroV2({ profile }: HeroV2Props) {
 
                         {/* 프로필 이미지 영역 */}
                         {profileImageUrl && (
-                            <div className="hidden md:flex justify-end">
+                            <div className="hidden md:flex justify-end md:col-span-3">
                                 <div
                                     className="relative w-64 h-80 lg:w-80 lg:h-[25rem] rounded-full overflow-hidden"
                                     style={{ border: '1px solid var(--v2-line-up)' }}
