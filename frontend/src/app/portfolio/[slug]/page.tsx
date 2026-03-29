@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { formatDateRange, getImageUrl } from '@/features/common/utils/utils';
 import Image from 'next/image';
 import Link from 'next/link';
+import LightboxImage from './LightboxImage';
 import { Skill } from '@/features/common/types/skill';
 import { StrapiMedia } from '@/features/common/types/media';
 import { RichTextRenderer } from '@/features/common/ui/RichTextRenderer';
@@ -137,24 +138,14 @@ export default async function ProjectPage(props: any) {
 
         {/* 메인 이미지 */}
         {mainImage && (
-          <div
-            style={{
-              position: 'relative',
-              aspectRatio: '16/9',
-              marginBottom: 56,
-              overflow: 'hidden',
-              borderRadius: 8,
-              border: '1px solid var(--v2-line)',
-            }}
-          >
-            <Image
-              src={getImageUrl(mainImage.url)}
-              alt={mainImage.alternativeText || title}
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
+          <LightboxImage
+            src={getImageUrl(mainImage.url)}
+            alt={mainImage.alternativeText || title}
+            width={mainImage.width || 1200}
+            height={mainImage.height || 675}
+            priority={true}
+            containerClassName="w-full mb-14 rounded-lg border border-[var(--v2-line)] block bg-[var(--v2-bg-up)]"
+          />
         )}
 
         {/* 본문: 설명 + 사이드바 */}
@@ -202,31 +193,17 @@ export default async function ProjectPage(props: any) {
                 >
                   ─── Screenshots
                 </h3>
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: 16,
-                  }}
-                >
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 w-full">
                   {otherImages.map((image: any) => (
-                    <div
+                    <LightboxImage
                       key={image.url}
-                      style={{
-                        position: 'relative',
-                        aspectRatio: '16/9',
-                        overflow: 'hidden',
-                        borderRadius: 6,
-                        border: '1px solid var(--v2-line)',
-                      }}
-                    >
-                      <Image
-                        src={getImageUrl(image.url)}
-                        alt={image.alternativeText || `${title} 스크린샷`}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
+                      src={getImageUrl(image.url)}
+                      alt={image.alternativeText || `${title} 스크린샷`}
+                      width={image.width || 800}
+                      height={image.height || 600}
+                      className="w-full h-24 sm:h-32 object-cover"
+                      containerClassName="rounded-lg border border-[var(--v2-line)] bg-[var(--v2-bg-up)] overflow-hidden flex items-center justify-center cursor-zoom-in group w-full"
+                    />
                   ))}
                 </div>
               </div>
