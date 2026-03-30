@@ -166,7 +166,8 @@ export default factories.createCoreController('api::site-setting.site-setting', 
   async mergeDuplicates(ctx) {
     const rows = await strapi.db
       .query('api::site-setting.site-setting')
-      .findMany({ select: ['id', 'updatedAt'], orderBy: { updatedAt: 'desc' } });
+      // 버그로 무한 생성된 빈껍데기보다, 가장 처음에 제대로 생성된 원본 데이터를 최우선(primary)으로 삼기 위해 오름차순(asc) 사용
+      .findMany({ select: ['id', 'createdAt', 'updatedAt'], orderBy: { createdAt: 'asc' } });
     if (!Array.isArray(rows) || rows.length <= 1) {
       ctx.body = { ok: true, message: 'No duplicates' };
       return;
