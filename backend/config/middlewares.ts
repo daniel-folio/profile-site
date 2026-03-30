@@ -22,7 +22,7 @@ export default [
   {
     name: 'strapi::favicon',
     config: {
-      path: './public/favicon.png',
+      path: 'public/favicon.png',
     },
   },
   'strapi::public',

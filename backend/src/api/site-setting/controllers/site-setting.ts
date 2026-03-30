@@ -4,27 +4,34 @@
 
 import { factories } from '@strapi/strapi'
 
-// 싱글톤 안전 조회 헬퍼: 최신(updatedAt desc) 1개를 사용, 없으면 생성, 최후 id=1 조회
+// 싱글톤 안전 조회 헬퍼: ID 1번을 최우선으로 사용하고, 없을 때만 생성 시도
 async function getSiteSettingSingleton(strapi: any): Promise<any> {
   try {
+    // 1. 먼저 ID 1번 레코드를 확실하게 조회
+    const setting = await strapi.entityService.findOne('api::site-setting.site-setting', 1, {
+      select: ['id', 'updatedAt']
+    });
+    if (setting) return setting;
+
+    // 2. ID 1번이 없으면 (초기 구동 등) findMany로 레코드 존재 여부 확인
     const rows = await strapi.db
       .query('api::site-setting.site-setting')
-      .findMany({ select: ['id', 'updatedAt'], orderBy: { updatedAt: 'desc' }, limit: 2 });
+      .findMany({ select: ['id', 'updatedAt'], orderBy: { updatedAt: 'desc' }, limit: 1 });
+    
     if (Array.isArray(rows) && rows.length > 0) {
-      if (rows.length > 1) {
-        try { strapi.log.warn(`[site-setting/controller] duplicate records detected: ids=${rows.map((r: any) => r.id).join(',')}`) } catch { }
-      }
+      // 레코드가 발견되면 그중 가장 최신 것을 반환
       return rows[0];
     }
-  } catch (e) { }
-  try {
+
+    // 3. 정말로 아무 데이터도 없을 때만 'create' 시도
+    // 주의: 단순 쿼리 에러인 경우 여기에 진입하면 안 되므로 findMany 결과가 명확히 0일 때만 실행
+    strapi.log.info('[site-setting/controller] No settings found, creating default record.');
     return await strapi.entityService.create('api::site-setting.site-setting', { data: {} });
-  } catch (e) {
-    try {
-      const fb = await strapi.entityService.findOne('api::site-setting.site-setting', 1);
-      if (fb) return fb;
-    } catch { }
-    throw e;
+
+  } catch (error) {
+    strapi.log.error('[site-setting/controller] Database error during singleton retrieval:', error);
+    // 에러 발생 시(예: DB 연결 지연) 새로 만들지 말고 예외를 던져서 상위에서 처리(fallback)하게 함
+    throw error;
   }
 }
 
