@@ -7,18 +7,17 @@ import { factories } from '@strapi/strapi'
 // 싱글톤 안전 조회 헬퍼: 단 한 번의 쿼리로 가장 최신 설정을 가져옴
 async function getSiteSettingSingleton(strapi: any): Promise<any> {
   try {
-    // findMany와 정렬(updatedAt:desc)을 조합하여 단 1회의 쿼리로 압축
-    const records = await strapi.entityService.findMany('api::site-setting.site-setting', {
-      sort: 'updatedAt:desc',
-      limit: 1,
+    // 단일 타입(Single Type)은 배열이 아닌 단일 객체(Object) 또는 null을 반환합니다.
+    const record = await strapi.entityService.findMany('api::site-setting.site-setting', {
+      populate: '*',
     });
     
-    if (Array.isArray(records) && records.length > 0) {
-      return records[0];
+    if (record && typeof record === 'object' && record.id) {
+      return record;
     }
 
-    // 데이터가 아예 없을 때만 단 1회 생성 (운영 중에는 여기 진입할 일이 거의 없음)
-    strapi.log.info('[site-setting/controller] No settings, creating default.');
+    // 데이터가 아예 없을 때만 단 1회 생성
+    strapi.log.info('[site-setting/controller] No settings found, creating default.');
     return await strapi.entityService.create('api::site-setting.site-setting', { data: {} });
 
   } catch (error) {
