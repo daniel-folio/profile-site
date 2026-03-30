@@ -4,33 +4,25 @@
 
 import { factories } from '@strapi/strapi'
 
-// 싱글톤 안전 조회 헬퍼: ID 1번을 최우선으로 사용하고, 없을 때만 생성 시도
+// 싱글톤 안전 조회 헬퍼: 단 한 번의 쿼리로 가장 최신 설정을 가져옴
 async function getSiteSettingSingleton(strapi: any): Promise<any> {
   try {
-    // 1. 먼저 ID 1번 레코드를 확실하게 조회
-    const setting = await strapi.entityService.findOne('api::site-setting.site-setting', 1, {
-      select: ['id', 'updatedAt']
+    // findMany와 정렬(updatedAt:desc)을 조합하여 단 1회의 쿼리로 압축
+    const records = await strapi.entityService.findMany('api::site-setting.site-setting', {
+      sort: 'updatedAt:desc',
+      limit: 1,
     });
-    if (setting) return setting;
-
-    // 2. ID 1번이 없으면 (초기 구동 등) findMany로 레코드 존재 여부 확인
-    const rows = await strapi.db
-      .query('api::site-setting.site-setting')
-      .findMany({ select: ['id', 'updatedAt'], orderBy: { updatedAt: 'desc' }, limit: 1 });
     
-    if (Array.isArray(rows) && rows.length > 0) {
-      // 레코드가 발견되면 그중 가장 최신 것을 반환
-      return rows[0];
+    if (Array.isArray(records) && records.length > 0) {
+      return records[0];
     }
 
-    // 3. 정말로 아무 데이터도 없을 때만 'create' 시도
-    // 주의: 단순 쿼리 에러인 경우 여기에 진입하면 안 되므로 findMany 결과가 명확히 0일 때만 실행
-    strapi.log.info('[site-setting/controller] No settings found, creating default record.');
+    // 데이터가 아예 없을 때만 단 1회 생성 (운영 중에는 여기 진입할 일이 거의 없음)
+    strapi.log.info('[site-setting/controller] No settings, creating default.');
     return await strapi.entityService.create('api::site-setting.site-setting', { data: {} });
 
   } catch (error) {
-    strapi.log.error('[site-setting/controller] Database error during singleton retrieval:', error);
-    // 에러 발생 시(예: DB 연결 지연) 새로 만들지 말고 예외를 던져서 상위에서 처리(fallback)하게 함
+    strapi.log.error('[site-setting/controller] Database error:', error);
     throw error;
   }
 }
@@ -48,12 +40,12 @@ export default factories.createCoreController('api::site-setting.site-setting', 
       console.log('🔍 패스워드 저장 (원본):', plainPassword);
     }
 
+    const s = await getSiteSettingSingleton(strapi);
     const result = await super.update(ctx);
 
     console.log('🔍 Update 결과:', JSON.stringify(result, null, 2));
 
-    const actualId = (await getSiteSettingSingleton(strapi)).id;
-    const actualData = await strapi.entityService.findOne('api::site-setting.site-setting', actualId);
+    const actualData = await strapi.entityService.findOne('api::site-setting.site-setting', s.id);
     console.log('🔍 업데이트 후 실제 DB 데이터:', JSON.stringify(actualData, null, 2));
 
     return result;
@@ -61,12 +53,8 @@ export default factories.createCoreController('api::site-setting.site-setting', 
   // 공개 설정 조회 (패스워드 제외)
   async find(ctx) {
     try {
-      // getSiteSettingSingleton은 id/updatedAt만 반환하므로
-      // entityService.findOne으로 전체 필드를 다시 조회해야 함
-      const singleton = await getSiteSettingSingleton(strapi);
-      const s: any = singleton
-        ? await strapi.entityService.findOne('api::site-setting.site-setting', singleton.id)
-        : null;
+      // 이제 여기서 한 번의 쿼리로 모든 데이터를 다 가져옵니다. (중복 findOne 제거)
+      const s = await getSiteSettingSingleton(strapi);
 
       const data = s ? {
         enableVisitorTracking: s.enableVisitorTracking ?? true,
@@ -99,9 +87,8 @@ export default factories.createCoreController('api::site-setting.site-setting', 
         return ctx.badRequest('Password is required');
       }
 
-      const target = await getSiteSettingSingleton(strapi);
-      // 타입 오류 방지를 위해 필드를 수동으로 지정하지 않고 전체 조회 후 필요한 것만 사용
-      const settings = (await strapi.entityService.findOne('api::site-setting.site-setting', target.id)) as any;
+      // 이미 전체 데이터를 가져왔으므로 추가 조회가 필요 없습니다.
+      const settings = await getSiteSettingSingleton(strapi);
 
       console.log('🔍 DB에서 조회한 설정 데이터:', JSON.stringify(settings, null, 2));
       console.log('🔍 DB 저장된 adminPassword 해시:', settings?.adminPassword);

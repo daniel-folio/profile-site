@@ -18,6 +18,14 @@ export default ({ env }) => {
             rejectUnauthorized: false,
           },
         },
+        pool: {
+          min: env.int('DATABASE_POOL_MIN', 2),
+          max: env.int('DATABASE_POOL_MAX', 10),
+          acquireTimeoutMillis: 30000,
+          idleTimeoutMillis: 30000,
+          reapIntervalMillis: 1000,
+          propagateCreateError: false,
+        },
         debug: false,
       },
     };
