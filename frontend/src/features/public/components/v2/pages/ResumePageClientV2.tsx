@@ -259,8 +259,12 @@ export default function ResumePageClientV2({
                                         <div className="absolute w-2 h-2 rounded-full -left-[17px] sm:-left-[21px] top-[6px]" style={{ background: 'var(--v2-line-up)', border: '2px solid var(--v2-bg-card)' }} />
                                         <div className="flex flex-wrap items-baseline gap-3 mb-1">
                                           {hasCareerDetail ? (
-                                            <Link href={careerHref!} className="font-bold text-[16px] transition-colors hover:text-[var(--v2-accent)]" style={{ color: 'var(--v2-t-hi)' }}>
-                                              {proj.title} <span className="text-[14px] text-[var(--v2-accent)] ml-1">↗</span>
+                                            <Link href={careerHref!} className="group font-bold text-[16px] text-[var(--v2-t-hi)] hover:text-[var(--v2-accent)] transition-colors">
+                                              <span className="group-hover:underline underline-offset-4">{proj.title}</span> <span className="text-[14px] text-[var(--v2-accent)] ml-1">↗</span>
+                                            </Link>
+                                          ) : proj.slug ? (
+                                            <Link href={`/portfolio/${proj.slug}`} className="group font-bold text-[16px] text-[var(--v2-t-hi)] hover:text-[var(--v2-accent)] transition-colors">
+                                              <span className="group-hover:underline underline-offset-4">{proj.title}</span> <span className="text-[14px] text-[var(--v2-accent)] ml-1">↗</span>
                                             </Link>
                                           ) : (
                                             <span className="font-bold text-[16px]" style={{ color: 'var(--v2-t-hi)' }}>{proj.title}</span>
@@ -368,8 +372,12 @@ export default function ResumePageClientV2({
                         <div className="absolute w-2 h-2 rounded-full -left-[17px] sm:-left-[21px] top-[6px]" style={{ background: 'var(--v2-line-up)', border: '2px solid var(--v2-bg-card)' }} />
                         <div className="flex flex-wrap items-baseline gap-3 mb-1">
                           {matchedCareerDetail ? (
-                            <Link href={careerHref!} className="font-bold text-[16px] transition-colors hover:text-[var(--v2-accent)]" style={{ color: 'var(--v2-t-hi)' }}>
-                              {proj.title} <span className="text-[14px] text-[var(--v2-accent)] ml-1">↗</span>
+                            <Link href={careerHref!} className="group font-bold text-[16px] text-[var(--v2-t-hi)] hover:text-[var(--v2-accent)] transition-colors">
+                              <span className="group-hover:underline underline-offset-4">{proj.title}</span> <span className="text-[14px] text-[var(--v2-accent)] ml-1">↗</span>
+                            </Link>
+                          ) : proj.slug ? (
+                            <Link href={`/portfolio/${proj.slug}`} className="group font-bold text-[16px] text-[var(--v2-t-hi)] hover:text-[var(--v2-accent)] transition-colors">
+                              <span className="group-hover:underline underline-offset-4">{proj.title}</span> <span className="text-[14px] text-[var(--v2-accent)] ml-1">↗</span>
                             </Link>
                           ) : (
                             <span className="font-bold text-[16px]" style={{ color: 'var(--v2-t-hi)' }}>{proj.title}</span>
@@ -452,8 +460,12 @@ export default function ResumePageClientV2({
                         <div className="absolute w-2 h-2 rounded-full -left-[17px] sm:-left-[21px] top-[6px]" style={{ background: 'var(--v2-line-up)', border: '2px solid var(--v2-bg-card)' }} />
                         <div className="flex flex-wrap items-baseline gap-3 mb-1">
                           {matchedCareerDetail ? (
-                            <Link href={careerHref!} className="font-bold text-[16px] transition-colors hover:text-[var(--v2-accent)]" style={{ color: 'var(--v2-t-hi)' }}>
-                              {proj.title} <span className="text-[14px] text-[var(--v2-accent)] ml-1">↗</span>
+                            <Link href={careerHref!} className="group font-bold text-[16px] text-[var(--v2-t-hi)] hover:text-[var(--v2-accent)] transition-colors">
+                              <span className="group-hover:underline underline-offset-4">{proj.title}</span> <span className="text-[14px] text-[var(--v2-accent)] ml-1">↗</span>
+                            </Link>
+                          ) : proj.slug ? (
+                            <Link href={`/portfolio/${proj.slug}`} className="group font-bold text-[16px] text-[var(--v2-t-hi)] hover:text-[var(--v2-accent)] transition-colors">
+                              <span className="group-hover:underline underline-offset-4">{proj.title}</span> <span className="text-[14px] text-[var(--v2-accent)] ml-1">↗</span>
                             </Link>
                           ) : (
                             <span className="font-bold text-[16px]" style={{ color: 'var(--v2-t-hi)' }}>{proj.title}</span>
