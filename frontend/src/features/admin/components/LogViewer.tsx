@@ -7,13 +7,13 @@ import { fetchAppLogs, fetchAppLogStats, cleanupOldLogs, AppLogEntry, AppLogStat
 const LEVEL_STYLES: Record<string, { bg: string; text: string; dot: string; border: string }> = {
   fatal: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-400', dot: 'bg-red-500', border: 'border-red-200 dark:border-red-800' },
   error: { bg: 'bg-red-50 dark:bg-red-900/20', text: 'text-red-600 dark:text-red-400', dot: 'bg-red-400', border: 'border-red-100 dark:border-red-900/50' },
-  warn:  { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-600 dark:text-amber-400', dot: 'bg-amber-400', border: 'border-amber-100 dark:border-amber-900/50' },
+  warn: { bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-600 dark:text-amber-400', dot: 'bg-amber-400', border: 'border-amber-100 dark:border-amber-900/50' },
 };
 
 const LEVEL_BADGE: Record<string, { bg: string; text: string }> = {
   fatal: { bg: 'bg-red-600', text: 'text-white' },
   error: { bg: 'bg-red-500', text: 'text-white' },
-  warn:  { bg: 'bg-amber-500', text: 'text-white' },
+  warn: { bg: 'bg-amber-500', text: 'text-white' },
 };
 
 function formatDateTime(iso: string): string {
@@ -269,11 +269,10 @@ export function LogViewer() {
             <button
               key={p}
               onClick={() => handlePeriodChange(p)}
-              className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition ${
-                period === p
+              className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition ${period === p
                   ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white'
                   : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:border-gray-400'
-              }`}
+                }`}
             >
               {p === '1d' ? '1일' : p === '7d' ? '7일' : '30일'}
             </button>
@@ -303,41 +302,57 @@ export function LogViewer() {
             />
           </div>
 
-          <div className="flex items-center gap-2 ml-auto">
-            {/* 마지막 새로고침 시각 */}
-            {lastRefreshed && (
-              <span className="text-[11px] text-gray-400 dark:text-gray-500 tabular-nums">
-                {new Intl.DateTimeFormat('ko-KR', {
-                  timeZone: 'Asia/Seoul',
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                  hour12: false,
-                }).format(lastRefreshed).replace(/\. /g, '.').replace(/\.$/, '')}
-              </span>
-            )}
-            <label className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={autoRefresh}
-                onChange={(e) => setAutoRefresh(e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              자동 새로고침
-            </label>
-            <button
-              onClick={() => { loadLogs(); loadStats(); }}
-              className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-              title="새로고침"
-            >
-              <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="flex items-center gap-3 ml-auto">
+            {/* ↻ 아이콘 + 마지막 새로고침 시각 (오전/오후 HH:mm:ss) */}
+            <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500">
+              <svg className={`w-3.5 h-3.5 shrink-0 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
+              {lastRefreshed && (
+                <span className="text-[11px] tabular-nums tracking-wide">
+                  {(() => {
+                    const kst = new Date(lastRefreshed.getTime() + 9 * 60 * 60 * 1000);
+                    const p = (n: number) => String(n).padStart(2, '0');
+                    const h = kst.getUTCHours();
+                    const ampm = h < 12 ? '오전' : '오후';
+                    const h12 = h % 12 === 0 ? 12 : h % 12;
+                    return `${ampm} ${p(h12)}:${p(kst.getUTCMinutes())}:${p(kst.getUTCSeconds())}`;
+                  })()}
+                </span>
+              )}
+            </div>
+
+            {/* 자동갱신 토글 스위치 */}
+            <label className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 cursor-pointer select-none">
+              <button
+                role="switch"
+                aria-checked={autoRefresh}
+                onClick={() => setAutoRefresh(!autoRefresh)}
+                className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  autoRefresh ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 ease-in-out ${
+                    autoRefresh ? 'translate-x-4' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+              자동갱신
+            </label>
+
+            {/* 새로고침 버튼 */}
+            <button
+              onClick={() => { loadLogs(); loadStats(); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+            >
+              <svg className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              새로고침
             </button>
           </div>
+
         </div>
 
         {/* 레벨 필터 + 키워드 검색 */}
@@ -352,17 +367,16 @@ export function LogViewer() {
               <button
                 key={lv.key}
                 onClick={() => { setLevelFilter(lv.key); setPage(1); }}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition ${
-                  levelFilter === lv.key
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition ${levelFilter === lv.key
                     ? lv.key === 'warn'
                       ? 'bg-amber-500 text-white'
                       : lv.key === 'error'
-                      ? 'bg-red-500 text-white'
-                      : lv.key === 'fatal'
-                      ? 'bg-red-700 text-white'
-                      : 'bg-gray-700 dark:bg-gray-200 text-white dark:text-gray-900'
+                        ? 'bg-red-500 text-white'
+                        : lv.key === 'fatal'
+                          ? 'bg-red-700 text-white'
+                          : 'bg-gray-700 dark:bg-gray-200 text-white dark:text-gray-900'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
+                  }`}
               >
                 {lv.label}
               </button>
@@ -543,11 +557,10 @@ export function LogViewer() {
               <button
                 key={d}
                 onClick={() => setCleanupDays(d)}
-                className={`px-3 py-1.5 rounded-lg text-sm border transition ${
-                  cleanupDays === d
+                className={`px-3 py-1.5 rounded-lg text-sm border transition ${cleanupDays === d
                     ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white'
                     : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600'
-                }`}
+                  }`}
               >
                 {d}일 이전
               </button>
