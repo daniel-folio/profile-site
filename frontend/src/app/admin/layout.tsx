@@ -51,6 +51,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // 모바일 환경: 경로 이동 시 사이드바 자동 닫힘
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
   // pathname이나 query string이 변경될 때마다 인증 상태를 재확인
   useEffect(() => {
     // 로그인 페이지 자체는 체크 불필요
@@ -93,7 +98,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // 인증 완료 — 사이드바 + 콘텐츠
   return (
     <AdminAuthContext.Provider value={{ isAuthorized, logout: handleLogout }}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+      <div className="min-h-screen pt-16 bg-gray-50 dark:bg-gray-900 flex">
         {/* 모바일 오버레이 */}
         {sidebarOpen && (
           <div
@@ -104,7 +109,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* 사이드바 */}
         <aside className={`
-          fixed lg:sticky top-0 left-0 z-40 h-screen w-64 bg-white dark:bg-gray-800
+          fixed lg:sticky top-16 left-0 z-40 h-[calc(100vh-4rem)] w-64 bg-white dark:bg-gray-800
           border-r border-gray-200 dark:border-gray-700 flex flex-col
           transform transition-transform duration-200 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
@@ -133,7 +138,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <li key={item.key}>
                     <Link
                       href={item.href}
-                      onClick={() => setSidebarOpen(false)}
                       className={`
                         flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
                         ${isActive
@@ -168,7 +172,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* 메인 콘텐츠 */}
         <div className="flex-1 min-w-0">
           {/* 모바일 헤더 */}
-          <div className="lg:hidden sticky top-0 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center gap-3">
+          <div className="lg:hidden sticky top-16 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
               className="p-1.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
