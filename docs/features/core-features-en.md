@@ -21,6 +21,13 @@
   - Docs: see [VISITOR_TRACKING.md](./VISITOR_TRACKING.md).
   - Owner auto-allowlist: Append some information to the visit URL to auto-add the current IP to `ownerIpAllowlist` and record this visit as owner. Do not expose this publicly to avoid abuse.
 
+#### 🚨 **System Error Logging Dashboard (Admin-only Logs Page)**
+- **Real-time Server Error Capture**: Any backend exception triggers the `logToDb` utility to instantly store the error message, source, and stack trace into the `app-log` collection.
+- **Auto-Refresh & Filtering**: Supports a modern pill-toggle for auto-refresh to keep the dashboard up-to-date. Includes Fatal / Error / Warn level filtering and keyword search.
+- **Top 5 Error Sources**: Aggregates and displays the most frequent error sources at the top for rapid troubleshooting.
+- **UI/UX Optimization**: Cross-platform KST(Korean Standard Time) date formatting. Allows administrators to clean up outdated logs (7-day/30-day retention) via a single click.
+- **Secure Integration**: Custom backend routing bypasses default Core Router (`auth: false`) to prevent 403 collisions, securely protected behind the frontend's standalone `/admin/login` page.
+
 #### 📄 **Advanced Content Management System**
 - **Dynamic PDF Generation** for resumes and career details using html2pdf.js with custom styling
 - **Rich Text Rendering Engine** supporting markdown, HTML, and custom components

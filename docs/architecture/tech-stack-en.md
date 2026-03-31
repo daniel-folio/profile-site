@@ -53,7 +53,9 @@ portfolio/
 │   │   │   ├── portfolio/      # Project Detail Pages
 │   │   │   ├── resume/         # Resume Page
 │   │   │   └── admin/          # Admin Dashboard
-│   │   │       └── visitors/   # Visitor Analytics Dashboard
+│   │   │       ├── login/      # Admin Auth Login
+│   │   │       ├── visitors/   # Visitor Analytics Dashboard
+│   │   │       └── logs/       # System Error Logs Monitoring
 │   │   └── features/           # Feature-Driven Domain Layer
 │   │       ├── admin/          # Admin-only (API, Components, Types)
 │   │       ├── public/         # Public user-facing (v1/v2/v3 themes, PDF)
@@ -70,6 +72,7 @@ portfolio/
 │   │       ├── education/     # Educational Background
 │   │       ├── career-detail/ # Detailed Career Information
 │   │       ├── visitor/       # Visitor Analytics Data
+│   │       ├── app-log/       # System Error Logs
 │   │       └── site-setting/  # Global Site Configuration
 │   ├── config/                # Strapi Configuration
 │   └── package.json
@@ -88,7 +91,7 @@ portfolio/
 - **Resume Page** (`/resume`) - Comprehensive resume with PDF download functionality
 - **Career Details** (`/career-detail`) - Detailed career information with PDF export
 - **Project Details** (`/portfolio/[slug]`) - Individual project case studies and technical details
-- **Admin Dashboard** (`/admin/visitors`) - Comprehensive visitor analytics and site management
+- **Admin Dashboard** (`/admin/*`) - Comprehensive visitor analytics, real-time log monitoring, and auth management
 
 #### **✅ Advanced UI/UX Features**
 - **Adaptive Theme System** - Complete dark/light mode with system preference detection and manual toggle

@@ -33,16 +33,21 @@ frontend/src/
 │   │   ├── page.tsx
 │   │   └── [id]/page.tsx
 │   └── admin/                              # /admin route (Admin only)
-│       └── visitors/page.tsx
+│       ├── layout.tsx                      # Admin sidebar layout
+│       ├── login/page.tsx                  # Standalone standalone page
+│       ├── visitors/page.tsx               # Visitor analytics
+│       └── logs/page.tsx                   # System log monitoring
 │
 └── features/                               [Feature Focus Layer - Business Logic]
     ├── admin/                              [Admin-only features]
-    │   ├── api/                            # Visitor stats fetch, tracking hooks
+    │   ├── api/                            # Visitor stats, logs, tracking hooks
     │   │   ├── visitor.ts
+    │   │   ├── appLog.ts
     │   │   └── useVisitorTracking.ts
     │   ├── components/                     # Admin UI components
     │   │   ├── VisitorAnalyticsDashboard.tsx
-    │   │   └── VisitorStats.tsx
+    │   │   ├── VisitorStats.tsx
+    │   │   └── LogViewer.tsx
     │   └── types/                          # Admin specific types (if needed)
     │
     ├── public/                             [General user features]
@@ -102,7 +107,7 @@ Refer to the table below to see how the frontend `features/` domains map to the 
 
 | Frontend Domain | Backend API |
 |---|---|
-| `features/admin/` | `api/visitor/`, `api/site-setting/` |
+| `features/admin/` | `api/visitor/`, `api/site-setting/`, `api/app-log/` |
 | `features/public/` | `api/project/`, `api/company/`, `api/education/`, `api/profile/`, `api/career-detail/`, `api/skill/` |
 | `features/common/` | `api/site-setting/` (Shared), Common utilities |
 
