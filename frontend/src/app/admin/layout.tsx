@@ -2,7 +2,7 @@
 
 import { useState, useEffect, createContext, useContext } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 // 인증 상태 컨텍스트
 interface AdminAuthContextType {
@@ -48,10 +48,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [checkingSession, setCheckingSession] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
 
-  // pathname이 변경될 때마다 인증 상태를 재확인
-  // (로그인 후 /admin/login → /admin/logs 이동 시 isAuthorized 갱신)
+  // pathname이나 query string이 변경될 때마다 인증 상태를 재확인
   useEffect(() => {
     // 로그인 페이지 자체는 체크 불필요
     if (pathname === '/admin/login') {
@@ -63,10 +63,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       setIsAuthorized(true);
       setCheckingSession(false);
     } else {
-      const redirect = encodeURIComponent(pathname || '/admin/visitors');
+      // searchParams(?owner=true 등)가 있을 경우 보존
+      const search = searchParams?.toString();
+      const currentPath = pathname + (search ? `?${search}` : '');
+      const redirect = encodeURIComponent(currentPath || '/admin/visitors');
       router.replace(`/admin/login?redirect=${redirect}`);
     }
-  }, [pathname]); // pathname 변경 시 재실행
+  }, [pathname, searchParams, router]);
 
   const handleLogout = () => {
     sessionStorage.removeItem('admin_authenticated');
