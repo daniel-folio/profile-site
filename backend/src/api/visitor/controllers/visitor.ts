@@ -88,30 +88,21 @@ function parseXff(header: string | string[] | undefined): string[] {
 
 // --- Site Settings 싱글톤 유틸리티 ---
 async function getSiteSettingSingleton(strapi: any): Promise<any> {
-  // Admin에서 보는 것과 동일한 단일 레코드를 DB에서 직접 조회
   try {
-    const rows = await strapi.db
-      .query('api::site-setting.site-setting')
-      .findMany({ select: ['id', 'ownerIpAllowlist', 'enableVisitorTracking'], orderBy: { id: 'desc' }, limit: 2 });
-    if (Array.isArray(rows) && rows.length > 0) {
-      if (rows.length > 1) {
-        try { strapi.log.warn(`[site-setting] duplicate records detected: ids=${rows.map(r => r.id).join(',')}`); } catch {}
-      }
-      return rows[0];
+    const record = await strapi.entityService.findMany('api::site-setting.site-setting', {
+      select: ['id', 'ownerIpAllowlist', 'enableVisitorTracking'],
+    });
+    
+    if (record && typeof record === 'object' && record.id) {
+      return record;
     }
-  } catch (e) {
-    // db.query 사용 불가한 환경일 경우 아래 분기 사용
-  }
-  // entityService로 생성 또는 조회
-  try {
-    const created = await strapi.entityService.create('api::site-setting.site-setting', { data: {} });
-    return created;
-  } catch (e) {
-    try {
-      const fallback = await strapi.entityService.findOne('api::site-setting.site-setting', 1);
-      if (fallback) return fallback;
-    } catch {}
-    throw e;
+
+    // 데이터가 없거나 조회에 실패해도 방문자 로깅 방해를 최소화하며, 
+    // 타임아웃/DB 오류 상황에서 빈 설정 파일이 무한 생성(사이트 초기화 버그)되는 것을 방지하기 위해 빈 객체를 반환합니다.
+    return { id: 0, ownerIpAllowlist: [], enableVisitorTracking: true };
+  } catch (error) {
+    strapi.log.error('[visitor/controller] Database error fetching site-setting:', error);
+    return { id: 0, ownerIpAllowlist: [], enableVisitorTracking: true };
   }
 }
 
