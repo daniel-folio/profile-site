@@ -3,6 +3,7 @@
  */
 
 import { factories } from '@strapi/strapi'
+import { logToDb } from '../../../utils/logToDb';
 
 // 싱글톤 안전 조회 헬퍼: 단 한 번의 쿼리로 가장 최신 설정을 가져옴
 async function getSiteSettingSingleton(strapi: any): Promise<any> {
@@ -20,8 +21,14 @@ async function getSiteSettingSingleton(strapi: any): Promise<any> {
     strapi.log.info('[site-setting/controller] No settings found, creating default.');
     return await strapi.entityService.create('api::site-setting.site-setting', { data: {} });
 
-  } catch (error) {
+  } catch (error: any) {
     strapi.log.error('[site-setting/controller] Database error:', error);
+    logToDb(strapi, {
+      level: 'error',
+      source: 'site-setting/getSiteSettingSingleton',
+      message: error?.message || String(error),
+      stack: error?.stack,
+    }).catch(() => {});
     throw error;
   }
 }

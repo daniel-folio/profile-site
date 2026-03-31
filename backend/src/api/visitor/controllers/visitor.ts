@@ -3,6 +3,7 @@
  */
 
 import { factories } from '@strapi/strapi';
+import { logToDb } from '../../../utils/logToDb';
 
 // --- IPv4 CIDR 매칭 유틸리티 ---
 function ipToLong(ip: string): number | null {
@@ -100,8 +101,14 @@ async function getSiteSettingSingleton(strapi: any): Promise<any> {
     // 데이터가 없거나 조회에 실패해도 방문자 로깅 방해를 최소화하며, 
     // 타임아웃/DB 오류 상황에서 빈 설정 파일이 무한 생성(사이트 초기화 버그)되는 것을 방지하기 위해 빈 객체를 반환합니다.
     return { id: 0, ownerIpAllowlist: [], enableVisitorTracking: true };
-  } catch (error) {
+  } catch (error: any) {
     strapi.log.error('[visitor/controller] Database error fetching site-setting:', error);
+    logToDb(strapi, {
+      level: 'error',
+      source: 'visitor/getSiteSettingSingleton',
+      message: error?.message || String(error),
+      stack: error?.stack,
+    }).catch(() => {});
     return { id: 0, ownerIpAllowlist: [], enableVisitorTracking: true };
   }
 }

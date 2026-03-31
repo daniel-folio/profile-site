@@ -1,12 +1,26 @@
 // import type { Core } from '@strapi/strapi';
 // src/index.ts
 import { startMemoryMonitor } from './config/memory-monitor'; // 모니터 함수 불러오기
+import { logToDb } from './utils/logToDb';
 const logger = require('./config/logger');
+
+// 전역 에러 핸들러에서 strapi 인스턴스를 사용하기 위한 참조
+let _strapi: any = null;
 
 // 1. 모든 치명적 에러를 처리할 중앙 함수
 const handleFatalError = (error: Error, origin: string) => {
   // 에러 로그 및 슬랙 알림을 먼저 요청합니다.
   logger.error(`[${origin}] ${error.stack || error.message}`);
+
+  // DB에 fatal 로그 기록 (strapi가 초기화된 경우에만)
+  if (_strapi) {
+    logToDb(_strapi, {
+      level: 'fatal',
+      source: origin,
+      message: error.message || String(error),
+      stack: error.stack,
+    }).catch(() => {}); // fire-and-forget
+  }
 
   // Winston이 모든 로그 전송(파일, 슬랙 등)을 마치면 'finish' 이벤트를 발생시킵니다.
   logger.on('finish', () => {
@@ -46,6 +60,8 @@ export default {
    * run jobs, or perform some special logic.
    */
   async bootstrap({ strapi }) {
+    // 전역 참조 저장 (에러 핸들러에서 logToDb에 사용)
+    _strapi = strapi;
     // 방문자 API에 대한 퍼블릭 권한 자동 설정
     try {
       const publicRole = await strapi
@@ -58,7 +74,14 @@ export default {
           .findMany({
             where: {
               role: publicRole.id,
-              action: ['api::visitor.visitor.create', 'api::visitor.visitor.find', 'api::visitor.visitor.getStats'],
+              action: [
+                'api::visitor.visitor.create',
+                'api::visitor.visitor.find',
+                'api::visitor.visitor.getStats',
+                'api::app-log.app-log.find',
+                'api::app-log.app-log.getStats',
+                'api::app-log.app-log.cleanup',
+              ],
             },
           });
 
@@ -97,9 +120,21 @@ export default {
             });
           console.log('✅ 방문자 getStats 권한이 활성화되었습니다.');
         }
+
+        // app-log 권한 자동 설정
+        for (const action of ['api::app-log.app-log.find', 'api::app-log.app-log.getStats', 'api::app-log.app-log.cleanup']) {
+          const perm = permissions.find(p => p.action === action);
+          if (perm && !perm.enabled) {
+            await strapi.query('plugin::users-permissions.permission').update({
+              where: { id: perm.id },
+              data: { enabled: true },
+            });
+            console.log(`✅ ${action} 권한이 활성화되었습니다.`);
+          }
+        }
       }
     } catch (error) {
-      console.error('방문자 API 권한 설정 중 오류:', error);
+      console.error('API 권한 설정 중 오류:', error);
     }
 
     // --- 운영용 라우트 정의 ---

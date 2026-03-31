@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "app_logs",
+  "info": {
+    "singularName": "app-log",
+    "pluralName": "app-logs",
+    "displayName": "App Log",
+    "description": "Application error and warning logs"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "level": {
+      "type": "enumeration",
+      "enum": ["warn", "error", "fatal"],
+      "required": true,
+      "default": "error"
+    },
+    "source": {
+      "type": "string",
+      "maxLength": 150,
+      "required": false
+    },
+    "message": {
+      "type": "text",
+      "required": true
+    },
+    "stack": {
+      "type": "text",
+      "required": false
+    },
+    "meta": {
+      "type": "json",
+      "required": false
+    },
+    "occurredAt": {
+      "type": "datetime",
+      "required": true
+    }
+  }
+}
