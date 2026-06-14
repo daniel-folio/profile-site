@@ -139,6 +139,20 @@ export default {
 
     // --- 운영용 라우트 정의 ---
     const routes = [
+      {
+        method: 'GET',
+        path: '/api/v1/health-check',
+        handler: async (ctx: any) => {
+          try {
+            await strapi.db.connection.raw('SELECT 1;');
+            ctx.body = { status: 'healthy', database: 'connected' };
+          } catch (err) {
+            ctx.status = 500;
+            ctx.body = { status: 'unhealthy', database: 'error' };
+          }
+        },
+        config: { auth: false },
+      },
       { method: 'GET', path: '/git-wakeupbot', handler: (ctx: any) => { ctx.body = { ok: true }; }, config: { auth: false } },
       { method: 'GET', path: '/cron-job', handler: (ctx: any) => { ctx.body = { ok: true }; }, config: { auth: false } },
       { method: 'GET', path: '/uptimerobot', handler: (ctx: any) => { ctx.body = { ok: true }; }, config: { auth: false } },
