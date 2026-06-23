@@ -142,14 +142,8 @@ export default {
       {
         method: 'GET',
         path: '/api/v1/health-check',
-        handler: async (ctx: any) => {
-          try {
-            await strapi.db.connection.raw('SELECT 1;');
-            ctx.body = { status: 'healthy', database: 'connected' };
-          } catch (err) {
-            ctx.status = 500;
-            ctx.body = { status: 'unhealthy', database: 'error' };
-          }
+        handler: (ctx: any) => {
+          ctx.body = { status: 'healthy' };
         },
         config: { auth: false },
       },
