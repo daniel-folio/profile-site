@@ -5,21 +5,29 @@ import { getSiteSettings } from '@/features/common/api/siteSettings';
 
 interface SiteAccessProps {
   children: React.ReactNode;
+  initialSiteUsed?: boolean;
 }
 
-export function MaintenanceMode({ children }: SiteAccessProps) {
-  const [isSiteBlocked, setIsSiteBlocked] = useState(false);
-  const [loading, setLoading] = useState(true);
+export function MaintenanceMode({ children, initialSiteUsed }: SiteAccessProps) {
+  const [isSiteBlocked, setIsSiteBlocked] = useState<boolean>(
+    initialSiteUsed !== undefined ? !initialSiteUsed : false
+  );
+  const [loading, setLoading] = useState<boolean>(initialSiteUsed === undefined);
 
   useEffect(() => {
+    // initialSiteUsed가 서버에서 제공된 경우 추가 블로킹 패칭 없이 바로 적용
+    if (initialSiteUsed !== undefined) {
+      setIsSiteBlocked(!initialSiteUsed);
+      setLoading(false);
+      return;
+    }
+
     const checkSiteAccess = async () => {
       try {
         const settings = await getSiteSettings();
-        // siteUsed가 false이면 사이트 차단
         setIsSiteBlocked(!settings.siteUsed);
       } catch (error) {
         console.error('Failed to check site access:', error);
-        // 에러 시 기본값: 사이트 허용
         setIsSiteBlocked(false);
       } finally {
         setLoading(false);
@@ -27,7 +35,7 @@ export function MaintenanceMode({ children }: SiteAccessProps) {
     };
 
     checkSiteAccess();
-  }, []);
+  }, [initialSiteUsed]);
 
   if (loading) {
     return (

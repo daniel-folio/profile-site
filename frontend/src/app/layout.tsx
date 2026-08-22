@@ -6,10 +6,7 @@ import { MaintenanceMode } from "@/features/common/ui/MaintenanceMode";
 import type { Metadata } from "next";
 import LayoutV1 from '@/features/public/components/v1/layout/LayoutV1';
 import LayoutV2 from '@/features/public/components/v2/layout/LayoutV2';
-import { getSiteSettings } from '@/features/common/api/siteSettings';
-
-// 이 설정을 추가하면 앱 전체가 동적으로 렌더링됩니다.
-export const dynamic = 'force-dynamic';
+import { getCachedSiteSettings } from '@/features/common/api/siteSettings';
 
 export const metadata: Metadata = {
   title: "DaeSung Han",
@@ -31,7 +28,7 @@ const LAYOUT_MAP: Record<string, React.ComponentType<{ children: React.ReactNode
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const settings = await getSiteSettings();
+  const settings = await getCachedSiteSettings();
   const version = settings.portfolioVersion || 'v1';
   // 버전 맵에 없는 값이 오면 v1으로 폴백
   const Layout = LAYOUT_MAP[version] ?? LayoutV1;
@@ -51,7 +48,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           attribute="class"
           defaultTheme="light"
         >
-          <MaintenanceMode>
+          <MaintenanceMode initialSiteUsed={settings.siteUsed}>
             <VisitorTracker />
             <Layout>{children}</Layout>
           </MaintenanceMode>

@@ -1,9 +1,9 @@
 import { getProfile, getSkills, getProjects } from "@/features/common/api/api";
-import { getSiteSettings } from '@/features/common/api/siteSettings';
+import { getCachedSiteSettings } from '@/features/common/api/siteSettings';
 import HomePageClientV1 from '@/features/public/components/v1/pages/HomePageClientV1';
 import HomePageClientV2 from '@/features/public/components/v2/pages/HomePageClientV2';
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 // 버전-컴포넌트 맵: 새 버전 추가 시 여기 한 줄만 추가하면 됩니다.
 const VERSION_COMPONENTS = {
@@ -20,9 +20,9 @@ export default async function Home() {
 
   try {
     [profile, skills, projects] = await Promise.all([
-      getProfile(undefined, { cache: 'no-store' }),
-      getSkills({ cache: 'no-store' }),
-      getProjects(true, { cache: 'no-store' }),
+      getProfile(undefined, { next: { revalidate: 60 } }),
+      getSkills(undefined, { next: { revalidate: 60 } }),
+      getProjects(true, undefined, { next: { revalidate: 60 } }),
     ]);
   } catch (e) {
     console.error('[HomePage] Backend fetch failed:', e);
@@ -57,7 +57,7 @@ export default async function Home() {
     );
   }
 
-  const settings = await getSiteSettings();
+  const settings = await getCachedSiteSettings();
   const version = settings.portfolioVersion || 'v1';
   // 버전 맵에 없는 값이 오면 v1으로 안전하게 폴백
   const PageComponent = VERSION_COMPONENTS[version as keyof typeof VERSION_COMPONENTS] ?? HomePageClientV1;

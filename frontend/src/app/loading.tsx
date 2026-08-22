@@ -1,9 +1,27 @@
 "use client";
+
+import { useEffect, useState } from "react";
 import { FaBolt } from "react-icons/fa6";
 import Player from "lottie-react";
 import developerAnimation from "@/../public/lottie/developer.json";
 
 export default function GlobalLoading() {
+  const [showLoading, setShowLoading] = useState(false);
+
+  useEffect(() => {
+    // 0.6초(600ms) 이상 로딩이 지연되는 경우에만 로딩 안내 화면을 노출합니다.
+    // 빠른 페이지 전환(0.1~0.5초) 시에는 로딩 화면이 나타나지 않고 즉시 전환됩니다.
+    const timer = setTimeout(() => {
+      setShowLoading(true);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!showLoading) {
+    return null;
+  }
+
   return (
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white dark:bg-white">
       <div className="flex items-center gap-2 mb-4 px-6 py-3 rounded-xl shadow-lg bg-yellow-50/90 dark:bg-yellow-900/80 border border-yellow-200 dark:border-yellow-700">
@@ -32,4 +50,4 @@ export default function GlobalLoading() {
       </div>
     </div>
   );
-} 
+}

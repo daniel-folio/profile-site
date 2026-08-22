@@ -8,10 +8,9 @@ import { CareerDetail } from '@/features/common/types/career-detail';
 import { OtherExperience } from '@/features/common/types/other-experience';
 import ResumePageClientV1 from '@/features/public/components/v1/pages/ResumePageClientV1';
 import ResumePageClientV2 from '@/features/public/components/v2/pages/ResumePageClientV2';
-import { getSiteSettings } from '@/features/common/api/siteSettings';
+import { getCachedSiteSettings } from '@/features/common/api/siteSettings';
 
-// 실시간 반영을 위해 동적 렌더링 강제
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 // 버전-컴포넌트 맵: 확장성을 위해 도입
 const VERSION_COMPONENTS = {
@@ -21,7 +20,6 @@ const VERSION_COMPONENTS = {
 } as const;
 
 export default async function ResumePage() {
-  // 캐시 없이 실시간 데이터를 가져오도록 모든 fetch 옵션 수정
   let profileRes: any = null;
   let companiesRes: any = null;
   let educationsRes: any = null;
@@ -32,14 +30,15 @@ export default async function ResumePage() {
   let fetchError = false;
 
   try {
+    const fetchOption = { next: { revalidate: 60 } };
     [profileRes, companiesRes, educationsRes, skillsRes, projectsRes, careerDetailsResRaw, otherExperiencesRes] = await Promise.all([
-      getProfile(undefined, { cache: 'no-store' }),
-      getCompanies({ cache: 'no-store' }),
-      getEducations({ cache: 'no-store' }),
-      getSkills({ cache: 'no-store' }),
-      getProjects(undefined, { cache: 'no-store' }),
-      getCareerDetails({ cache: 'no-store' }),
-      getOtherExperiences({ cache: 'no-store' }),
+      getProfile(undefined, fetchOption),
+      getCompanies(undefined, fetchOption),
+      getEducations(undefined, fetchOption),
+      getSkills(undefined, fetchOption),
+      getProjects(undefined, undefined, fetchOption),
+      getCareerDetails(undefined, fetchOption),
+      getOtherExperiences(undefined, fetchOption),
     ]);
   } catch (e) {
     console.error('[ResumePage] Backend fetch failed:', e);
@@ -135,7 +134,7 @@ export default async function ResumePage() {
   }
 
   // 백엔드 설정에서 포트폴리오 버전 확인
-  const settings = await getSiteSettings();
+  const settings = await getCachedSiteSettings();
   const version = settings.portfolioVersion || 'v1';
   
   // 버전 맵에서 컴포넌트 선택 (v1 폴백 포함)

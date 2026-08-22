@@ -87,6 +87,7 @@ async function fetchAPI<T>(path: string, params?: any, options: RequestInit = {}
 
   const defaultOptions: RequestInit = {
     headers,
+    next: { revalidate: 60 },
     ...options,
   };
 
