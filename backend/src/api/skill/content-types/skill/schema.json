@@ -23,12 +23,14 @@
       "description": "📂 홈/이력서 스킬 섹션의 그룹 분류 (skillCategories.ts 에서 중앙 관리, 순서도 동일 파일에서 제어)",
       "enum": [
         "Data Engineering",
+        "AI",
         "Database",
         "Tools",
         "Server",
-        "Machine Learning",
         "Backend",
         "Frontend",
+        "Machine Learning",
+        "DevOps",
         "Other"
       ]
     },
