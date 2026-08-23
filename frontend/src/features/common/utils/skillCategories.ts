@@ -1,10 +1,12 @@
 export const SKILL_CATEGORY_ORDER = [
   'Data Engineering',
+  'AI',
   'Database',
   'Tools',
   'Server',
-  'Machine Learning',
   'Backend',
   'Frontend',
+  'Machine Learning',
+  'DevOps',
   'Other'
 ];
