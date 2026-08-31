@@ -173,7 +173,7 @@ export default function HeroV2({ profile }: HeroV2Props) {
 
                                 {/* 소셜 링크 - CTA 바로 아래로 이동 */}
                                 {socialLinks && (
-                                    <div className="flex gap-5">
+                                    <div className="flex gap-5 items-center">
                                         {Object.entries(socialLinks || {}).map(([key, url]) => {
                                             if (!url || !socialIconMap[key]) return null;
                                             return (
@@ -183,12 +183,17 @@ export default function HeroV2({ profile }: HeroV2Props) {
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     aria-label={socialIconMap[key].label}
-                                                    className="transition-colors"
+                                                    className="relative group transition-all duration-300 transform hover:scale-150 origin-center inline-flex items-center justify-center"
                                                     style={{ color: 'var(--v2-t-sub)' }}
                                                     onMouseEnter={e => (e.currentTarget.style.color = 'var(--v2-accent)')}
                                                     onMouseLeave={e => (e.currentTarget.style.color = 'var(--v2-t-sub)')}
                                                 >
                                                     {socialIconMap[key].icon}
+                                                    {/* 말풍선 툴팁 */}
+                                                    <span className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 px-2.5 py-1 text-[11px] font-semibold text-white dark:text-gray-900 bg-gray-900/90 dark:bg-gray-100/90 backdrop-blur-sm rounded-md shadow-md opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-50">
+                                                        {socialIconMap[key].label}
+                                                        <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900/90 dark:border-t-gray-100/90" />
+                                                    </span>
                                                 </a>
                                             );
                                         })}
@@ -196,12 +201,17 @@ export default function HeroV2({ profile }: HeroV2Props) {
                                             <a
                                                 href={`mailto:${email}`}
                                                 aria-label="Email"
-                                                className="transition-colors"
+                                                className="relative group transition-all duration-300 transform hover:scale-150 origin-center inline-flex items-center justify-center"
                                                 style={{ color: 'var(--v2-t-sub)' }}
                                                 onMouseEnter={e => (e.currentTarget.style.color = 'var(--v2-accent)')}
                                                 onMouseLeave={e => (e.currentTarget.style.color = 'var(--v2-t-sub)')}
                                             >
                                                 <FaEnvelope size={24} />
+                                                {/* 말풍선 툴팁 */}
+                                                <span className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 px-2.5 py-1 text-[11px] font-semibold text-white dark:text-gray-900 bg-gray-900/90 dark:bg-gray-100/90 backdrop-blur-sm rounded-md shadow-md opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-200 whitespace-nowrap z-50">
+                                                    Email
+                                                    <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900/90 dark:border-t-gray-100/90" />
+                                                </span>
                                             </a>
                                         )}
                                     </div>
