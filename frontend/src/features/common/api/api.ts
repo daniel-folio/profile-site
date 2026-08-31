@@ -176,65 +176,99 @@ export async function getProfile(params?: any, options?: RequestInit): Promise<P
 }
 
 export async function getSkills(params?: any, options?: RequestInit): Promise<SkillsResponse> {
-  const defaultParams = { populate: '*', sort: 'order:asc', 'pagination[pageSize]': 1000 };
-  const response = await fetchAPI<SkillsResponse>(
-    '/skills',
-    { ...defaultParams, ...params },
-    options
-  );
-  return response;
+  try {
+    const defaultParams = { populate: '*', sort: 'order:asc', 'pagination[pageSize]': 1000 };
+    return await fetchAPI<SkillsResponse>(
+      '/skills',
+      { ...defaultParams, ...params },
+      options
+    );
+  } catch (e) {
+    console.error('getSkills failed:', e);
+    return { data: [] } as any;
+  }
 }
 
 export async function getProjects(featured?: boolean, params?: any, options?: RequestInit): Promise<ProjectsResponse> {
-  const defaultParams: any = { populate: '*', 'pagination[pageSize]': 1000 };
-  
-  if (featured) {
-    // 대표 프로젝트는 featuredOrder 기준으로 오름차순 정렬
-    defaultParams['filters[featured][$eq]'] = true;
-    defaultParams['sort'] = 'featuredOrder:asc';
-  } else {
-    // 그 외 모든 프로젝트는 기존 order 기준으로 오름차순 정렬
-    defaultParams['sort'] = 'order:asc';
+  try {
+    const defaultParams: any = { populate: '*', 'pagination[pageSize]': 1000 };
+    if (featured) {
+      defaultParams['filters[featured][$eq]'] = true;
+      defaultParams['sort'] = 'featuredOrder:asc';
+    } else {
+      defaultParams['sort'] = 'order:asc';
+    }
+    return await fetchAPI<ProjectsResponse>(
+      '/projects',
+      { ...defaultParams, ...params },
+      options
+    );
+  } catch (e) {
+    console.error('getProjects failed:', e);
+    return { data: [] } as any;
   }
-  return fetchAPI<ProjectsResponse>(
-    '/projects',
-    { ...defaultParams, ...params },
-    options
-  );
 }
 
-export async function getProjectBySlug(slug: string, options?: RequestInit): Promise<ProjectsResponse> {
-  return fetchAPI<ProjectsResponse>(
-    '/projects',
-    { filters: { slug: { $eq: slug } }, populate: '*' },
-    options
-  );
+export async function getProjectBySlug(slug: string, options?: RequestInit): Promise<ProjectsResponse | null> {
+  try {
+    return await fetchAPI<ProjectsResponse>(
+      '/projects',
+      { filters: { slug: { $eq: slug } }, populate: '*' },
+      options
+    );
+  } catch (e) {
+    try {
+      return await fetchAPI<ProjectsResponse>(
+        '/projects',
+        { filters: { slug: slug }, populate: '*' },
+        options
+      );
+    } catch (e2) {
+      console.error(`getProjectBySlug failed for slug: ${slug}`, e2);
+      return null;
+    }
+  }
 }
 
-export async function getAllProjectSlugs(options?: RequestInit): Promise<{ data: { attributes: { slug: string } }[] }> {
-  return fetchAPI<{ data: { attributes: { slug: string } }[] }>(
-    '/projects',
-    { fields: ['slug'] },
-    options
-  );
+export async function getAllProjectSlugs(options?: RequestInit): Promise<{ data: { attributes: { slug: string } }[] } | null> {
+  try {
+    return await fetchAPI<{ data: { attributes: { slug: string } }[] }>(
+      '/projects',
+      { fields: ['slug'] },
+      options
+    );
+  } catch (e) {
+    console.error('getAllProjectSlugs failed:', e);
+    return null;
+  }
 }
 
 export async function getCompanies(params?: any, options?: RequestInit): Promise<CompanyResponse> {
-  const defaultParams = { populate: '*', sort: 'startDate:desc', 'pagination[pageSize]': 1000 };
-  return fetchAPI<CompanyResponse>(
-    '/companies',
-    { ...defaultParams, ...params },
-    options
-  );
+  try {
+    const defaultParams = { populate: '*', sort: 'startDate:desc', 'pagination[pageSize]': 1000 };
+    return await fetchAPI<CompanyResponse>(
+      '/companies',
+      { ...defaultParams, ...params },
+      options
+    );
+  } catch (e) {
+    console.error('getCompanies failed:', e);
+    return { data: [] } as any;
+  }
 }
 
 export async function getEducations(params?: any, options?: RequestInit): Promise<EducationResponse> {
-  const defaultParams = { populate: '*', sort: 'order:asc', 'pagination[pageSize]': 1000 };
-  return fetchAPI<EducationResponse>(
-    '/educations',
-    { ...defaultParams, ...params },
-    options
-  );
+  try {
+    const defaultParams = { populate: '*', sort: 'order:asc', 'pagination[pageSize]': 1000 };
+    return await fetchAPI<EducationResponse>(
+      '/educations',
+      { ...defaultParams, ...params },
+      options
+    );
+  } catch (e) {
+    console.error('getEducations failed:', e);
+    return { data: [] } as any;
+  }
 }
 
 export async function getCareerDetails(params?: any, options?: RequestInit) {
@@ -251,10 +285,15 @@ export async function getCareerDetails(params?: any, options?: RequestInit) {
 }
 
 export async function getOtherExperiences(params?: any, options?: RequestInit) {
-  const defaultParams = { 'pagination[pageSize]': 1000 };
-  return fetchAPI(
-    '/other-experiences',
-    { ...defaultParams, ...params },
-    options
-  );
+  try {
+    const defaultParams = { 'pagination[pageSize]': 1000 };
+    return await fetchAPI(
+      '/other-experiences',
+      { ...defaultParams, ...params },
+      options
+    );
+  } catch (e) {
+    console.error('getOtherExperiences failed:', e);
+    return { data: [] } as any;
+  }
 }

@@ -348,14 +348,21 @@ function MetaCell({ label, value, isLast }: { label: string; value: string; isLa
   );
 }
 
+export const dynamicParams = true;
+
 // 빌드 시점에 정적 페이지를 미리 생성하기 위한 함수
 export async function generateStaticParams() {
-  const allProjects = await getAllProjectSlugs();
-  if (!allProjects?.data || !Array.isArray(allProjects.data)) {
+  try {
+    const allProjects = await getAllProjectSlugs();
+    if (!allProjects?.data || !Array.isArray(allProjects.data)) {
+      return [];
+    }
+    const slugs = allProjects.data
+      .map((item: any) => item?.attributes?.slug || item?.slug)
+      .filter((slug: any) => typeof slug === 'string' && !!slug);
+    return slugs.map((slug: string) => ({ slug }));
+  } catch (e) {
+    console.warn('generateStaticParams failed, fallback to empty array:', e);
     return [];
   }
-  const slugs = allProjects.data
-    .map((item: any) => item?.attributes?.slug || item?.slug)
-    .filter((slug: any) => typeof slug === 'string' && !!slug);
-  return slugs.map((slug: string) => ({ slug }));
 }
