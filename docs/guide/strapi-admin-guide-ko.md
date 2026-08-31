@@ -31,7 +31,7 @@
 | `showPhone` | 이력서 | `FALSE` = 이력서에서 전화번호 숨김 |
 | `resumeDownloadEnabled` | 이력서 | `TRUE` = 이력서 PDF 다운로드 버튼 표시 |
 | `careerDetailDownloadEnabled` | 경력기술서 | `TRUE` = 경력기술서 PDF 다운로드 버튼 표시 |
-| `socialLinks` | 홈·이력서 | GitHub/LinkedIn 등 소셜 링크 (JSON 형식) |
+| `socialLinks` | 홈·이력서 | GitHub/LinkedIn/GitHub Blog 등 소셜 링크 (JSON 형식) |
 
 ---
 

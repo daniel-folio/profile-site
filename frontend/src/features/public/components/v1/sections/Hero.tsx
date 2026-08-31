@@ -4,6 +4,7 @@ import { Profile } from "@/features/common/types/profile";
 import { FaGithub, FaLinkedin, FaEnvelope, FaInstagram, FaFacebook, FaYoutube, FaBlogger, FaMedium, FaGlobe } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { SiVelog, SiTistory, SiNotion } from 'react-icons/si';
+import { GithubBlogIcon } from '@/features/common/ui/GithubBlogIcon';
 import { getStrapiMedia } from "@/features/common/api/api";
 import Image from "next/image";
 import Link from "next/link";
@@ -139,67 +140,42 @@ export function Hero({ profile }: HeroProps) {
           {/* <Button size="lg" variant="secondary" className="shadow-lg shadow-purple-400/30 hover:scale-105 transition-transform">이력서 다운로드</Button> */}
         </motion.div>
         {socialLinks && (
-          <motion.div variants={fadeUpVariant} className="flex gap-6 mt-8">
-            {socialLinks.github && (
-              <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" aria-label="Github" className="text-gray-500 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-300">
-                <FaGithub size={32} />
-              </a>
-            )}
-            {socialLinks.linkedin && (
-              <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-gray-500 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-300">
-                <FaLinkedin size={32} />
-              </a>
-            )}
-            {socialLinks.x && (
-              <a href={socialLinks.x} target="_blank" rel="noopener noreferrer" aria-label="X" className="text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors duration-300">
-                <FaXTwitter size={32} />
-              </a>
-            )}
-            {socialLinks.instagram && (
-              <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gray-500 dark:text-gray-300 hover:text-pink-500 dark:hover:text-pink-400 transition-colors duration-300">
-                <FaInstagram size={32} />
-              </a>
-            )}
-            {socialLinks.facebook && (
-              <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-gray-500 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-500 transition-colors duration-300">
-                <FaFacebook size={32} />
-              </a>
-            )}
-            {socialLinks.youtube && (
-              <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-gray-500 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-300">
-                <FaYoutube size={32} />
-              </a>
-            )}
-            {socialLinks.blog && (
-              <a href={socialLinks.blog} target="_blank" rel="noopener noreferrer" aria-label="Blog" className="text-gray-500 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors duration-300">
-                <FaBlogger size={32} />
-              </a>
-            )}
-            {socialLinks.velog && (
-              <a href={socialLinks.velog} target="_blank" rel="noopener noreferrer" aria-label="Velog" className="text-gray-500 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400 transition-colors duration-300">
-                <SiVelog size={32} />
-              </a>
-            )}
-            {socialLinks.tistory && (
-              <a href={socialLinks.tistory} target="_blank" rel="noopener noreferrer" aria-label="Tistory" className="text-gray-500 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-300">
-                <SiTistory size={32} />
-              </a>
-            )}
-            {socialLinks.notion && (
-              <a href={socialLinks.notion} target="_blank" rel="noopener noreferrer" aria-label="Notion" className="text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors duration-300">
-                <SiNotion size={32} />
-              </a>
-            )}
-            {socialLinks.medium && (
-              <a href={socialLinks.medium} target="_blank" rel="noopener noreferrer" aria-label="Medium" className="text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors duration-300">
-                <FaMedium size={32} />
-              </a>
-            )}
-            {socialLinks.website && (
-              <a href={socialLinks.website} target="_blank" rel="noopener noreferrer" aria-label="Website" className="text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
-                <FaGlobe size={32} />
-              </a>
-            )}
+          <motion.div variants={fadeUpVariant} className="flex gap-6 mt-8 flex-wrap">
+            {Object.entries(socialLinks || {}).map(([key, url]) => {
+              if (!url) return null;
+              const iconConfig: Record<string, { icon: React.ReactNode; label: string; hoverClass: string }> = {
+                github: { icon: <FaGithub size={32} />, label: 'Github', hoverClass: 'hover:text-blue-500 dark:hover:text-blue-400' },
+                githubBlog: { icon: <GithubBlogIcon size={32} />, label: 'GitHub Blog', hoverClass: 'hover:text-black dark:hover:text-white' },
+                github_blog: { icon: <GithubBlogIcon size={32} />, label: 'GitHub Blog', hoverClass: 'hover:text-black dark:hover:text-white' },
+                githubio: { icon: <GithubBlogIcon size={32} />, label: 'GitHub Blog', hoverClass: 'hover:text-black dark:hover:text-white' },
+                linkedin: { icon: <FaLinkedin size={32} />, label: 'LinkedIn', hoverClass: 'hover:text-blue-500 dark:hover:text-blue-400' },
+                x: { icon: <FaXTwitter size={32} />, label: 'X', hoverClass: 'hover:text-black dark:hover:text-white' },
+                twitter: { icon: <FaXTwitter size={32} />, label: 'Twitter', hoverClass: 'hover:text-black dark:hover:text-white' },
+                instagram: { icon: <FaInstagram size={32} />, label: 'Instagram', hoverClass: 'hover:text-pink-500 dark:hover:text-pink-400' },
+                facebook: { icon: <FaFacebook size={32} />, label: 'Facebook', hoverClass: 'hover:text-blue-700 dark:hover:text-blue-500' },
+                youtube: { icon: <FaYoutube size={32} />, label: 'YouTube', hoverClass: 'hover:text-red-500 dark:hover:text-red-400' },
+                blog: { icon: <FaBlogger size={32} />, label: 'Blog', hoverClass: 'hover:text-green-600 dark:hover:text-green-400' },
+                velog: { icon: <SiVelog size={32} />, label: 'Velog', hoverClass: 'hover:text-green-500 dark:hover:text-green-400' },
+                tistory: { icon: <SiTistory size={32} />, label: 'Tistory', hoverClass: 'hover:text-orange-500 dark:hover:text-orange-400' },
+                notion: { icon: <SiNotion size={32} />, label: 'Notion', hoverClass: 'hover:text-black dark:hover:text-white' },
+                medium: { icon: <FaMedium size={32} />, label: 'Medium', hoverClass: 'hover:text-black dark:hover:text-white' },
+                website: { icon: <FaGlobe size={32} />, label: 'Website', hoverClass: 'hover:text-blue-600 dark:hover:text-blue-400' },
+              };
+              const item = iconConfig[key];
+              if (!item) return null;
+              return (
+                <a
+                  key={key}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={item.label}
+                  className={`text-gray-500 dark:text-gray-300 ${item.hoverClass} transition-colors duration-300`}
+                >
+                  {item.icon}
+                </a>
+              );
+            })}
             {email && (
               <a href={`mailto:${email}`} aria-label="Email" className="text-gray-500 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-300">
                 <FaEnvelope size={32} />

@@ -31,7 +31,7 @@ There are **2 types of order fields** in this portfolio.
 | `showPhone` | Resume | `FALSE` = Hide phone number on resume |
 | `resumeDownloadEnabled` | Resume | `TRUE` = Show PDF download button |
 | `careerDetailDownloadEnabled` | Career Detail | `TRUE` = Show PDF download button |
-| `socialLinks` | Home/Resume | GitHub/LinkedIn social links (JSON format) |
+| `socialLinks` | Home/Resume | GitHub/LinkedIn/GitHub Blog social links (JSON format) |
 
 ---
 

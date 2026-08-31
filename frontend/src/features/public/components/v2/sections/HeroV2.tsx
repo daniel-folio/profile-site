@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { FaGithub, FaLinkedin, FaEnvelope, FaInstagram, FaFacebook, FaYoutube, FaBlogger, FaMedium, FaGlobe } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 import { SiVelog, SiTistory, SiNotion } from 'react-icons/si';
+import { GithubBlogIcon } from '@/features/common/ui/GithubBlogIcon';
 import { RichTextRenderer } from '@/features/common/ui/RichTextRenderer';
 
 interface HeroV2Props {
@@ -59,6 +60,9 @@ export default function HeroV2({ profile }: HeroV2Props) {
     // 소셜 링크 아이콘 매핑
     const socialIconMap: Record<string, { icon: React.ReactNode; label: string }> = {
         github: { icon: <FaGithub size={24} />, label: 'GitHub' },
+        githubBlog: { icon: <GithubBlogIcon size={24} />, label: 'GitHub Blog' },
+        github_blog: { icon: <GithubBlogIcon size={24} />, label: 'GitHub Blog' },
+        githubio: { icon: <GithubBlogIcon size={24} />, label: 'GitHub Blog' },
         linkedin: { icon: <FaLinkedin size={24} />, label: 'LinkedIn' },
         x: { icon: <FaXTwitter size={24} />, label: 'X' },
         twitter: { icon: <FaXTwitter size={24} />, label: 'Twitter' },

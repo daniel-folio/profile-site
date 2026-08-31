@@ -11,6 +11,7 @@ export interface Profile {
   profileImage?: StrapiMedia;
   socialLinks?: {
     github?: string;
+    githubBlog?: string;
     linkedin?: string;
     twitter?: string;
     instagram?: string;

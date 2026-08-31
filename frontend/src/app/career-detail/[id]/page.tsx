@@ -22,7 +22,7 @@ export default async function CareerDetailPage({ params }: CareerDetailPageProps
       <h1 className="text-2xl font-bold mb-6">{detail.title}</h1>
       <div className="mb-2 text-gray-600">
         {typeof detail.company === 'object' && (detail.company as any)?.company && <span>회사: {(detail.company as any).company} </span>}
-        {detail.project?.title && <span>프로젝트: {detail.project.title} </span>}
+        {typeof detail.project === 'object' && (detail.project as any)?.title && <span>프로젝트: {(detail.project as any).title} </span>}
         {detail.period && <span>기간: {detail.period} </span>}
         {detail.teamSize && <span>팀 규모: {detail.teamSize} </span>}
       </div>

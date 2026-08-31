@@ -1,5 +1,18 @@
 # 💻 개발 및 운영 가이드
 
+### 🌟 **전문 개발 포트폴리오 개요**
+
+본 프로젝트는 풀스택 웹 개발 및 시스템 아키텍처 모범 사례를 적용하여 구축되었습니다:
+- **풀스택 개발** - 최신 모던 JavaScript / TypeScript 생태계 및 최적화 기법 적용
+- **시스템 아키텍처** - 마이크로서비스 원칙을 준수하는 확장 가능하고 유지보수가 용이한 코드 구조
+- **UI/UX 디자인** - 접근성(Accessibility) 및 성능을 고려한 사용자 중심 디자인
+- **성능 최적화** - 실시간 대용량 데이터 렌더링, 정적 생성을 통한 사이트 속도 극대화
+- **보안 모범 사례** - 산업 표준 보안 패러다임 및 취약점 방지 로직 적용
+- **DevOps & 배포** - 자동화된 CI/CD 파이프라인 및 멀티 클라우드 이중화 인프라 관리
+- **문서화 & 커뮤니케이션** - 명확하고 체계적인 기술 문서화 및 아키텍처 정보 공유
+
+---
+
 ## 🚀 빠른 시작
 
 ### 1. 저장소 클론
@@ -9,7 +22,7 @@ git clone <repository-url>
 cd portfolio
 ```
 
-### 2. 백엔드 설정
+### 2. 백엔드 설정 (Strapi CMS)
 
 ```bash
 cd backend
@@ -19,11 +32,12 @@ npm run develop
 
 브라우저에서 [http://localhost:1337/admin](http://localhost:1337/admin)을 열어 관리자 계정을 생성하세요.
 
-### 3. 프론트엔드 설정
+### 3. 프론트엔드 설정 (Next.js)
 
 ```bash
 cd frontend
 npm install
+npm run dev
 ```
 
 `.env.local` 파일을 생성하고 다음 내용을 추가하세요:
@@ -33,11 +47,14 @@ npm install
 NEXT_PUBLIC_STRAPI_API_URL_PRIMARY=http://localhost:1337
 ```
 
-### 🔐 **프로덕션 환경 변수 (Vercel)**
+브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 확인하세요.
+
+---
+
+## 🔐 프로덕션 환경 변수 (Vercel)
 
 **⚠️ 중요**: 프로덕션 배포 시 Vercel 대시보드에 환경 변수를 반드시 설정해야 합니다.
 
-#### **필수 변수 (프론트엔드)**
 ```env
 # Primary backend URL (required in production)
 NEXT_PUBLIC_STRAPI_API_URL_PRIMARY=https://your-backend-url.render.com
@@ -49,19 +66,15 @@ NEXT_PUBLIC_STRAPI_URL=https://your-preview-backend.example.com
 # STRAPI_API_TOKEN=vercel_strapi_api_token
 ```
 
-#### **보안 설정**
+### 보안 설정 규칙
 1. **Vercel 대시보드** → **프로젝트** → **Settings** → **Environment Variables**
 2. **관리자 비밀번호**: Strapi Admin의 `Site Settings`에서 설정/관리
 3. **미리보기/테스트**: 환경에 맞는 백엔드 URL 사용
-4. **비밀값 하드코딩 금지**
+4. **비밀값 하드코딩 금지**: 보안 비밀번호는 코드에 직접 작성하지 마세요.
 
-📖 **[배포 가이드 자세히 보기](./DEPLOYMENT.md)** - Vercel/Render 설정 및 환경 변수 안내
+📖 **[배포 가이드 자세히 보기](./DEPLOYMENT.md)** - Vercel/Render 설정 및 환경 변수 상세 안내
 
-```bash
-npm run dev
-```
-
-브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 확인하세요.
+---
 
 ## 🌐 배포 아키텍처
 
@@ -98,13 +111,13 @@ npm run dev
       - ***Wake-up Monitoring(옵션)***: UptimeRobot (14분 주기 헬스 체크)
     - **실시간 알림**: `Slack`을 통해 메모리 초과 및 서버 다운 이벤트에 대한 즉각적인 알림을 받습니다.
 
-
 Neon 사용 시 `DATABASE_URL`은 Render 환경 변수에 설정합니다. 예시: `postgres://<user>:<password>@<neon-host>/<db>?sslmode=require`.
 
-### 💓 헬스 체크 / 웨이크업 설정
+---
+
+## 💓 헬스 체크 / 웨이크업 설정
 
 Render 무료 플랜의 서버 다운 및 휴면 상태에 대응하기 위해, GitHub Actions와 전용 헬스 체크 엔드포인트를 사용합니다.
-
 
 - **1. 지능형 자가 복구 (메모리 모니터)**
     - **역할**: Strapi 애플리케이션이 5분마다 스스로의 메모리 사용량을 체크하여, 설정된 임계값(450MB) 초과 시 **선제적으로** 자신을 재시작합니다. 갑작스러운 트래픽 증가로 인한 다운을 예방하는 1차 방어선입니다.
@@ -121,6 +134,8 @@ Render 무료 플랜의 서버 다운 및 휴면 상태에 대응하기 위해, 
     - **GitHub Actions Bot**: `GET /git-wakeupbot`
     - **UptimeRobot (선택)**: `GET /uptimerobot`
     - **수동 재시작**: `GET /restart-server?secret=<SECRET_KEY>`
+
+---
 
 ## 🔄 고가용성 및 배포 자동화
 
@@ -139,6 +154,8 @@ Render 무료 플랜의 서버 다운 및 휴면 상태에 대응하기 위해, 
   1. 메인 프론트엔드(A-운영)는 데이터를 요청할 때 먼저 메인 백엔드(A-운영)에 접속을 시도합니다.
   2. 만약 이 요청이 실패하면, `lib/api.ts`에 구현된 로직이 자동으로 백업 백엔드(B-운영)에 동일한 요청을 다시 보냅니다.
 - **적용 범위:** 이 기능은 Vercel 환경 변수(`FAILOVER_MODE_ENABLED`)에 의해 제어되며, 오직 **A-운영 환경(메인)에서만 활성화**됩니다. 개발, 로컬, 백업(B) 환경에는 영향을 주지 않습니다.
+
+---
 
 ## 🔧 환경 변수 가이드
 
@@ -171,6 +188,53 @@ Render 무료 플랜의 서버 다운 및 휴면 상태에 대응하기 위해, 
 ### Render (B-백엔드 - 개발/백업)
 - `DATABASE_URL`, `JWT_SECRET`, `ADMIN_JWT_SECRET`, `CLOUDINARY_URL` 등을 각 환경(운영/개발)에 맞게 설정합니다.
 
+---
+
+## 📁 프로젝트 구조 및 구현 기능
+
+```
+portfolio/
+├── frontend/                    # Next.js 프론트엔드 애플리케이션
+│   ├── src/
+│   │   ├── app/                # Next.js App Router 페이지
+│   │   │   ├── career-detail/  # 경력 상세 페이지
+│   │   │   ├── portfolio/      # 프로젝트 상세 페이지
+│   │   │   ├── resume/         # 이력서 페이지
+│   │   │   └── admin/          # 관리자 대시보드 (방문자 통계)
+│   │   ├── features/           # 기능별 컴포넌트 및 로직
+│   │   ├── lib/                # 유틸리티 및 API 클라이언트
+│   │   └── types/              # TypeScript 타입 정의
+│   ├── public/                 # 정적 에셋 (이미지 등)
+│   └── package.json
+├── backend/                    # Strapi 백엔드 CMS
+│   ├── src/
+│   │   └── api/               # 콘텐츠 타입 및 API
+│   ├── config/                # Strapi 환경 설정
+│   └── package.json
+└── README.md
+```
+
+### 구현 기능 요약
+- **홈페이지 (`/`)**: 프로필 소개, 기술 스택, 대표 프로젝트 및 최신 프로젝트 포트폴리오
+- **이력서 페이지 (`/resume`)**: PDF 다운로드 기능이 포함된 이력서
+- **경력 상세 페이지 (`/career-detail`)**: 상세 경력 정보 및 PDF 내보내기
+- **방문자 분석 대시보드 (`/admin/visitors`)**: 실시간 방문자 수 및 통계 분석
+
+---
+
+## 🎛️ 사이트 설정 가이드 (Site Settings)
+
+Strapi Admin Panel의 `Site Settings` 단일 컬렉션을 통해 사이트의 주요 동작을 코드 수정 없이 실시간 제어할 수 있습니다.
+
+- **`adminPassword`**: 방문자 통계 대시보드 (`/admin/visitors`) 접속 비밀번호
+- **`enableVisitorTracking`**: 방문자 데이터 수집 및 트래킹 시스템 활성화 여부 (`true`/`false`)
+- **`siteName`**: 웹사이트 메타 타이틀 및 상단 브라우저 탭 이름
+- **`siteDescription`**: 검색 엔진 SEO 및 소셜 미디어를 위한 사이트 메타 설명
+- **`siteUsed`**: 전체 사이트 접근 스위치 (`false`로 설정 시 즉시 점검 화면 전환)
+- **`maxVisitorsPerDay`**: 일일 트래픽 제어 및 과도한 요청 방지 제한 수치
+
+---
+
 ## 📊 데이터 모델
 
 ### Profile (프로필)
@@ -188,33 +252,32 @@ Render 무료 플랜의 서버 다운 및 휴면 상태에 대응하기 위해, 
 - 썸네일, 이미지들, 사용 기술
 - 프로젝트 타입, 상태, 기간
 - GitHub/라이브 URL, 메인 페이지 노출 여부
-- 회사 연동
-- 대표 프로젝트 정렬 순서
+- 회사 연동, 대표 프로젝트 정렬 순서
 
 ### Company (회사)
-- 회사명, 로고, 설명
-- 위치, 웹사이트, 산업 분야
+- 회사명, 로고, 설명, 위치, 웹사이트, 산업 분야
 
 ### Education (학력)
-- 학교명, 전공, 학위
-- 기간, GPA, 설명
+- 학교명, 전공, 학위, 기간, GPA, 설명
 
 ### CareerDetail (경력 상세)
-- 프로젝트별 상세 경력 정보
-- 기술 스택, 역할, 성과
+- 프로젝트별 상세 경력 정보, 기술 스택, 역할, 성과
 
 ### OtherExperience (기타 경험)
-- 기타 활동, 수상, 자격증 등
+- 기타 활동, 수료, 자격증 등
 
 ### BlogPost/BlogCategory (블로그)
-- 블로그 포스트 및 카테고리 (백엔드만 준비됨 & 오픈되지 않음)
+- 블로그 포스트 및 카테고리 (백엔드만 준비됨)
 
-### socialLinks 입력 안내
+---
+
+## 🔗 socialLinks 입력 안내
 
 **socialLinks 필드는 다양한 소셜 미디어 링크를 JSON 형식으로 입력할 수 있습니다.**
 
 #### 지원하는 소셜 미디어 키 목록
 - github: GitHub
+- githubBlog (또는 github_blog, githubio): GitHub Blog (GitHub Pages)
 - x: X(Twitter)
 - linkedin: LinkedIn
 - instagram: Instagram
@@ -231,6 +294,7 @@ Render 무료 플랜의 서버 다운 및 휴면 상태에 대응하기 위해, 
 ```json
 {
   "github": "https://github.com/yourid",
+  "githubBlog": "https://yourid.github.io",
   "x": "https://x.com/yourid",
   "linkedin": "https://www.linkedin.com/in/yourid",
   "instagram": "https://instagram.com/yourid",
@@ -247,131 +311,81 @@ Render 무료 플랜의 서버 다운 및 휴면 상태에 대응하기 위해, 
 
 - 원하는 소셜만 입력해도 되고, 모두 입력해도 됩니다.
 - 각 키에 해당하는 URL만 입력하면 아이콘이 자동으로 표시됩니다.
+- 입력된 순서 그대로 화면에 순서대로 노출됩니다.
 - 이메일은 별도 필드로 입력하면 이메일 아이콘이 함께 표시됩니다.
-- Strapi Admin에서는 JSON 타입 필드에 Description(설명) 안내문구를 직접 넣을 수 없으니, 이 README를 참고해 입력해 주세요.
 
-### Profile 노출여부 관련 필드 안내
+---
 
-Profile(프로필)에는 아래와 같이 어드민에서 각종 정보의 노출 여부를 제어할 수 있는 Boolean 필드가 있습니다.
+## 📊 Profile 및 데이터 노출 여부 관리 팁
 
-- showProfileImage: 프로필 이미지를 화면에 노출할지 여부 (true/false)
-- showPhone: 전화번호를 화면에 노출할지 여부 (true/false)
-- resumeDownloadEnabled: 이력서 PDF 다운로드 버튼 노출 여부 (true/false)
-- careerDetailDownloadEnabled: 경력기술서 PDF 다운로드 버튼 노출 여부 (true/false)
+### Profile 노출여부 관련 필드
+- **showProfileImage**: 프로필 이미지를 화면에 노출할지 여부 (`true`/`false`)
+- **showPhone**: 전화번호를 화면에 노출할지 여부 (`true`/`false`)
+- **resumeDownloadEnabled**: 이력서 PDF 다운로드 버튼 노출 여부 (`true`/`false`)
+- **careerDetailDownloadEnabled**: 경력기술서 PDF 다운로드 버튼 노출 여부 (`true`/`false`)
 
-이 필드들은 Strapi Admin에서 체크박스(스위치)로 설정할 수 있으며,
-각 값에 따라 실제 사이트에서 해당 정보가 노출/비노출됩니다.
-
-### 데이터 노출여부 및 관리 팁 안내
+### 데이터 노출여부 및 정렬 관리 팁
 
 #### Skill(기술)
-- isPublic: **홈 화면(메인)과 이력서에서** 해당 기술을 노출할지 여부 (true/false)
-  - false로 설정하면 홈 화면(메인), 이력서나 이력서 PDF 등에는 포함될 수 없습니다.
-- visible: **홈 화면(메인)에서** 해당 기술을 노출할지 여부 (true/false)
-  - false로 설정해도 이력서나 이력서 PDF 등에는 포함될 수 있습니다.
-- order: 기술의 정렬 순서(숫자가 작을수록 먼저 노출)
+- **isPublic**: **홈 화면(메인)과 이력서에서** 해당 기술을 노출할지 여부 (`true`/`false`)
+- **visible**: **홈 화면(메인)에서** 해당 기술을 노출할지 여부 (`true`/`false`)
+- **order**: 기술의 정렬 순서(숫자가 작을수록 먼저 노출)
 
 #### Project(프로젝트)
-- visible: **이력서/홈 어디에도** 노출하지 않을지 여부 (임시 비활성용)
-- isBasicShow: **이력서에서** 기본으로 노출할지 여부 (false 시 '더보기'에 숨겨짐)
-- teamType: **이력서에서** 팀(Team) 또는 개인(Personal) 섹션으로 분류 (회사 연동 없을 때 적용)
-- featured: **홈 화면(메인)에서** 대표 프로젝트로 노출할지 여부 (true/false)
-- order: **이력서 내에서** 프로젝트의 정렬 순서
-- featuredOrder: **홈 화면(메인)에서** 대표 프로젝트의 정렬 순서
+- **visible**: **이력서/홈 어디에도** 노출하지 않을지 여부 (임시 비활성용)
+- **isBasicShow**: **이력서에서** 기본으로 노출할지 여부 (`false` 시 '더보기'에 숨겨짐)
+- **teamType**: **이력서에서** 팀(Team) 또는 개인(Personal) 섹션으로 분류 (회사 연동 없을 때 적용)
+- **featured**: **홈 화면(메인)에서** 대표 프로젝트로 노출할지 여부 (`true`/`false`)
+- **order**: **이력서 내에서** 프로젝트의 정렬 순서
+- **featuredOrder**: **홈 화면(메인)에서** 대표 프로젝트의 정렬 순서
 
 #### Company(회사)
-- order: 회사의 정렬 순서
-- isBasicShow: **이력서에서** 기본으로 노출할지 여부 (false 시 '경력 더보기'에 숨겨짐)
+- **order**: 회사의 정렬 순서
+- **isBasicShow**: **이력서에서** 기본으로 노출할지 여부 (`false` 시 '경력 더보기'에 숨겨짐)
 
 #### CareerDetail(경력 상세)
-- order: 경력 상세의 정렬 순서
-- project: 연결된 프로젝트가 있을 경우, 프로젝트 상세에서 함께 노출
+- **order**: 경력 상세의 정렬 순서
+- **project**: 연결된 프로젝트가 있을 경우, 프로젝트 상세에서 함께 노출
 
 #### Education(학력)
-- order: 학력의 정렬 순서
+- **order**: 학력의 정렬 순서
 
-#### 공통 안내
-- 모든 `order` 및 `featuredOrder` 필드는 숫자가 작을수록 먼저 노출(오름차순)됩니다.
-- visible, show~ 등 Boolean 필드는 false로 설정 시 프론트엔드에서 해당 항목이 숨겨집니다.
-- 관리자는 각 항목의 노출여부와 순서를 주기적으로 점검해 주세요.
+---
 
 ## 🌐 배포
 
 ### Frontend (Vercel)
 1. GitHub 저장소를 Vercel에 연결
-2. 환경 변수 설정:
-   - `NEXT_PUBLIC_STRAPI_URL`: Strapi 백엔드 URL
-   - `NEXT_PUBLIC_SITE_URL`: 프론트엔드 URL
+2. 환경 변수 설정 (`NEXT_PUBLIC_STRAPI_API_URL_PRIMARY` 등)
 
 ### Backend (Render)
 1. GitHub 저장소를 Render에 연결
-2. 환경 변수 설정:
-   - `DATABASE_URL`: PostgreSQL 연결 문자열
-   - `JWT_SECRET`: JWT 시크릿 키
-   - `ADMIN_JWT_SECRET`: 관리자 JWT 시크릿 키
-   - `CLOUDINARY_URL`: Cloudinary 설정
+2. 환경 변수 설정 (`DATABASE_URL`, `JWT_SECRET`, `CLOUDINARY_URL` 등)
 
-## 🔧 개발 가이드
+---
 
-### 새 기능 추가
-1. 백엔드: Strapi Admin Panel에서 Content Type 생성
-2. 프론트엔드: TypeScript 타입 정의 및 컴포넌트 생성
-3. API 연동: `src/lib/api.ts`에 함수 추가
+## 📝 라이선스 및 기여하기
 
-### 스타일링
-- Tailwind CSS 사용
-- 컴포넌트별 스타일링
-- 반응형 디자인 고려
-- 다크 모드 지원
-
-### 성능 최적화
-- Next.js Image 컴포넌트 사용
-- 정적 생성 (SSG) 활용
-- API 응답 캐싱
-- 코드 스플리팅
-
-### 애니메이션 추가
-- Framer Motion 사용
-- Three.js/Vanta 배경 효과
-- CSS 애니메이션
-
-## 📝 라이센스
-
+### 라이선스
 MIT License
 
-## 🤝 기여하기
-
+### 기여하기
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📞 연락처
+### 연락처
+프로젝트 문의사항: daniel.han.developer@gmail.com
 
-프로젝트에 대한 문의사항이 있으시면 이슈를 생성해주세요.
-daniel.han.developer@gmail.com
 ---
 
-*이 프로젝트는 완전한 포트폴리오 시스템으로 구현되었으며, 지속적인 개선과 확장을 통해 더욱 발전시킬 예정입니다.*
-
-### 무료 서버 환경 안내 및 사용자 알림 팁
+## 💡 무료 서버 환경 안내 및 사용자 알림 팁
 
 본 프로젝트는 무료 서버(Vercel, Render 등) 환경에서 운영될 수 있습니다. 이 경우, 서버 슬립/웨이크업 등으로 인해 **첫 접속 시 반응속도가 느릴 수 있습니다.**
 
 #### 사용자에게 안내하는 방법 예시
-
-- **로딩 스피너/로더 + 안내 메시지**
-  - 예시: `서버를 깨우는 중입니다. 무료 서버 환경으로 인해 첫 접속 시 최대 1분 정도 소요될 수 있습니다. 잠시만 기다려 주세요!`
-- **상단/하단 배너 안내**
-  - 예시: `⚡️ 안내: 본 사이트는 무료 서버 환경에서 운영되어 첫 접속 시 로딩이 느릴 수 있습니다.`
-- **FAQ/소개 페이지 안내**
-  - 예시: `무료 서버 환경으로 인해 첫 접속 시 최대 1분 정도 소요될 수 있습니다.`
-
-**Tip:**
-- 로딩 컴포넌트, 레이아웃(Header/Footer), FAQ/소개 등 다양한 위치에 안내 메시지를 추가하면 사용자 경험이 향상됩니다.
-- 실제 운영 시, 안내 메시지를 통해 사용자의 혼란과 이탈을 줄일 수 있습니다.
-
----
-
-<a name="english-version"></a>
+- **로딩 스피너/로더 + 안내 메시지**: `서버를 깨우는 중입니다. 무료 서버 환경으로 인해 첫 접속 시 최대 1분 정도 소요될 수 있습니다. 잠시만 기다려 주세요!`
+- **상단/하단 배너 안내**: `⚡️ 안내: 본 사이트는 무료 서버 환경에서 운영되어 첫 접속 시 로딩이 느릴 수 있습니다.`
+- **FAQ/소개 페이지 안내**: `무료 서버 환경으로 인해 첫 접속 시 최대 1분 정도 소요될 수 있습니다.`
